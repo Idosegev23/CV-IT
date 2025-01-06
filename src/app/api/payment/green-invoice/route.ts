@@ -11,24 +11,36 @@ export async function POST(request: Request) {
     console.log('Starting Green Invoice payment process...');
     
     // בדיקת משתני הסביבה
+    console.log('Checking environment variables...');
+    console.log('GREEN_INVOICE_SANDBOX_URL:', GREEN_INVOICE_SANDBOX_URL ? 'exists' : 'missing');
+    console.log('GREEN_INVOICE_SANDBOX_KEY:', GREEN_INVOICE_SANDBOX_KEY ? 'exists' : 'missing');
+    console.log('GREEN_INVOICE_SANDBOX_SECRET:', GREEN_INVOICE_SANDBOX_SECRET ? 'exists' : 'missing');
+    console.log('GREEN_INVOICE_PLUGIN_ID:', GREEN_INVOICE_PLUGIN_ID ? 'exists' : 'missing');
+    console.log('NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL ? 'exists' : 'missing');
+
     if (!GREEN_INVOICE_SANDBOX_URL || !GREEN_INVOICE_SANDBOX_KEY || !GREEN_INVOICE_SANDBOX_SECRET || !GREEN_INVOICE_PLUGIN_ID) {
-      console.error('Missing required environment variables');
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+      throw new Error('Missing required environment variables');
     }
 
     if (!process.env.NEXT_PUBLIC_APP_URL) {
-      console.error('Missing NEXT_PUBLIC_APP_URL');
-      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+      throw new Error('Missing NEXT_PUBLIC_APP_URL');
     }
 
     // קבלת נתוני הבקשה
     const requestData = await request.json();
+    console.log('Request data:', JSON.stringify(requestData, null, 2));
+    
     const { sessionId, amount, lang, packageType, client } = requestData;
 
     // בדיקת תקינות הנתונים
     if (!sessionId || !amount || !lang || !packageType || !client) {
-      console.error('Missing required request data:', { sessionId, amount, lang, packageType, client });
-      return NextResponse.json({ error: 'Missing required data' }, { status: 400 });
+      throw new Error(`Missing required request data: ${JSON.stringify({ 
+        sessionId: !!sessionId, 
+        amount: !!amount, 
+        lang: !!lang, 
+        packageType: !!packageType, 
+        client: !!client 
+      })}`);
     }
 
     const supabase = createClientComponentClient();
@@ -49,15 +61,14 @@ export async function POST(request: Request) {
 
     if (!authResponse.ok) {
       const authError = await authResponse.text();
-      console.error('Green Invoice authentication failed:', authError);
-      return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
+      throw new Error(`Green Invoice authentication failed: ${authError}`);
     }
 
     const authData = await authResponse.json();
+    console.log('Auth response:', JSON.stringify(authData, null, 2));
     
     if (!authData.token) {
-      console.error('No token received from Green Invoice');
-      return NextResponse.json({ error: 'Invalid authentication response' }, { status: 500 });
+      throw new Error('No token received from Green Invoice');
     }
 
     const token = authData.token;
@@ -96,16 +107,9 @@ export async function POST(request: Request) {
       custom: sessionId
     };
 
-    console.log('=== Payment Form Data ===');
-    console.log(JSON.stringify(paymentData, null, 2));
-    console.log('=== URLs ===');
-    console.log('Success URL:', paymentData.successUrl);
-    console.log('Failure URL:', paymentData.failureUrl);
-    console.log('Notify URL:', paymentData.notifyUrl);
-    console.log('=== Client Data ===');
-    console.log('Client:', JSON.stringify(paymentData.client, null, 2));
+    console.log('Payment request data:', JSON.stringify(paymentData, null, 2));
+    console.log('Sending request to:', `${GREEN_INVOICE_SANDBOX_URL}/payments/form`);
     
-    console.log('Sending payment form request to:', `${GREEN_INVOICE_SANDBOX_URL}/payments/form`);
     const paymentResponse = await fetch(`${GREEN_INVOICE_SANDBOX_URL}/payments/form`, {
       method: 'POST',
       headers: {
@@ -117,26 +121,27 @@ export async function POST(request: Request) {
 
     if (!paymentResponse.ok) {
       const paymentError = await paymentResponse.text();
-      console.error('Green Invoice payment form creation failed:', paymentError);
-      return NextResponse.json({ error: 'Payment form creation failed', details: paymentError }, { status: paymentResponse.status });
+      throw new Error(`Green Invoice payment form creation failed: ${paymentError}`);
     }
 
     const paymentResult = await paymentResponse.json();
+    console.log('Payment response:', JSON.stringify(paymentResult, null, 2));
     
     if (!paymentResult.url) {
-      console.error('No payment URL in response:', paymentResult);
-      return NextResponse.json({ error: 'Invalid payment form response' }, { status: 500 });
+      throw new Error(`Invalid payment form response: ${JSON.stringify(paymentResult)}`);
     }
 
     console.log('Payment process completed successfully');
     return NextResponse.json({ success: true, paymentUrl: paymentResult.url });
 
   } catch (error) {
-    console.error('Detailed payment error:', error);
+    console.error('Payment error:', error instanceof Error ? error.message : 'Unknown error');
+    console.error('Full error details:', error);
+    
     return NextResponse.json(
       { 
         error: error instanceof Error ? error.message : 'Failed to process payment',
-        details: process.env.NODE_ENV === 'development' ? error : undefined
+        details: error
       },
       { status: 500 }
     );
