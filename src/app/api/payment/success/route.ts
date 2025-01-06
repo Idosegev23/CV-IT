@@ -6,12 +6,14 @@ import { cookies } from 'next/headers';
 async function handlePaymentSuccess(data: any) {
   console.log('Processing payment data:', data);
   
-  const sessionId = data.custom || data.sessionId;
-  const transactionId = data.transactionId || data.TranzilaPK;
-  const sum = data.amount || data.sum;
+  // קבלת ה-requestId כ-transactionId
+  const transactionId = data.requestId;
+  
+  // חילוץ ה-sessionId מה-flow
+  const sessionId = data.flow;
   
   if (!sessionId) {
-    console.error('Missing session ID in payment success');
+    console.error('Missing session ID (flow) in payment success');
     throw new Error('Missing session ID');
   }
 
@@ -20,8 +22,8 @@ async function handlePaymentSuccess(data: any) {
 
   const paymentDetails = {
     transaction_id: transactionId,
-    sum: sum,
-    payment_type: 'green_invoice',
+    request_id: data.requestId,
+    message: data.message,
     date: new Date().toISOString()
   };
 
@@ -67,26 +69,20 @@ export async function GET(request: Request) {
     const params = Object.fromEntries(url.searchParams);
     console.log('GET params:', params);
     
+    // בדיקה שהתשלום אכן הצליח
+    if (params.success !== 'true') {
+      throw new Error('Payment was not successful');
+    }
+    
     const result = await handlePaymentSuccess(params);
     
-    const script = `
-      <script>
-        window.parent.postMessage(JSON.stringify({
-          success: true,
-          transactionId: "${result.transactionId}",
-          sessionId: "${result.sessionId}"
-        }), "*");
-        
-        window.location.href = "${process.env.NEXT_PUBLIC_APP_URL}/he/create/template/1/form?session=${result.sessionId}";
-      </script>
-    `;
-
-    return new NextResponse(script, {
-      headers: { 'Content-Type': 'text/html' },
-    });
+    // הפניה ישירה לדף הבא במקום script
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/he/create/template/1/form?session=${result.sessionId}`);
+    
   } catch (error) {
     console.error('Payment success GET handler error:', error);
-    return NextResponse.json({ error: 'Internal server error', details: error }, { status: 500 });
+    // הפניה לדף השגיאה במקרה של כישלון
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/he/packages?error=payment_failed`);
   }
 }
 
