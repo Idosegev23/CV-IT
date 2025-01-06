@@ -1,0 +1,153 @@
+:root {
+  /* Base Variables */
+  --base-font-size: 16px;
+  --line-height: 1.5;
+  --scale-factor: 1;
+  --a4-width: 210mm;
+  --a4-height: 297mm;
+  
+  /* Mobile Variables */
+  --mobile-scale-factor: 0.99;
+  --mobile-font-size: 14px;
+  --mobile-padding: 0;
+}
+
+/* Mobile First Base Styles */
+.cv-template {
+  font-size: var(--mobile-font-size);
+  line-height: var(--line-height);
+  transform: scale(var(--mobile-scale-factor));
+  transform-origin: top center;
+  width: var(--a4-width);
+  min-height: var(--a4-height);
+  margin: 0 auto;
+  padding: var(--mobile-padding);
+  overflow: hidden;
+  
+  @media screen and (max-width: 768px) {
+    display: none;
+  }
+  
+  @media screen and (min-width: 768px) {
+    font-size: var(--base-font-size);
+    transform: scale(var(--scale-factor));
+    padding: 0;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .cv-template {
+    display: block !important;
+    transform: none !important;
+    width: var(--a4-width) !important;
+    height: var(--a4-height) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* Mobile First Direction Styles */
+[data-cv-lang="en"] {
+  direction: ltr;
+  text-align: left;
+  
+  .header,
+  .contact-info,
+  .section-title,
+  .content-block,
+  .experience-item,
+  .education-item,
+  .skills-item,
+  .military-item {
+    text-align: left;
+    direction: ltr;
+  }
+  
+  .icon {
+    margin-right: 8px;
+    margin-left: 0;
+  }
+
+  .section-content {
+    padding-left: 0;
+    padding-right: 16px;
+  }
+
+  ul, ol {
+    padding-left: 20px;
+    padding-right: 0;
+  }
+}
+
+/* Mobile Optimizations */
+@media screen and (max-width: 767px) {
+  .cv-template {
+    max-width: 100vw;
+    overflow-x: hidden;
+    
+    .header {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .contact-info {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+    }
+    
+    .experience-item,
+    .education-item,
+    .military-item {
+      margin-bottom: 1rem;
+    }
+    
+    .skills-grid,
+    .languages-grid {
+      grid-template-columns: 1fr;
+      gap: 0.5rem;
+    }
+  }
+}
+
+/* Global image handling */
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+@media print {
+  img {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  img {
+    display: block !important;
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+  }
+} 

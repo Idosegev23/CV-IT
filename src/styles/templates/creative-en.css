@@ -1,0 +1,403 @@
+/* Base for creative template - English version */
+:root {
+  --scale-factor: 1;
+  --a4-width: 210mm;
+  --a4-height: 297mm;
+  --left-column-width: 25%;
+  --right-column-width: 75%;
+  --primary-blue: #4855CE;
+  --primary-grey: #E8E8E5;
+  --separator-color: #E8E8E5;
+}
+
+.creative-template-en {
+  position: relative;
+  width: var(--a4-width);
+  height: var(--a4-height);
+  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  transform-origin: top center;
+  transform: scale(var(--scale-factor));
+  font-family: Assistant, sans-serif !important;
+  background-color: var(--primary-grey);
+  direction: ltr;
+}
+
+/* Ensure all elements use the font */
+.creative-template-en * {
+  font-family: Assistant, sans-serif !important;
+}
+
+/* Left Column (was right in RTL) */
+.creative-left-column-en {
+  width: var(--left-column-width);
+  height: 100%;
+  background-color: var(--primary-blue);
+  color: white;
+  padding: 2rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-family);
+  border-bottom-right-radius: 40px;
+  z-index: 2;
+}
+
+.creative-left-column-en::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background-color: var(--primary-blue);
+  z-index: 0;
+}
+
+/* Background decorations */
+.creative-bg-top-en {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  opacity: 1;
+  transform: scaleX(-1);
+}
+
+.creative-bg-bottom-en {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 1rem;
+  opacity: 1;
+  z-index: 1;
+  transform: scale(-0.8, 0.8);
+  width: calc(100% - 2rem);
+  height: auto;
+}
+
+/* Personal Info */
+.creative-personal-info-en {
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-name-en {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.creative-firstname-en {
+  font-weight: 700 !important;
+  display: block;
+}
+
+.creative-lastname-en {
+  font-weight: 400 !important;
+  display: block;
+}
+
+.creative-separator-en {
+  height: 1px;
+  background-color: var(--separator-color);
+  margin: 0.5rem 0;
+  opacity: 0.3;
+  width: 30%;
+}
+
+/* Sections */
+.creative-section-en {
+  margin-bottom: 1.2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-section-title-en {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+/* Languages */
+.creative-language-item-en {
+  margin-bottom: 0.5rem;
+  display: grid;
+  grid-template-columns: auto 20px auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.creative-language-en {
+  font-weight: 700;
+  text-align: left;
+}
+
+.creative-separator-vertical-en {
+  opacity: 0.3;
+  text-align: center;
+  justify-self: center;
+}
+
+.creative-level-en {
+  font-weight: 300;
+  text-align: left;
+}
+
+/* Skills */
+.creative-skills-en {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-width: 100%;
+  padding-left: 0.5rem;
+}
+
+.creative-skill-item-en {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.creative-skill-name-en {
+  font-size: 0.9rem;
+  color: white;
+  min-width: 80px;
+  max-width: calc(100% - 70px);
+  word-wrap: break-word;
+  line-height: 1.2;
+}
+
+.creative-skill-level-en {
+  display: flex;
+  gap: 3px;
+  justify-content: flex-start;
+  width: 50px;
+  flex-shrink: 0;
+  direction: ltr;
+  margin-top: 2px;
+  margin-right: 0.5rem;
+}
+
+/* Right Column (was left in RTL) */
+.creative-right-column-en {
+  width: var(--right-column-width);
+  height: 100%;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.creative-icon-top-en {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  opacity: 0.8;
+  width: 60px;
+  height: 60px;
+}
+
+.creative-bg-grey-en {
+  position: absolute;
+  top: 5rem;
+  right: 7rem;
+  width: 50%;
+  transform: translateY(2rem) scaleX(-1);
+  filter: brightness(0) invert(1);
+}
+
+/* Experience, Education and Military */
+.creative-experience-en {
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-experience-en:first-of-type {
+  margin-top: 4rem;
+}
+
+.creative-experience-items-en {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.creative-experience-item-en {
+  margin-bottom: 0.8rem;
+}
+
+.creative-experience-header-en {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.creative-experience-title-wrapper-en {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.creative-experience-position-en {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--primary-blue);
+  margin: 0;
+}
+
+.creative-experience-company-en {
+  font-weight: 400;
+  font-size: 1rem;
+}
+
+.creative-experience-date-en {
+  font-weight: 300;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.creative-experience-description-en {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.creative-experience-description-en li {
+  position: relative;
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.creative-experience-description-en li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--primary-blue);
+}
+
+/* Print settings */
+@media print {
+  .creative-template-en {
+    transform: none !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    overflow: hidden !important;
+    font-family: var(--font-family) !important;
+  }
+}
+
+/* Long skills */
+.creative-skill-name-en.small {
+  font-size: 0.8rem;
+}
+
+.creative-skill-name-en.smaller {
+  font-size: 0.7rem;
+}
+
+/* Professional Summary */
+.creative-summary-en {
+  margin-top: 2rem;
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-summary-title-en {
+  color: #4B4553;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+}
+
+.creative-summary-content-en {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4B4553;
+  white-space: pre-line;
+}
+
+/* Education bullets */
+.creative-education-description-en {
+  position: relative;
+  padding-left: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.creative-education-description-en::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: var(--primary-blue);
+}
+
+/* Skills spacing */
+.creative-skill-content-en {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+/* Different spacing for different skill types */
+.creative-skill-item-en:has(.creative-skill-level-en) {
+  margin-bottom: 0.8rem;
+}
+
+.creative-skill-item-en:not(:has(.creative-skill-level-en)) {
+  margin-bottom: 0.4rem;
+}
+
+/* Section titles in right column */
+.creative-right-column-en .creative-section-title-en {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+  color: #4B4553;
+}
+
+/* Section titles in left column */
+.creative-left-column-en .creative-section-title-en {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+/* Skills in right column */
+.creative-right-column-en .creative-skill-name-en {
+  font-size: 1.1rem;
+  color: #4B4553;
+  min-width: 80px;
+  max-width: calc(100% - 70px);
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+/* Soft skills (without dots) */
+.creative-right-column-en .creative-skill-item-en.soft-skill .creative-skill-name-en {
+  font-size: 1.1rem;
+  font-weight: 300;
+}
+
+/* Long skill names */
+.creative-right-column-en .creative-skill-name-en.small {
+  font-size: 1rem;
+}
+
+.creative-right-column-en .creative-skill-name-en.smaller {
+  font-size: 0.9rem;
+} 

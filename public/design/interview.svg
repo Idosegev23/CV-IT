@@ -1,0 +1,36 @@
+<svg width="250" height="172" viewBox="0 0 250 172" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1_6)">
+    <!-- רקע מעוגל -->
+    <path d="M25 86C25 130 65 172 125 172C185 172 225 130 225 86C225 42 185 0 125 0C65 0 25 42 25 86Z" fill="#E8E8E5" fill-opacity="0.33"/>
+    
+    <!-- דמות מראיין -->
+    <g transform="translate(80, 86)">
+        <circle cx="0" cy="-20" r="20" fill="#4855CE"/>
+        <path d="M-8 -20 A8 8 0 0 1 8 -20" stroke="white" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="0" cy="-30" r="6" fill="white"/>
+        <rect x="-25" y="10" width="50" height="40" rx="8" fill="#4855CE"/>
+    </g>
+    
+    <!-- דמות מרואיין -->
+    <g transform="translate(170, 86)">
+        <circle cx="0" cy="-20" r="20" fill="#C78CEA"/>
+        <path d="M-8 -20 A8 8 0 0 1 8 -20" stroke="white" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="0" cy="-30" r="6" fill="white"/>
+        <rect x="-25" y="10" width="50" height="40" rx="8" fill="#C78CEA"/>
+    </g>
+    
+    <!-- בועות שיחה -->
+    <path d="M60 40H100L90 60H70L60 40Z" fill="#4855CE"/>
+    <path d="M150 60H190L180 80H160L150 60Z" fill="#C78CEA"/>
+    
+    <!-- סימני שאלה ותשובה -->
+    <text x="75" y="55" fill="white" font-size="16" font-weight="bold">?</text>
+    <text x="165" y="75" fill="white" font-size="16" font-weight="bold">!</text>
+</g>
+
+<defs>
+<clipPath id="clip0_1_6">
+<rect width="250" height="172" fill="white"/>
+</clipPath>
+</defs>
+</svg> 

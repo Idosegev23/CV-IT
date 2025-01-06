@@ -1,0 +1,34 @@
+<svg width="250" height="172" viewBox="0 0 250 172" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_1_4)">
+    <!-- רקע מעוגל -->
+    <path d="M20 86C20 130 60 172 125 172C190 172 230 130 230 86C230 42 190 0 125 0C60 0 20 42 20 86Z" fill="#E8E8E5" fill-opacity="0.33"/>
+    
+    <!-- מסגרת פרופיל -->
+    <rect x="60" y="30" width="130" height="110" rx="10" fill="#4855CE"/>
+    
+    <!-- תמונת פרופיל -->
+    <circle cx="95" cy="65" r="20" fill="white"/>
+    <path d="M87 65 A8 8 0 0 1 103 65" stroke="#4855CE" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="95" cy="53" r="6" fill="#4855CE"/>
+    
+    <!-- קווי טקסט -->
+    <rect x="125" y="55" width="45" height="5" rx="2.5" fill="white"/>
+    <rect x="125" y="65" width="35" height="5" rx="2.5" fill="white"/>
+    
+    <!-- כפתורי פעולה -->
+    <rect x="75" y="95" width="100" height="10" rx="5" fill="#C78CEA"/>
+    <rect x="75" y="115" width="100" height="10" rx="5" fill="#C78CEA"/>
+    
+    <!-- אייקון לינקדאין -->
+    <g transform="translate(190, 30)">
+        <rect width="40" height="40" rx="8" fill="#C78CEA"/>
+        <path d="M10 15h6v15h-6z M23 12h6v18h-6z M10 8h6v4h-6z" fill="white"/>
+    </g>
+</g>
+
+<defs>
+<clipPath id="clip0_1_4">
+<rect width="250" height="172" fill="white"/>
+</clipPath>
+</defs>
+</svg> 

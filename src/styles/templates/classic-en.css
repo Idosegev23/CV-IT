@@ -1,0 +1,480 @@
+/* Dynamic sizing system */
+:root {
+  --scale-factor: 0.99;
+  --base-font-size: 16px;
+  --base-spacing: 0.1rem;
+  --a4-width: 210mm;
+  --a4-height: 297mm;
+  --header-height: 160px;
+  --content-height: calc(var(--a4-height) - var(--header-height));
+  --font-family: 'Assistant', sans-serif;
+}
+
+.classic-template {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: var(--a4-width);
+  height: var(--a4-height);
+  margin: 0 auto;
+  background: #F3F4F1;
+  font-family: var(--font-family);
+  overflow: hidden;
+  transform-origin: top center;
+  transform: scale(var(--scale-factor));
+  
+  /* Dynamic font size calculation */
+  --adjusted-font-size: calc(var(--base-font-size) * var(--scale-factor));
+  --adjusted-spacing: calc(var(--base-spacing) * var(--scale-factor));
+}
+
+.classic-header {
+  height: var(--header-height);
+  background: #1F1B2F;
+  position: relative;
+  width: 100%;
+  padding: 0.5rem 3rem 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.2rem;
+  overflow: hidden;
+  border-bottom-right-radius: 45px;
+  border-bottom-left-radius: 0;
+}
+
+.classic-header::after,
+.classic-header::before {
+  display: none;
+}
+
+.header-corner-decoration {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  width: 40px;
+  height: 40px;
+}
+
+.header-name-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding-left: 1.9rem;
+  gap: 0;
+}
+
+.header-name {
+  color: #F3F4F1;
+  margin: 0;
+  display: flex;
+  gap: 0.5rem;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1;
+  font-family: var(--font-family);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.3rem;
+}
+
+.header-name-first {
+  font-weight: 400;
+  font-family: var(--font-family);
+}
+
+.header-name-last {
+  font-weight: 200;
+  font-family: var(--font-family);
+}
+
+.header-contact {
+  color: #F3F4F1;
+  font-weight: 200;
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  margin-left: 2rem;
+  opacity: 0.85;
+  margin-top: 0;
+  font-family: var(--font-family);
+  letter-spacing: 0.02em;
+}
+
+.contact-separator {
+  content: '|';
+  opacity: 0.4;
+  font-weight: 200;
+  margin: 0 0.2rem;
+}
+
+.classic-content {
+  flex: 1;
+  padding: 1rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  overflow: visible;
+  margin-bottom: 2rem;
+  font-family: var(--font-family);
+}
+
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1F1B2F;
+  margin-bottom: 0.3rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.section-title::after {
+  display: none;
+}
+
+.section-title::before {
+  display: none;
+}
+
+.skills-list, .experience-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.skills-list li {
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  list-style: none;
+}
+
+.skills-list li::before {
+  display: none;
+}
+
+.experience-section {
+  min-height: 0;
+  overflow: hidden;
+  margin-left: 0;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.experience-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding-right: 0;
+  padding-left: 0;
+  width: 100%;
+}
+
+.experience-item {
+  margin-bottom: 0.5rem;
+}
+
+.experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.experience-title-wrapper {
+  flex: 1;
+}
+
+.experience-title {
+  font-weight: 500;
+  font-size: 1rem;
+  font-family: var(--font-family);
+}
+
+.experience-company {
+  font-weight: 300;
+  font-size: 0.9rem;
+  font-family: var(--font-family);
+}
+
+.experience-separator {
+  opacity: 0.4;
+  font-weight: 200;
+  margin: 0 0.1rem;
+}
+
+.experience-date {
+  text-align: right;
+  min-width: 150px;
+  margin-left: 20px;
+  font-weight: 200;
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.experience-description {
+  list-style: none;
+  padding-left: 1.2rem;
+  margin-top: 0.3rem;
+}
+
+.experience-description li {
+  position: relative;
+  margin-bottom: calc(0.15rem * var(--scale-factor));
+  font-weight: 200;
+  font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+  line-height: 1.4;
+  color: #333;
+  list-style: none;
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
+  margin-bottom: 0.5rem;
+}
+
+.experience-description li::before {
+  display: none;
+}
+
+.education-section {
+  min-height: 0;
+  margin-left: 0;
+  margin-bottom: 0.5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.education-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding-right: 0;
+  padding-left: 0;
+  width: 100%;
+}
+
+.education-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin-bottom: 0.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.education-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.education-title-wrapper {
+  flex: 1;
+}
+
+.education-degree {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.education-institution {
+  font-weight: 300;
+  font-size: 0.9rem;
+}
+
+.education-date {
+  text-align: right;
+  min-width: 150px;
+  margin-left: 20px;
+  font-weight: 200;
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.education-specialization {
+  font-weight: 200;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.2rem;
+}
+
+.skills-section, .languages-section {
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.skills-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-right: 0;
+  padding-left: 0;
+  width: 100%;
+}
+
+.skill-item {
+  font-weight: 200;
+  font-size: 0.9rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-section {
+  margin-bottom: 1rem;
+  padding-right: 0;
+  padding-left: 0;
+  width: 100%;
+}
+
+.summary-content {
+  font-size: 0.85rem;
+  font-weight: 300;
+  line-height: 1.4;
+  color: #333;
+  text-align: justify;
+  white-space: normal;
+}
+
+/* מבטל את כל הסגנונות הקודמים שגורמים לירידת שורה */
+.summary-content::after,
+.summary-content br {
+  display: none;
+  content: none;
+}
+
+/* מבטל את כל ההגדרות הכפולות הקודמות */
+.summary-content {
+  display: inline;
+}
+
+.summary-content {
+  display: block;
+}
+
+/* מסיר את כל הקווים והנקודות */
+.section-title::after,
+.section-title::before,
+.classic-header::after,
+.classic-header::before,
+.skills-list li::before,
+.skills-list li::after,
+.experience-description li::before,
+.experience-description li::after {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  background: none !important;
+} 
+
+.classic-footer {
+  position: relative;
+  width: 100%;
+  height: 45px;
+  background: #1F1B2F;
+  border-top-left-radius: 45px;
+  border-top-right-radius: 0;
+}
+
+/* מסיר את הקווים והנקודות מהפטר */
+.classic-footer::after,
+.classic-footer::before {
+  display: none;
+}
+
+/* גורם לירידת שורה אחרי כל נקודה */
+.summary-content {
+  display: inline-block;
+}
+
+.summary-content::after {
+  content: '';
+  display: block;
+  height: 0.8em;
+}
+
+/* מחליף את הנקודות בנקודות + ירידת שורה */
+.summary-content {
+  white-space: normal;
+  word-break: break-word;
+}
+
+.summary-content {
+  display: block;
+}
+
+.summary-content {
+  text-align: left;
+}
+
+/* מוסיף ירידת שורה אחרי כל נקודה */
+.summary-content {
+  display: inline;
+}
+
+.summary-content {
+  display: block;
+}
+
+.summary-content {
+  text-align: justify;
+}
+
+/* Skills Section Styles */
+.skills-section {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.skills-group {
+  margin-bottom: 1rem;
+}
+
+.skills-subtitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.skills-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.skill-item {
+  font-weight: 300;
+  font-size: 0.9rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+}
+
+.skill-separator {
+  margin: 0 0.5rem;
+  color: #666;
+  opacity: 0.6;
+}
+
+/* Languages Section */
+.languages-section {
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+/* Print Styles */
+@media print {
+  .skills-section,
+  .languages-section {
+    page-break-inside: avoid;
+  }
+  
+  .skills-items {
+    break-inside: avoid;
+  }
+}

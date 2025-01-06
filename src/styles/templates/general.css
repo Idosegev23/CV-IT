@@ -1,0 +1,734 @@
+/* Base Styles */
+:root {
+  --primary-font: Assistant, sans-serif;
+  --primary-color: #000000;
+  --secondary-color: #000000;
+  --line-color: #000000;
+  --background-color: #F3F4F1;
+  --scale-factor: 1;
+  --a4-width: 210mm;
+  --a4-height: 297mm;
+  --font-family: var(--font-assistant), Assistant, sans-serif;
+}
+
+/* General Template Styles */
+.general-template {
+  font-family: var(--font-assistant), Assistant, sans-serif;
+  width: var(--a4-width);
+  height: var(--a4-height);
+  margin: 0 auto;
+  padding: 0.5cm 1.5cm 1.5cm;
+  background: var(--background-color);
+  color: var(--primary-color);
+  direction: rtl;
+  text-align: right;
+  position: relative;
+  overflow: hidden;
+  transform-origin: top left;
+  transform: scale(var(--scale-factor));
+}
+
+@page {
+  size: A4;
+  margin: 0;
+  padding: 0;
+}
+
+@media print {
+  /* Reset any browser defaults */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    width: 210mm;
+    height: 297mm;
+  }
+
+  .general-template {
+    transform: none !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0.5cm 1.5cm 1.5cm !important;
+    overflow: hidden !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+  }
+
+  /* וידוא שכל התמונות והצבעים מודפסים כראוי */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+
+  /* מניעת שבירת עמוד באמצע אלמנטים */
+  .section {
+    page-break-inside: avoid;
+  }
+
+  /* וידוא שהתמונות מודפסות */
+  img {
+    print-color-adjust: exact;
+  }
+
+  /* התאמת שקיפויות להדפסה */
+  .header-decoration img,
+  .footer-decorations img {
+    opacity: 0.8 !important;
+  }
+}
+
+/* Header Styles */
+.general-header {
+  height: 4%;
+  min-height: 4vh;
+  margin-bottom: 3rem;
+  position: relative;
+  display: flex;
+  align-items: center;
+  text-align: right;
+  direction: rtl;
+}
+
+.general-header::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: -1.5cm;
+  width: calc(100% + 3cm);
+  height: 1px;
+  background: var(--line-color);
+}
+
+.general-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.general-header-name {
+  order: 2;
+}
+
+.general-header-name h1 {
+  font-size: 38px;
+  margin: 0;
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+  color: var(--primary-color);
+}
+
+.firstname {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.lastname {
+  font-weight: 300;
+  color: var(--primary-color);
+}
+
+/* Contact Info */
+.contact-info {
+  display: flex;
+  gap: 0.8rem;
+  justify-content: flex-start;
+  order: 1;
+  margin-right: 2rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--primary-color);
+  font-size: 18px;
+}
+
+.contact-item-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contact-item-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Content Layout */
+.content {
+  position: relative;
+  margin-top: 1rem;
+}
+
+/* הקו האנכי הראשי */
+.content::before {
+  content: '';
+  position: absolute;
+  top: 170px;
+  right: 0;
+  width: 1px;
+  height: calc(100% - 190px);
+  background: var(--line-color);
+}
+
+/* Section Styles */
+.section {
+  margin-bottom: 1.3rem;
+  position: relative;
+}
+
+/* Military Service Section */
+.section:has(.section-title:contains("שירות צבאי")) {
+  order: 3;
+  margin-bottom: 1.3rem;
+}
+
+/* Skills Section */
+.section:has(.section-title:contains("כישורים")) {
+  order: 4;
+  margin-bottom: 1.3rem;
+  max-width: 60%;
+}
+
+/* Languages Section */
+.section:has(.section-title:contains("שפות")) {
+  order: 5;
+  margin-bottom: 8rem;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-right: 3rem;
+  transform: translateY(-8px);
+}
+
+/* הקו האופקי מהאייקון */
+.section-title::after {
+  content: '';
+  position: absolute;
+  right: -24px;
+  top: 24px;
+  width: 30%;
+  height: 1px;
+  background-color: #000000 !important;
+  z-index: 1;
+  display: block !important;
+}
+
+/* נקודת הסיום של הקו */
+.section-title::before {
+  content: '';
+  position: absolute;
+  right: calc(30% - 24px);
+  top: 22px;
+  width: 4px;
+  height: 4px;
+  background-color: #000000 !important;
+  border-radius: 50%;
+  z-index: 1;
+  display: block !important;
+}
+
+.section-icon {
+  width: 48px;
+  height: 48px;
+  position: absolute;
+  right: -24px;
+  top: 0;
+  background: var(--background-color);
+  border: 1px solid #000000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+/* Timeline Content */
+.timeline-container {
+  padding-top: 0.3rem;
+}
+
+.timeline-item {
+  position: relative;
+  padding-right: 3rem;
+  margin-bottom: 0.5rem;
+  direction: rtl;
+  text-align: right;
+}
+
+.timeline-header {
+  margin-bottom: 0.3rem;
+}
+
+.timeline-header h4 {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 14px;
+  margin: 0;
+  direction: rtl;
+  text-align: right;
+  flex-wrap: wrap;
+}
+
+.timeline-position {
+  font-weight: 600;
+  color: var(--primary-color);
+  direction: rtl;
+}
+
+.timeline-separator {
+  color: var(--primary-color);
+  margin: 0 0.5rem;
+  opacity: 0.6;
+}
+
+.timeline-company {
+  color: var(--primary-color);
+  font-weight: normal;
+  direction: rtl;
+}
+
+.timeline-date {
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+.timeline-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.timeline-content {
+  margin-top: 0.3rem;
+  padding-right: 1rem;
+  font-size: 14px;
+  line-height: 1.4;
+  direction: rtl;
+  text-align: right;
+}
+
+.timeline-content ul {
+  margin: 0;
+  padding-right: 1.5rem;
+  padding-left: 0;
+  list-style-type: none;
+}
+
+.timeline-content li {
+  margin-bottom: 0.2rem;
+  position: relative;
+}
+
+.timeline-content li::before {
+  content: '•';
+  position: absolute;
+  right: -1rem;
+}
+
+/* Skills and Languages */
+.skills-grid {
+  padding-right: 3rem;
+  margin-top: 0.1rem;
+  max-width: 75%;
+  direction: rtl;
+  text-align: right;
+  line-height: 1.8;
+}
+
+.skill-item {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary-color);
+  white-space: normal;
+  display: inline;
+}
+
+.skill-item .skill-level {
+  font-weight: 300;
+}
+
+.skill-item:last-child {
+  margin-left: 0;
+}
+
+.languages-grid {
+  padding-right: 3rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.1rem;
+  max-width: 70%;
+  direction: rtl;
+  text-align: right;
+}
+
+.language-item {
+  font-size: 14px;
+  display: flex;
+  gap: 0.5rem;
+  direction: rtl;
+  text-align: right;
+}
+
+.language-name {
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+.language-level {
+  color: var(--primary-color);
+}
+
+.language-name::after {
+  content: "";
+  margin: 0;
+}
+
+/* Responsive Design */
+@media print {
+  .general-template {
+    padding: 1cm;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .contact-info {
+    flex-direction: column;
+  }
+}
+
+.header-decoration {
+  position: absolute;
+  top: 6rem;
+  z-index: 1;
+  transform: scale(1.2);
+}
+
+.right-decoration {
+  right: -4rem;
+}
+
+.left-decoration {
+  left: 2rem;
+  transform: scale(1.2) scaleX(-1);
+}
+
+.header-decoration img {
+  opacity: 0.8;
+}
+
+/* Footer Decorations */
+.footer-decorations {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 200px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.building-decoration {
+  position: absolute;
+  bottom: 3rem;
+  left: 2rem;
+  z-index: 2;
+  transform: scale(0.6);
+}
+
+.icon-decoration {
+  position: absolute;
+  bottom: 8rem;
+  left: 2rem;
+  z-index: 3;
+  transform: scale(0.8);
+}
+
+.cloud-decoration {
+  position: absolute;
+  bottom: 12rem;
+  left: 9rem;
+  z-index: 1;
+  transform: scale(0.5);
+}
+
+.footer-decorations img {
+  opacity: 0.8;
+}
+
+.skill-level {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  margin: 0 4px;
+}
+
+.skill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  transition: background-color 0.3s ease;
+}
+
+.skill-dot.filled {
+  background-color: #4B4553;
+}
+
+/* Summary Section Styles */
+.summary-content {
+  padding-right: 3rem;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--primary-color);
+  margin-top: 0.5rem;
+  max-width: 90%;
+}
+
+.summary-content p {
+  margin: 0;
+  text-align: justify;
+}
+
+/* Add new summary section styles */
+.summary-section {
+  margin-bottom: 2rem;
+  padding-right: 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.summary-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+/* Update existing styles for LTR support */
+.general-template.ltr {
+  direction: ltr;
+  text-align: left;
+}
+
+.general-template.ltr .content::before {
+  right: auto;
+  left: 0;
+}
+
+.general-template.ltr .section-title {
+  padding-right: 0;
+  padding-left: 3rem;
+}
+
+.general-template.ltr .section-icon {
+  right: auto;
+  left: -24px;
+}
+
+.general-template.ltr .section-title::after {
+  right: auto;
+  left: -24px;
+}
+
+.general-template.ltr .section-title::before {
+  right: auto;
+  left: calc(30% - 24px);
+}
+
+.general-template.ltr .timeline-item {
+  padding-right: 0;
+  padding-left: 3rem;
+  direction: ltr;
+  text-align: left;
+}
+
+.general-template.ltr .timeline-content ul {
+  padding-right: 0;
+  padding-left: 1.5rem;
+}
+
+.general-template.ltr .timeline-content li::before {
+  right: auto;
+  left: -1rem;
+}
+
+.general-template.ltr .skills-grid,
+.general-template.ltr .languages-grid {
+  padding-right: 0;
+  padding-left: 3rem;
+  direction: ltr;
+  text-align: left;
+}
+
+.general-template.ltr .contact-info {
+  margin-right: 0;
+  margin-left: 2rem;
+}
+
+/* Update decorations for LTR */
+.general-template.ltr .right-decoration {
+  right: auto;
+  left: -4rem;
+  transform: scale(1.2) scaleX(-1);
+}
+
+.general-template.ltr .left-decoration {
+  left: auto;
+  right: 2rem;
+  transform: scale(1.2);
+}
+
+/* עדכון מפריד הכישורים */
+.skill-item:not(:last-child)::after {
+  content: ' | ';
+  margin: 0 4px;
+  color: var(--primary-color);
+}
+
+/* הסרת המפריד הקודם */
+.skill-item:last-child::after {
+  content: none;
+}
+
+.summary-section .section-title::after,
+.summary-section .section-title::before {
+  display: none;
+}
+
+.section:not(.summary-section) .section-title::after {
+  content: '';
+  position: absolute;
+  right: -24px;
+  top: 24px;
+  width: 30%;
+  height: 1px;
+  background-color: #000000 !important;
+  z-index: 1;
+  display: block !important;
+}
+
+.section:not(.summary-section) .section-title::before {
+  content: '';
+  position: absolute;
+  right: calc(30% - 24px);
+  top: 22px;
+  width: 4px;
+  height: 4px;
+  background-color: #000000 !important;
+  border-radius: 50%;
+  z-index: 1;
+  display: block !important;
+}
+
+.summary-content {
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--primary-color);
+  white-space: pre-line;
+}
+
+/* Image handling for general template */
+.general-template img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+.header-decoration img,
+.footer-decorations img {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  z-index: 1;
+}
+
+.contact-item-icon img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 768px) {
+  .general-template img,
+  .header-decoration img,
+  .footer-decorations img,
+  .contact-item-icon img {
+    display: block !important;
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
+    object-fit: contain !important;
+    margin: 0 auto !important;
+  }
+}
+
+.timeline-description {
+  list-style-type: none;
+  padding-right: 1.5rem;
+  margin: 0.5rem 0;
+  max-width: 80%;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.timeline-description li {
+  display: inline;
+  position: relative;
+  color: var(--primary-color);
+  font-weight: normal;
+}
+
+.timeline-description li:not(:last-child)::after {
+  content: '';
+  margin: 0 0.5rem;
+  color: var(--primary-color);
+  opacity: 0.6;
+}
+
+/* עדכון תצוגת LTR */
+.general-template.ltr .timeline-description {
+  padding-right: 0;
+  padding-left: 1.5rem;
+}
+
+.general-template.ltr .timeline-description li::before {
+  right: auto;
+  left: -1rem;
+} 

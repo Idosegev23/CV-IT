@@ -1,0 +1,560 @@
+/* בסיס לתבנית קריאטיבית */
+:root {
+  --scale-factor: 1;
+  --a4-width: 210mm;
+  --a4-height: 297mm;
+  --right-column-width: 25%;
+  --left-column-width: 75%;
+  --primary-blue: #4855CE;
+  --primary-grey: #E8E8E5;
+  --separator-color: #E8E8E5;
+}
+
+/* הגדרות פונט */
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-ExtraLight.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Assistant';
+  src: url('/fonts/Assistant-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+}
+
+.creative-template {
+  position: relative;
+  width: var(--a4-width);
+  height: var(--a4-height);
+  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  transform-origin: top left;
+  transform: scale(var(--scale-factor));
+  font-family: Assistant, sans-serif !important;
+  background-color: var(--primary-grey);
+}
+
+/* וידוא שכל האלמנטים בתוך התבנית משתמשים בפונט */
+.creative-template * {
+  font-family: Assistant, sans-serif !important;
+}
+
+/* הגדרות משקל ספציפיות */
+.creative-firstname {
+  font-weight: 700 !important;
+  display: block;
+}
+
+.creative-lastname {
+  font-weight: 400 !important;
+  display: block;
+}
+
+.creative-contact-info {
+  font-weight: 300 !important;
+}
+
+.creative-section-title {
+  font-weight: 500 !important;
+}
+
+.creative-language {
+  font-weight: 700 !important;
+}
+
+.creative-level {
+  font-weight: 300 !important;
+}
+
+/* עמודה ימנית */
+.creative-right-column {
+  width: var(--right-column-width);
+  height: 100%;
+  background-color: var(--primary-blue);
+  color: white;
+  padding: 2rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  font-family: var(--font-family);
+  border-bottom-left-radius: 40px;
+  z-index: 2;
+}
+
+.creative-right-column::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 40px;
+  background-color: var(--primary-blue);
+  z-index: 0;
+}
+
+.creative-bg-top {
+  position: absolute;
+  top: 1rem;
+  right: 0;
+  opacity: 1;
+}
+
+.creative-bg-bottom {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 0;
+  opacity: 1;
+  z-index: 1;
+  transform: scale(0.65);
+}
+
+/* פרטים אישיים */
+.creative-personal-info {
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-name {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.creative-separator {
+  height: 1px;
+  background-color: var(--separator-color);
+  margin: 0.5rem 0;
+  opacity: 0.3;
+  width: 100%;
+}
+
+/* סקשנים */
+.creative-section {
+  margin-bottom: 1.2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-section-title {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: white;
+}
+
+/* שפות */
+.creative-language-item {
+  margin-bottom: 0.5rem;
+  display: grid;
+  grid-template-columns: auto 20px auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.creative-language {
+  font-weight: 700;
+  text-align: right;
+}
+
+.creative-separator-vertical {
+  opacity: 0.3;
+  text-align: center;
+  justify-self: center;
+}
+
+.creative-level {
+  font-weight: 300;
+  text-align: right;
+}
+
+/* כישורים */
+.creative-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-width: 100%;
+  padding-right: 0.5rem;
+}
+
+.creative-skill-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.creative-skill-name {
+  font-size: 0.9rem;
+  color: white;
+  min-width: 80px;
+  max-width: calc(100% - 70px);
+  word-wrap: break-word;
+  line-height: 1.2;
+}
+
+.creative-skill-level {
+  display: flex;
+  gap: 3px;
+  justify-content: flex-end;
+  width: 50px;
+  flex-shrink: 0;
+  direction: ltr;
+  margin-top: 2px;
+}
+
+/* עמודה שמאלית */
+.creative-left-column {
+  width: var(--left-column-width);
+  height: 100%;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.creative-icon-top {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  opacity: 0.8;
+  width: 60px;
+  height: 60px;
+}
+
+.creative-bg-grey {
+  position: absolute;
+  top: 5rem;
+  left: 7rem;
+  width: 50%;
+  transform: translateY(2rem);
+  filter: brightness(0) invert(1);
+}
+
+/* ניסיון תעסוקתי, השכלה ושירות צבאי */
+.creative-experience {
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-experience:first-of-type {
+  margin-top: 4rem;
+}
+
+.creative-experience-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.creative-experience-item {
+  margin-bottom: 0.8rem;
+}
+
+.creative-experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+}
+
+.creative-experience-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  color: #4B4553;
+  margin: 0;
+}
+
+.creative-experience-company {
+  color: #4B4553;
+  font-weight: 300;
+  font-size: 0.9rem;
+}
+
+.creative-experience-date {
+  font-weight: 300;
+  font-size: 0.9rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.creative-experience-description {
+  list-style-type: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  max-width: 80%;
+}
+
+.creative-experience-description li {
+  display: inline;
+  position: relative;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #4B4553;
+  font-weight: normal;
+}
+
+.creative-experience-description li:not(:last-child)::after {
+  content: '';
+  margin: 0 0.25rem;
+  color: #4B4553;
+  opacity: 0.6;
+}
+
+@media print {
+  .creative-template {
+    transform: none !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    overflow: hidden !important;
+    font-family: var(--font-family) !important;
+  }
+} 
+
+/* כישורים ארוכים */
+.creative-skill-name.small {
+  font-size: 0.8rem;
+}
+
+.creative-skill-name.smaller {
+  font-size: 0.7rem;
+} 
+
+/* עדכון צבע הכותרות והתפקיד */
+.creative-section-title.dark {
+  color: #4B4553;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.creative-experience-position {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #4B4553; /* שינוי צבע התפקיד */
+  margin: 0;
+}
+
+/* הוספת סגנון לתקציר המקצועי */
+.creative-summary {
+  margin-top: 2rem;
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.creative-summary-title {
+  color: #4B4553;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+}
+
+.creative-summary-content {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4B4553;
+  white-space: pre-line;
+} 
+
+/* הוספת נקודות להשכלה */
+.creative-education-description {
+  position: relative;
+  padding-right: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.creative-education-description::before {
+  content: "•";
+  position: absolute;
+  right: 0;
+  color: var(--primary-blue);
+} 
+
+/* הוספת מרווח קבוע בין הכישור לנקודות */
+.creative-skill-content {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.5rem;
+} 
+
+/* סגנון נפרד לכישורים רכים */
+.creative-skill-item:has(.creative-skill-level) {
+  margin-bottom: 0.8rem; /* מרווח גדול יותר לכישורים טכניים */
+}
+
+.creative-skill-item:not(:has(.creative-skill-level)) {
+  margin-bottom: 0.4rem; /* מרווח קטן יותר לכישורים רכים */
+} 
+
+/* עמודה שמאלית */
+.creative-left-column {
+  width: var(--left-column-width);
+  height: 100%;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+/* וידוא שהתוכן מעל הרקע */
+.creative-experience,
+.creative-summary,
+.creative-education-description {
+  position: relative;
+  z-index: 2;
+} 
+
+/* עדכון הקו המפריד בעמודה הימנית */
+.creative-right-column .creative-separator {
+  height: 1px;
+  background-color: var(--separator-color);
+  margin: 0.5rem 0;
+  opacity: 0.3;
+  width: 30%; /* הקטנת הרוחב ל-30% */
+} 
+
+/* הוספת תמיכה ב-LTR */
+.creative-template[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
+}
+
+/* הפיכת המיקום של העמודות */
+.creative-template[dir="ltr"] {
+  flex-direction: row-reverse;
+}
+
+/* התאמת העמודה הימנית */
+.creative-template[dir="ltr"] .creative-right-column {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 40px;
+}
+
+.creative-template[dir="ltr"] .creative-right-column::after {
+  left: auto;
+  right: 0;
+}
+
+/* התאמת הרקעים והקישוטים */
+.creative-template[dir="ltr"] .creative-bg-top {
+  right: auto;
+  left: 0;
+  transform: scaleX(-1);
+}
+
+.creative-template[dir="ltr"] .creative-bg-bottom {
+  right: auto;
+  left: 0;
+  transform: scale(-0.45, 0.45);
+}
+
+.creative-template[dir="ltr"] .creative-icon-top {
+  left: auto;
+  right: 2rem;
+}
+
+.creative-template[dir="ltr"] .creative-bg-grey {
+  left: auto;
+  right: 7rem;
+  transform: translateY(2rem) scaleX(-1);
+}
+
+/* התאמת טקסט ומרווחים */
+.creative-template[dir="ltr"] .creative-skills {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+
+.creative-template[dir="ltr"] .creative-experience-description li {
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+.creative-template[dir="ltr"] .creative-experience-description li::before {
+  right: auto;
+  left: 0;
+}
+
+.creative-template[dir="ltr"] .creative-education-description {
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+.creative-template[dir="ltr"] .creative-education-description::before {
+  right: auto;
+  left: 0;
+}
+
+/* התאמת יישור טקסט */
+.creative-template[dir="ltr"] .creative-language {
+  text-align: left;
+}
+
+.creative-template[dir="ltr"] .creative-level {
+  text-align: left;
+}
+
+/* התאמת גריד השפות */
+.creative-template[dir="ltr"] .creative-language-item {
+  grid-template-columns: auto 20px auto;
+  direction: ltr;
+}
+
+/* התאמת הכישורים */
+.creative-template[dir="ltr"] .creative-skill-content {
+  flex-direction: row-reverse;
+}
+
+.creative-template[dir="ltr"] .creative-skill-level {
+  justify-content: flex-start;
+} 

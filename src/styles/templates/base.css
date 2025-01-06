@@ -1,0 +1,45 @@
+:root {
+  --cv-scale: 1;
+  --base-font-size: 16px;
+  --header-font-size: 24px;
+  --section-title-font-size: 20px;
+  --content-font-size: 14px;
+}
+
+.cv-container {
+  /* קבועים לדף A4 */
+  width: 210mm;
+  min-height: 297mm;
+  padding: 20mm;
+  margin: 0 auto;
+  box-sizing: border-box;
+  background: white;
+  position: relative;
+  overflow: hidden;
+  
+  /* שליטה בגדלי טקסט */
+  font-size: var(--base-font-size);
+}
+
+/* כותרות */
+.cv-header {
+  font-size: var(--header-font-size);
+}
+
+/* כותרות משנה */
+.section-title {
+  font-size: var(--section-title-font-size);
+}
+
+/* תוכן */
+.cv-content {
+  font-size: var(--content-font-size);
+}
+
+/* מדיה קוורי להתאמת גדלים במסכים קטנים */
+@media print, screen and (max-width: 210mm) {
+  .cv-container {
+    transform: scale(var(--cv-scale));
+    transform-origin: top left;
+  }
+} 

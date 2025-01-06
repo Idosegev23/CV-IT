@@ -1,0 +1,391 @@
+/* Dynamic sizing system */
+:root {
+  --scale-factor: 0.99;
+  --base-font-size: 16px;
+  --base-spacing: 0.1rem;
+  --a4-width: 210mm;
+  --a4-height: 297mm;
+  --right-column-width: 250px;
+  --left-column-width: calc(100% - var(--right-column-width));
+  --separator-color: rgba(255, 255, 255, 0.34);
+  --font-family: 'Assistant', sans-serif !important;
+}
+
+.professional-template {
+  position: relative;
+  display: flex;
+  width: var(--a4-width);
+  height: var(--a4-height);
+  margin: 0 auto;
+  background: #F3F4F1;
+  font-family: var(--font-family);
+  overflow: hidden;
+  transform-origin: top center;
+  transform: scale(var(--scale-factor));
+  box-sizing: border-box;
+  
+  /* Dynamic font size calculation */
+  --adjusted-font-size: calc(var(--base-font-size) * var(--scale-factor));
+  --adjusted-spacing: calc(var(--base-spacing) * var(--scale-factor));
+}
+
+/* Left Column (was right in RTL) */
+.professional-left-column {
+  width: 35%;
+  background: #4B4553;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Right Column (was left in RTL) */
+.professional-right-column {
+  flex: 1;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  background: #F3F4F1;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* Header */
+.professional-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.professional-name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: #F3F4F1;
+}
+
+.professional-name-first {
+  font-size: 2.2rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.professional-name-last {
+  font-size: 2rem;
+  font-weight: 200;
+  line-height: 1;
+}
+
+.professional-separator {
+  width: 100%;
+  height: 1px;
+  background: rgba(243, 244, 241, 0.2);
+  margin: 0.5rem 0;
+}
+
+.professional-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  color: #F3F4F1;
+  font-weight: 200;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Section Titles */
+.professional-section-title {
+  color: #1F1B2F;
+  font-size: 1.2rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+}
+
+.professional-left-column .professional-section-title {
+  color: #F3F4F1;
+}
+
+/* Skills */
+.professional-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.professional-skill-item {
+  color: #F3F4F1;
+  font-weight: 200;
+  font-size: 0.9rem;
+}
+
+.professional-skill-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.professional-skill-name {
+  font-weight: 300;
+}
+
+.professional-skill-separator {
+  opacity: 0.3;
+}
+
+.professional-skill-level {
+  font-weight: 200;
+  opacity: 0.8;
+  font-size: 0.85rem;
+}
+
+/* Experience */
+.professional-experience-item {
+  margin-bottom: 1.5rem;
+}
+
+.professional-experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
+}
+
+.professional-experience-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  max-width: 75%;
+}
+
+.professional-experience-title {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #1F1B2F;
+}
+
+.professional-experience-company {
+  font-weight: 300;
+  font-size: 0.9rem;
+  color: #1F1B2F;
+}
+
+.professional-experience-separator {
+  opacity: 0.3;
+  margin: 0 0.2rem;
+}
+
+.professional-experience-date {
+  font-weight: 200;
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: right;
+}
+
+.professional-experience-description {
+  list-style-type: none;
+  padding-left: 1.2rem;
+  margin: 0.5rem 0;
+}
+
+.professional-experience-description li {
+  position: relative;
+  margin-bottom: 0.3rem;
+  font-weight: 200;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #333;
+}
+
+.professional-experience-description li::before {
+  content: "•";
+  position: absolute;
+  left: -1.2rem;
+  opacity: 0.5;
+}
+
+/* Education */
+.professional-education-item {
+  margin-bottom: 1rem;
+}
+
+.professional-education-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.3rem;
+  gap: 1rem;
+}
+
+.professional-education-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  max-width: 75%;
+}
+
+.professional-education-title {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #1F1B2F;
+}
+
+.professional-education-institution {
+  font-weight: 300;
+  font-size: 0.9rem;
+  color: #1F1B2F;
+}
+
+.professional-education-date {
+  font-weight: 200;
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: right;
+}
+
+.professional-education-specialization {
+  font-weight: 200;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.2rem;
+}
+
+/* Military Service */
+.professional-military-section {
+  margin-bottom: 1.5rem;
+}
+
+.professional-military-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.3rem;
+  gap: 1rem;
+}
+
+.professional-military-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  max-width: 75%;
+}
+
+.professional-military-title {
+  font-weight: 500;
+  font-size: 1rem;
+  color: #1F1B2F;
+}
+
+.professional-military-unit {
+  font-weight: 300;
+  font-size: 0.9rem;
+  color: #1F1B2F;
+}
+
+.professional-military-date {
+  font-weight: 200;
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: right;
+}
+
+/* Summary */
+.professional-summary {
+  margin-bottom: 2rem;
+}
+
+.professional-summary-text {
+  font-weight: 200;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #333;
+  text-align: justify;
+}
+
+/* Logo */
+.professional-logo {
+  position: absolute;
+  bottom: 3.5rem;
+  left: 2rem;
+  opacity: 0.1;
+}
+
+.professional-logo img {
+  width: 100px;
+  height: auto;
+}
+
+/* Mobile Responsive Styles */
+@media screen and (max-width: 768px) {
+  .professional-template {
+    transform: scale(0.7);
+    transform-origin: top center;
+    margin: 0;
+    padding: 0;
+  }
+
+  .professional-left-column,
+  .professional-right-column {
+    padding: 2rem 1rem;
+  }
+
+  .professional-name-first,
+  .professional-name-last {
+    font-size: 1.8rem;
+  }
+
+  .professional-contact {
+    font-size: 0.8rem;
+  }
+
+  .professional-section-title {
+    font-size: 1rem;
+  }
+
+  .professional-skill-item,
+  .professional-experience-title,
+  .professional-education-title,
+  .professional-military-title {
+    font-size: 0.9rem;
+  }
+
+  .professional-experience-date,
+  .professional-education-date,
+  .professional-military-date {
+    font-size: 0.8rem;
+  }
+
+  .professional-experience-description li,
+  .professional-education-specialization {
+    font-size: 0.85rem;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .professional-template {
+    transform: none !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .professional-left-column,
+  .professional-right-column {
+    padding: 3rem 2rem !important;
+  }
+} 

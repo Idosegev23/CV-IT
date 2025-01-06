@@ -1,0 +1,42 @@
+.formContainer {
+  @apply min-h-screen bg-[#EAEAE7];
+}
+
+.questionCard {
+  @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8;
+}
+
+.gradientText {
+  @apply bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent;
+}
+
+/* Add no-scrollbar utility */
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+} 
+
+@keyframes progressFill {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.progressFill {
+  animation: progressFill 0.5s ease-out forwards;
+}
+
+/* הוספה ל-Tailwind */
+@layer utilities {
+  .animate-progressFill {
+    animation: progressFill 0.5s ease-out forwards;
+  }
+} 
