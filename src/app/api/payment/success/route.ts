@@ -76,13 +76,35 @@ export async function GET(request: Request) {
     
     const result = await handlePaymentSuccess(params);
     
-    // הפניה ישירה לדף הבא במקום script
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/he/create/template/1/form?session=${result.sessionId}`);
+    // החזרת script שישלח הודעה לחלון הראשי
+    const script = `
+      <script>
+        window.parent.postMessage(JSON.stringify({
+          success: true,
+          transactionId: "${result.transactionId}",
+          sessionId: "${result.sessionId}",
+          flow: "${result.sessionId}"
+        }), "*");
+      </script>
+    `;
+
+    return new NextResponse(script, {
+      headers: { 'Content-Type': 'text/html' },
+    });
     
   } catch (error) {
     console.error('Payment success GET handler error:', error);
-    // הפניה לדף השגיאה במקרה של כישלון
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/he/packages?error=payment_failed`);
+    const script = `
+      <script>
+        window.parent.postMessage(JSON.stringify({
+          success: false,
+          error: "Payment failed"
+        }), "*");
+      </script>
+    `;
+    return new NextResponse(script, {
+      headers: { 'Content-Type': 'text/html' },
+    });
   }
 }
 

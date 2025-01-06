@@ -164,14 +164,33 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
       const messageHandler = (event: MessageEvent) => {
         try {
           console.log('Received message from iframe:', event.data);
-          const data = JSON.parse(event.data);
+          let data;
+          try {
+            data = JSON.parse(event.data);
+          } catch (e) {
+            console.log('Not a JSON message, ignoring');
+            return;
+          }
           
           if (data.success) {
             console.log('Payment successful, starting CV generation...');
+            // עדכון ה-sessionId אם הוא מגיע מהשרת
+            if (data.flow) {
+              setCurrentSessionId(data.flow);
+              useSessionStore.getState().setSessionId(data.flow);
+            }
+            
             setPaymentStatus('success');
             setTimeout(() => {
               setPaymentStatus('generating');
-              checkCVStatus(currentSessionId);
+              // שימוש ב-sessionId המעודכן
+              const sessionToUse = data.flow || currentSessionId;
+              if (sessionToUse) {
+                checkCVStatus(sessionToUse);
+              } else {
+                console.error('No session ID available');
+                toast.error(isRTL ? 'אירעה שגיאה בתהליך' : 'An error occurred');
+              }
             }, 1500);
           } else if (data.error) {
             console.error('Payment error from iframe:', data.error);
@@ -183,8 +202,9 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
             setPaymentStatus('idle');
           }
         } catch (error) {
-          // התעלם משגיאות פרסור JSON - ייתכן שזו הודעה מרכיב אחר
-          console.log('Failed to parse message:', event.data);
+          console.error('Error handling message:', error);
+          toast.error(isRTL ? 'אירעה שגיאה בתהליך' : 'An error occurred');
+          setPaymentStatus('idle');
         }
       };
 
