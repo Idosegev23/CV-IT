@@ -46,15 +46,21 @@ export async function GET(request: Request) {
     const result = await handlePaymentFailure(params);
     
     const script = `
-      <script>
-        window.parent.postMessage(JSON.stringify({
-          success: false,
-          error: "${result.errorMessage || result.error || 'Payment failed'}",
-          sessionId: "${result.sessionId}"
-        }), "*");
-        
-        window.location.href = "${process.env.NEXT_PUBLIC_APP_URL}/he/packages?error=payment_failed";
-      </script>
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Payment Failed</title>
+        </head>
+        <body>
+          <script>
+            window.parent.postMessage(JSON.stringify({
+              success: false,
+              error: "${result.errorMessage || result.error || 'Payment failed'}",
+              sessionId: "${result.sessionId}"
+            }), "*");
+          </script>
+        </body>
+      </html>
     `;
 
     return new NextResponse(script, {
@@ -85,15 +91,21 @@ export async function POST(request: Request) {
     const result = await handlePaymentFailure(data);
     
     const script = `
-      <script>
-        window.parent.postMessage(JSON.stringify({
-          success: false,
-          error: "${result.errorMessage || result.error || 'Payment failed'}",
-          sessionId: "${result.sessionId}"
-        }), "*");
-        
-        window.location.href = "${process.env.NEXT_PUBLIC_APP_URL}/he/packages?error=payment_failed";
-      </script>
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Payment Failed</title>
+        </head>
+        <body>
+          <script>
+            window.parent.postMessage(JSON.stringify({
+              success: false,
+              error: "${result.errorMessage || result.error || 'Payment failed'}",
+              sessionId: "${result.sessionId}"
+            }), "*");
+          </script>
+        </body>
+      </html>
     `;
 
     return new NextResponse(script, {

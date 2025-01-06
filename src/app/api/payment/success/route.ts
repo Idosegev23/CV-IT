@@ -78,14 +78,22 @@ export async function GET(request: Request) {
     
     // החזרת script שישלח הודעה לחלון הראשי
     const script = `
-      <script>
-        window.parent.postMessage(JSON.stringify({
-          success: true,
-          transactionId: "${result.transactionId}",
-          sessionId: "${result.sessionId}",
-          flow: "${result.sessionId}"
-        }), "*");
-      </script>
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Payment Success</title>
+        </head>
+        <body>
+          <script>
+            window.parent.postMessage(JSON.stringify({
+              success: true,
+              transactionId: "${result.transactionId}",
+              sessionId: "${result.sessionId}",
+              flow: "${result.sessionId}"
+            }), "*");
+          </script>
+        </body>
+      </html>
     `;
 
     return new NextResponse(script, {
@@ -127,15 +135,21 @@ export async function POST(request: Request) {
     const result = await handlePaymentSuccess(data);
     
     const script = `
-      <script>
-        window.parent.postMessage(JSON.stringify({
-          success: true,
-          transactionId: "${result.transactionId}",
-          sessionId: "${result.sessionId}"
-        }), "*");
-        
-        window.location.href = "${process.env.NEXT_PUBLIC_APP_URL}/he/create/template/1/form?session=${result.sessionId}";
-      </script>
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Payment Success</title>
+        </head>
+        <body>
+          <script>
+            window.parent.postMessage(JSON.stringify({
+              success: true,
+              transactionId: "${result.transactionId}",
+              sessionId: "${result.sessionId}"
+            }), "*");
+          </script>
+        </body>
+      </html>
     `;
 
     return new NextResponse(script, {
@@ -143,6 +157,24 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('Payment success POST handler error:', error);
-    return NextResponse.json({ error: 'Internal server error', details: error }, { status: 500 });
+    const errorScript = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Payment Error</title>
+        </head>
+        <body>
+          <script>
+            window.parent.postMessage(JSON.stringify({
+              success: false,
+              error: "Payment failed"
+            }), "*");
+          </script>
+        </body>
+      </html>
+    `;
+    return new NextResponse(errorScript, {
+      headers: { 'Content-Type': 'text/html' },
+    });
   }
 } 

@@ -74,8 +74,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
       switch(data.status) {
         case 'completed':
           setCvStatus('completed');
-          const redirectUrl = `/${lang}/create/template/${sessionId}/preview`;
-          router.push(redirectUrl);
+          window.location.href = `/${lang}/create/template/${sessionId}/preview`;
           break;
         case 'error':
           setCvStatus('error');
@@ -85,11 +84,15 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         case 'processing':
           setTimeout(() => checkCVStatus(sessionId), 5000);
           break;
+        default:
+          setTimeout(() => checkCVStatus(sessionId), 5000);
+          break;
       }
     } catch (error) {
       console.error('Error checking CV status:', error);
       setCvStatus('error');
       setCvError('Failed to check CV status');
+      toast.error(isRTL ? 'אירעה שגיאה בבדיקת סטטוס קורות החיים' : 'Error checking CV status');
     }
   };
 
@@ -165,45 +168,93 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         try {
           console.log('Received message from iframe:', event.data);
           let data;
-          try {
-            data = JSON.parse(event.data);
-          } catch (e) {
-            console.log('Not a JSON message, ignoring');
-            return;
+          
+          // אם זה אובייקט רגיל (לא JSON string)
+          if (typeof event.data === 'object' && event.data !== null) {
+            data = event.data;
+            // אם זה הודעת תשלום מהשרת של Green Invoice
+            if (data.action === 'payment') {
+              data = {
+                success: data.status === 1,
+                error: data.status !== 1 ? 'Payment failed' : undefined
+              };
+            }
+          } else {
+            // אם זה JSON string
+            try {
+              data = JSON.parse(event.data);
+            } catch (e) {
+              console.log('Not a valid message format, ignoring');
+              return;
+            }
           }
           
           if (data.success) {
-            console.log('Payment successful, starting CV generation...');
-            // עדכון ה-sessionId אם הוא מגיע מהשרת
-            if (data.flow) {
-              setCurrentSessionId(data.flow);
-              useSessionStore.getState().setSessionId(data.flow);
-            }
+            console.log('Payment successful');
             
+            // סגירת ה-iframe של התשלום
+            setPaymentIframe(null);
+            
+            // עדכון סטטוס התשלום
             setPaymentStatus('success');
+            
+            // הצגת הודעת הצלחה
+            toast.success(
+              isRTL 
+                ? 'התשלום התקבל בהצלחה!' 
+                : 'Payment successful!',
+              {
+                duration: 3000,
+              }
+            );
+            
+            // המתנה קצרה לפני המעבר לשלב הבא
             setTimeout(() => {
               setPaymentStatus('generating');
-              // שימוש ב-sessionId המעודכן
-              const sessionToUse = data.flow || currentSessionId;
-              if (sessionToUse) {
-                checkCVStatus(sessionToUse);
+              
+              // התחלת תהליך יצירת קורות החיים
+              if (currentSessionId) {
+                checkCVStatus(currentSessionId);
               } else {
                 console.error('No session ID available');
                 toast.error(isRTL ? 'אירעה שגיאה בתהליך' : 'An error occurred');
               }
-            }, 1500);
+            }, 2000);
+            
           } else if (data.error) {
             console.error('Payment error from iframe:', data.error);
+            // סגירת ה-iframe של התשלום
+            setPaymentIframe(null);
+            
+            // הצגת הודעת שגיאה
             toast.error(
               isRTL 
-                ? `שגיאה בתשלום: ${data.error}` 
-                : `Payment error: ${data.error}`
+                ? 'התשלום לא התקבל. אנא נסה שוב או צור קשר עם התמיכה.' 
+                : 'Payment failed. Please try again or contact support.',
+              {
+                duration: 5000,
+              }
             );
+            
+            // איפוס הטופס
             setPaymentStatus('idle');
           }
         } catch (error) {
           console.error('Error handling message:', error);
-          toast.error(isRTL ? 'אירעה שגיאה בתהליך' : 'An error occurred');
+          // סגירת ה-iframe של התשלום
+          setPaymentIframe(null);
+          
+          // הצגת הודעת שגיאה
+          toast.error(
+            isRTL 
+              ? 'אירעה שגיאה בתהליך התשלום. אנא נסה שוב.' 
+              : 'An error occurred during payment. Please try again.',
+            {
+              duration: 5000,
+            }
+          );
+          
+          // איפוס הטופס
           setPaymentStatus('idle');
         }
       };
@@ -583,6 +634,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                       />
                       
                       <motion.div
+                        key="blue-wheel"
                         className="absolute top-0 right-0"
                         animate={{ 
                           rotate: 360
@@ -602,6 +654,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                       </motion.div>
 
                       <motion.div
+                        key="white-wheel"
                         className="absolute bottom-0 left-0"
                         animate={{ 
                           rotate: -360
