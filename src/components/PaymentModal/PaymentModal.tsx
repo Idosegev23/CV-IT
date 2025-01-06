@@ -71,10 +71,23 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
       const response = await fetch(`/api/generate-cv/status?sessionId=${sessionId}`);
       const data = await response.json();
       
+      console.log('CV Status:', data.status);
+      
       switch(data.status) {
         case 'completed':
           setCvStatus('completed');
-          window.location.href = `/${lang}/create/template/${sessionId}/preview`;
+          // ניווט לדף התצוגה המקדימה רק כשקורות החיים מוכנים
+          toast.success(
+            isRTL 
+              ? 'קורות החיים שלך מוכנים!' 
+              : 'Your CV is ready!',
+            {
+              duration: 2000,
+            }
+          );
+          setTimeout(() => {
+            window.location.href = `/${lang}/create/template/${sessionId}/preview`;
+          }, 1000);
           break;
         case 'error':
           setCvStatus('error');
@@ -82,17 +95,24 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
           toast.error(isRTL ? 'אירעה שגיאה ביצירת קורות החיים' : 'Error generating CV');
           break;
         case 'processing':
-          setTimeout(() => checkCVStatus(sessionId), 5000);
-          break;
+        case 'pending':
         default:
-          setTimeout(() => checkCVStatus(sessionId), 5000);
+          // המשך לבדוק את הסטטוס כל 3 שניות
+          console.log('CV still processing, checking again in 3 seconds...');
+          setTimeout(() => checkCVStatus(sessionId), 3000);
           break;
       }
     } catch (error) {
       console.error('Error checking CV status:', error);
       setCvStatus('error');
       setCvError('Failed to check CV status');
-      toast.error(isRTL ? 'אירעה שגיאה בבדיקת סטטוס קורות החיים' : 'Error checking CV status');
+      toast.error(
+        isRTL 
+          ? 'אירעה שגיאה בבדיקת סטטוס קורות החיים' 
+          : 'Error checking CV status'
+      );
+      // נסה שוב בעוד 3 שניות במקרה של שגיאה
+      setTimeout(() => checkCVStatus(sessionId), 3000);
     }
   };
 
@@ -209,12 +229,41 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
             );
             
             // המתנה קצרה לפני המעבר לשלב הבא
-            setTimeout(() => {
+            setTimeout(async () => {
               setPaymentStatus('generating');
               
               // התחלת תהליך יצירת קורות החיים
               if (currentSessionId) {
-                checkCVStatus(currentSessionId);
+                try {
+                  // קריאה ל-API ליצירת קורות החיים
+                  const generateResponse = await fetch('/api/generate-cv', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                      sessionId: currentSessionId,
+                      lang
+                    }),
+                  });
+
+                  if (!generateResponse.ok) {
+                    throw new Error('Failed to start CV generation');
+                  }
+
+                  console.log('Started CV generation process');
+                  
+                  // התחלת בדיקת הסטטוס
+                  checkCVStatus(currentSessionId);
+                } catch (error) {
+                  console.error('Failed to start CV generation:', error);
+                  toast.error(
+                    isRTL 
+                      ? 'אירעה שגיאה בהתחלת תהליך יצירת קורות החיים' 
+                      : 'Error starting CV generation'
+                  );
+                  setPaymentStatus('idle');
+                }
               } else {
                 console.error('No session ID available');
                 toast.error(isRTL ? 'אירעה שגיאה בתהליך' : 'An error occurred');
@@ -400,6 +449,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          key="payment-modal-overlay"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -408,6 +458,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
           <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
           <motion.div
+            key="payment-modal-content"
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
@@ -605,12 +656,14 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
               </>
             ) : (
               <motion.div 
+                key="payment-status-content"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="p-8 text-center"
               >
                 {paymentStatus === 'success' && (
                   <motion.div
+                    key="payment-success-content"
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", bounce: 0.5 }}
@@ -623,7 +676,10 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                 )}
 
                 {paymentStatus === 'generating' && (
-                  <motion.div className="space-y-4">
+                  <motion.div 
+                    key="payment-generating-content"
+                    className="space-y-4"
+                  >
                     <div className="relative w-32 h-32 mx-auto">
                       <Image 
                         src="/design/CV.svg"
@@ -691,6 +747,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
       )}
 
       <ReservistCouponPopup
+        key="reservist-popup"
         isOpen={isReservistPopupOpen}
         onClose={() => setIsReservistPopupOpen(false)}
         isRTL={isRTL}
