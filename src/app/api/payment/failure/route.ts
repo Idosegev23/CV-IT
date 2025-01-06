@@ -2,61 +2,57 @@ import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 
-export async function POST(request: Request) {
-  console.log('Payment failure handler started');
+// פונקציה משותפת לטיפול בתשלום שנכשל
+async function handlePaymentFailure(data: any) {
+  console.log('Processing failure data:', data);
   
-  try {
-    // נסה לקרוא את הנתונים בכל הפורמטים האפשריים
-    let sessionId, error, errorMessage;
-    
-    try {
-      const formData = await request.formData();
-      console.log('Form data received:', Object.fromEntries(formData));
-      sessionId = formData.get('custom');
-      error = formData.get('Response');
-      errorMessage = formData.get('ErrorMessage');
-    } catch (e) {
-      console.log('Failed to parse as form data, trying JSON');
-      const jsonData = await request.json();
-      console.log('JSON data received:', jsonData);
-      sessionId = jsonData.custom;
-      error = jsonData.error;
-      errorMessage = jsonData.errorMessage;
-    }
+  const sessionId = data.custom || data.sessionId;
+  const error = data.error || data.Response;
+  const errorMessage = data.errorMessage || data.ErrorMessage;
   
+  if (sessionId) {
     console.log('Processing payment failure for session:', sessionId);
+    const supabase = createRouteHandlerClient({ cookies });
     
-    if (sessionId) {
-      const supabase = createRouteHandlerClient({ cookies });
+    // עדכון סטטוס התשלום לנכשל
+    const { error: updateError } = await supabase
+      .from('sessions')
+      .update({ 
+        payment_status: 'failed',
+        payment_error: {
+          code: error,
+          message: errorMessage,
+          date: new Date().toISOString()
+        }
+      })
+      .eq('id', sessionId);
       
-      // עדכון סטטוס התשלום לנכשל
-      const { error: updateError } = await supabase
-        .from('sessions')
-        .update({ 
-          payment_status: 'failed',
-          payment_error: {
-            code: error,
-            message: errorMessage,
-            date: new Date().toISOString()
-          }
-        })
-        .eq('id', sessionId);
-        
-      if (updateError) {
-        console.error('Failed to update session:', updateError);
-      }
+    if (updateError) {
+      console.error('Failed to update session:', updateError);
     }
+  }
+  
+  return { sessionId, error, errorMessage };
+}
+
+// טיפול בבקשת GET
+export async function GET(request: Request) {
+  console.log('Payment failure GET handler started');
+  try {
+    const url = new URL(request.url);
+    const params = Object.fromEntries(url.searchParams);
+    console.log('GET params:', params);
     
-    console.log('Payment failure processing completed');
+    const result = await handlePaymentFailure(params);
+    
     const script = `
       <script>
         window.parent.postMessage(JSON.stringify({
           success: false,
-          error: "${errorMessage || error || 'Payment failed'}",
-          sessionId: "${sessionId}"
+          error: "${result.errorMessage || result.error || 'Payment failed'}",
+          sessionId: "${result.sessionId}"
         }), "*");
         
-        // ניסיון לנווט בחזרה לאפליקציה
         window.location.href = "${process.env.NEXT_PUBLIC_APP_URL}/he/packages?error=payment_failed";
       </script>
     `;
@@ -65,7 +61,46 @@ export async function POST(request: Request) {
       headers: { 'Content-Type': 'text/html' },
     });
   } catch (error) {
-    console.error('Payment failure handler error:', error);
+    console.error('Payment failure GET handler error:', error);
+    return NextResponse.json({ error: 'Internal server error', details: error }, { status: 500 });
+  }
+}
+
+// טיפול בבקשת POST
+export async function POST(request: Request) {
+  console.log('Payment failure POST handler started');
+  try {
+    let data;
+    
+    try {
+      const formData = await request.formData();
+      console.log('Form data received:', Object.fromEntries(formData));
+      data = Object.fromEntries(formData);
+    } catch (e) {
+      console.log('Failed to parse as form data, trying JSON');
+      data = await request.json();
+      console.log('JSON data received:', data);
+    }
+    
+    const result = await handlePaymentFailure(data);
+    
+    const script = `
+      <script>
+        window.parent.postMessage(JSON.stringify({
+          success: false,
+          error: "${result.errorMessage || result.error || 'Payment failed'}",
+          sessionId: "${result.sessionId}"
+        }), "*");
+        
+        window.location.href = "${process.env.NEXT_PUBLIC_APP_URL}/he/packages?error=payment_failed";
+      </script>
+    `;
+
+    return new NextResponse(script, {
+      headers: { 'Content-Type': 'text/html' },
+    });
+  } catch (error) {
+    console.error('Payment failure POST handler error:', error);
     return NextResponse.json({ error: 'Internal server error', details: error }, { status: 500 });
   }
 } 
