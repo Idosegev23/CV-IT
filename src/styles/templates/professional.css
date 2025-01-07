@@ -70,7 +70,7 @@
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
   background-color: #4B4553;
   color: #F3F4F1;
   position: relative;
@@ -241,7 +241,7 @@
   background: #F3F4F1;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.2rem;
   font-family: var(--font-family);
 }
 
@@ -258,7 +258,7 @@
 .professional-experience-item,
 .professional-education-item,
 .professional-military-item {
-  margin-bottom: 1rem;
+  margin-bottom: 0.7rem;
 }
 
 .professional-experience-header,
@@ -515,7 +515,7 @@
 
 /* תקציר מקצועי */
 .professional-summary {
-  margin-bottom: 2rem;
+  margin-bottom: 1.2rem;
 }
 
 .professional-summary-text {

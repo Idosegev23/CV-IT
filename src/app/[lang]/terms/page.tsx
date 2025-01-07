@@ -130,6 +130,21 @@ const content = {
           'דוא"ל: office@cvit.co.il',
           'כתובת: צבי סגל 20א, אשקלון'
         ].join('\n')
+      },
+      {
+        title: 'אספקת המוצרים',
+        content: `1. אופן האספקה:
+           - קורות החיים והמסמכים הנלווים יישלחו לכתובת המייל שסופקה בעת ההרשמה.
+           - המשלוח הינו מיידי ואוטומטי לאחר השלמת התהליך והתשלום.
+           - ביתן להוריד את קורות החיים באופן מיידי מהמערכת.
+           - במקרה של תקלה טכנית, החברה מתחייבת לטפל בבעיה תוך 24 שעות לכל היותר.
+
+        2. פורמט הקבצים:
+           - קורות החיים יסופקו בפורמט PDF בלבד.
+
+        3. גישה למערכת:
+           - לאחר הרכישה, תינתן גישה מיידית למערכת הניהול האישית.
+           - אפשרות העריכה של קורות החיים זמינה רק בחבילות Advanced ו-Pro.`
       }
     ]
   },
@@ -145,6 +160,100 @@ const content = {
         These terms define the conditions of use of the site, the relationship between users and the Company, and the information usage policy. Use of the site constitutes agreement to these terms.`
       },
       {
+        title: 'Services Offered',
+        content: `The site offers three main service packages, tailored to different job seekers' needs:
+
+        1. Basic Package (75 NIS):
+           - Hebrew CV creation
+           - Personalized CV design
+           - Distribution to recruitment agencies
+           - Job interview preparation
+           - Personalized salary calculator
+           - PDF file download
+
+        2. Advanced Package (85 NIS):
+           Includes all Basic package features plus:
+           - English CV creation
+           - CV editing
+           - Automatic LinkedIn profile creation
+
+        3. Pro Package (95 NIS):
+           Includes all Advanced package features plus:
+           - Personal job interview preparation
+           - Personal guidance with employers
+           - GetCVit taxi voucher for job interview`
+      },
+      {
+        title: 'Terms of Use',
+        content: `1. The use of the site is intended for private individuals aged 18 and above only.
+        2. Commercial use of the site is prohibited without written permission from the Company.
+        3. It is forbidden to upload content to the site or use the site in a way that violates third-party rights or the law.
+        4. The user is responsible for checking the products created on the site before using them.`
+      },
+      {
+        title: 'Personal Information Collection and Use',
+        content: `1. Information Collection:
+           - Information provided by users (including contact details and CVs) is stored in the Company's database.
+           - Information is stored by name and associated with the user account.
+
+        2. Use of Information:
+           - Personal information is used to provide the services offered on the site, including CV distribution to recruitment agencies.
+           - The Company reserves the right to use the information for commercial purposes, including selling CVs to third parties.
+           - The Company will not disclose personal contact details without user consent.
+
+        3. Information Storage:
+           - Information is stored on Company servers and protected by advanced security measures.
+
+        4. User Rights:
+           - Users may request access to their information or delete it in accordance with the law.`
+      },
+      {
+        title: 'Payments and Refund Policy',
+        content: `1. Payment:
+           - Payment for services is made by credit card through secure payment providers.
+           - All payments are displayed in New Israeli Shekels and include VAT.
+
+        2. Refund Policy:
+           - The Company does not provide refunds or transaction cancellations after payment.`
+      },
+      {
+        title: 'Information Security',
+        content: `1. The site uses advanced security measures to protect personal information, including:
+           - Data encryption in transit (TLS) and at rest.
+           - Strict database access control.
+           - Regular security updates.
+
+        2. The Company is not responsible for damages resulting from unauthorized access but commits to preventing breaches as much as possible.`
+      },
+      {
+        title: 'Site Accessibility',
+        content: `1. The site complies with AA accessibility standard, ensuring a comfortable user experience for all users, including people with disabilities.
+        2. Accessibility issues will be addressed as quickly as possible.`
+      },
+      {
+        title: 'Customer Service',
+        content: [
+          '1. For inquiries and questions, please email: office@cvit.co.il',
+          '2. Customer service is also available on <whatsapp />',
+          '3. The Company commits to responding within 2 business days.'
+        ].join('\n')
+      },
+      {
+        title: 'Copyright and Intellectual Property',
+        content: `1. All content on the site is the exclusive property of the Company.
+        2. Copying, duplicating, or distributing content from the site without prior written permission is prohibited.`
+      },
+      {
+        title: 'Changes to Terms',
+        content: `1. The Company reserves the right to update these terms at any time.
+        2. Updates will be published on the site and take effect immediately.`
+      },
+      {
+        title: 'Jurisdiction',
+        content: `1. These terms shall be governed exclusively by the laws of the State of Israel.
+        2. Any dispute will be heard in the competent court in the Tel Aviv district.`
+      },
+      {
         title: 'Contact Information',
         content: [
           'Contact us:',
@@ -152,6 +261,21 @@ const content = {
           'Email: office@cvit.co.il',
           'Address: 20A Tzvi Segal St., Ashkelon, Israel'
         ].join('\n')
+      },
+      {
+        title: 'Product Delivery',
+        content: `1. Delivery Method:
+           - CVs and accompanying documents will be sent to the email address provided during registration.
+           - Delivery is immediate and automatic upon process and payment completion.
+           - CVs can be downloaded immediately from the system.
+           - In case of technical issues, the Company commits to resolving the problem within 24 hours maximum.
+
+        2. File Format:
+           - CVs will be delivered in PDF format only.
+
+        3. System Access:
+           - After purchase, immediate access will be granted to the personal management system.
+           - CV editing capability is available only in Advanced and Pro packages.`
       }
     ]
   }

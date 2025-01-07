@@ -489,12 +489,12 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                         <span className="timeline-company">{degree.institution}</span>
                       </>
                     )}
+                    <span className="timeline-date">{degree.years}</span>
                   </h4>
-                  <span className="timeline-date">{degree.years}</span>
                 </div>
                 {degree.specialization && (
                   <div className="timeline-description">
-                    {`${t.specialization}: ${degree.specialization}`}
+                    <li>{`${t.specialization}: ${degree.specialization}`}</li>
                   </div>
                 )}
               </div>
@@ -530,10 +530,10 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                       <span className="timeline-company">{data.military.unit}</span>
                     </>
                   )}
+                  <span className="timeline-date">
+                    {`${data.military.startDate} - ${data.military.endDate}`}
+                  </span>
                 </h4>
-                <span className="timeline-date">
-                  {`${data.military.startDate} - ${data.military.endDate}`}
-                </span>
               </div>
               {data.military.description && data.military.description.length > 0 && (
                 <ul className="timeline-description">

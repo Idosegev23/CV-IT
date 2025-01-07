@@ -46,11 +46,11 @@ const sections: Section[] = [
     id: 'basics',
     icon: Target,
     title: {
-      he: 'בואו נבין את המספרים',
+      he: 'איך לפענח את המספרים',
       en: 'Understanding the Numbers'
     },
     shortDesc: {
-      he: 'איך לקרוא את התלוש בצורה נכונה',
+      he: 'מה כל מספר אומר לנו בתלוש?',
       en: 'How to read your payslip correctly'
     },
     content: {
@@ -384,10 +384,10 @@ export default function SalaryGuide({ lang = 'he' }: { lang?: 'he' | 'en' }) {
             className="text-center space-y-4 mb-8"
           >
             <h1 className="text-2xl md:text-4xl font-bold text-[#4754D7]">
-              {isRTL ? 'המדריך המלא לתלוש משכורת' : 'The Complete Salary Slip Guide'}
+              {isRTL ? 'תלוש המשכורת - פשוט ולעניין' : 'The Complete Salary Slip Guide'}
             </h1>
             <p className="text-sm md:text-lg text-gray-600">
-              {isRTL ? 'בואו נבין ביחד כל שורה בתלוש' : 'Let\'s understand every line in your payslip'}
+              {isRTL ? 'כל מה שצריך לדעת על התלוש שלך' : 'Let\'s understand every line in your payslip'}
             </p>
           </motion.div>
 
@@ -503,10 +503,10 @@ export default function SalaryGuide({ lang = 'he' }: { lang?: 'he' | 'en' }) {
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {isRTL ? 'מחשבון ברוטו/נטו' : 'Gross/Net Calculator'}
+                        {isRTL ? 'מחשבון ברוטו-נטו' : 'Gross/Net Calculator'}
                       </h3>
                       <p className="text-sm text-gray-600 mt-1">
-                        {isRTL ? 'בואו נחשב כמה יישאר לכם ביד' : 'Let\'s calculate your take-home pay'}
+                        {isRTL ? 'רוצה לדעת כמה יישאר בארנק?' : 'Calculate your take-home pay'}
                       </p>
                     </div>
                   </button>
@@ -542,7 +542,7 @@ export default function SalaryGuide({ lang = 'he' }: { lang?: 'he' | 'en' }) {
                 <div className="px-6 py-4 border-b border-gray-100">
                   <div className="flex justify-between items-center">
                     <h3 className="text-xl font-bold text-gray-900">
-                      {isRTL ? 'מחשבון ברוטו/נטו' : 'Gross/Net Calculator'}
+                      {isRTL ? 'מחשבון ברוטו-נטו' : 'Gross/Net Calculator'}
                     </h3>
                     <button
                       onClick={() => {

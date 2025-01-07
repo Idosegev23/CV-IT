@@ -294,22 +294,21 @@
   flex-wrap: wrap;
 }
 
+.timeline-position,
+.timeline-company,
+.timeline-date {
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .timeline-position {
   font-weight: 600;
   color: var(--primary-color);
-  direction: rtl;
-}
-
-.timeline-separator {
-  color: var(--primary-color);
-  margin: 0 0.5rem;
-  opacity: 0.6;
 }
 
 .timeline-company {
   color: var(--primary-color);
   font-weight: normal;
-  direction: rtl;
 }
 
 .timeline-date {
@@ -317,7 +316,14 @@
   font-size: 14px;
   font-weight: normal;
   white-space: nowrap;
-  direction: ltr;
+  margin-right: auto;
+  padding-right: 0.5rem;
+}
+
+.timeline-separator {
+  color: var(--primary-color);
+  margin: 0 0.5rem;
+  opacity: 0.6;
 }
 
 .timeline-title-wrapper {
@@ -702,33 +708,64 @@
 .timeline-description {
   list-style-type: none;
   padding-right: 1.5rem;
-  margin: 0.5rem 0;
-  max-width: 80%;
-  font-size: 14px;
-  line-height: 1.6;
+  margin: 0.2rem 0;
+  max-width: 95%;
+  font-size: 13px;
+  line-height: 1.3;
+  color: #666;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.6rem;
 }
 
 .timeline-description li {
-  display: inline;
   position: relative;
-  color: var(--primary-color);
-  font-weight: normal;
+  display: inline-block;
+  padding-right: 0.5rem;
+  white-space: normal;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .timeline-description li:not(:last-child)::after {
-  content: '';
-  margin: 0 0.5rem;
-  color: var(--primary-color);
-  opacity: 0.6;
+  content: "•";
+  position: absolute;
+  left: -0.3rem;
+  color: #999;
+  font-size: 8px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* עדכון תצוגת LTR */
-.general-template.ltr .timeline-description {
+.general-template[dir="ltr"] .timeline-description {
   padding-right: 0;
   padding-left: 1.5rem;
+  text-align: left;
 }
 
-.general-template.ltr .timeline-description li::before {
-  right: auto;
-  left: -1rem;
+.general-template[dir="ltr"] .timeline-description li:not(:last-child)::after {
+  left: auto;
+  right: -0.3rem;
+}
+
+/* התאמה למובייל */
+@media screen and (max-width: 768px) {
+  .timeline-description {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+}
+
+/* עדכון תצוגת LTR */
+.general-template[dir="ltr"] .timeline-header h4 {
+  direction: ltr;
+  text-align: left;
+}
+
+.general-template[dir="ltr"] .timeline-date {
+  margin-right: 0;
+  margin-left: auto;
+  padding-right: 0;
+  padding-left: 0.5rem;
 } 

@@ -27,6 +27,7 @@ const navContent = {
     contact: 'צור קשר',
     packages: 'מסלולים',
     guides: 'מדריכים',
+    terms: 'תקנון',
     langToggle: 'EN'
   },
   en: {
@@ -36,6 +37,7 @@ const navContent = {
     contact: 'Contact',
     packages: 'Packages',
     guides: 'Guides',
+    terms: 'Terms',
     langToggle: 'עב'
   }
 };
@@ -270,6 +272,18 @@ function NavLinks({ lang, pathname, isRTL, isMobile = false, onNavClick }: NavLi
         )}
       >
         {content.guides}
+      </Link>
+
+      <Link 
+        href={`/${lang}/terms`}
+        onClick={onNavClick}
+        className={cn(
+          "text-[#4754D6] hover:text-[#4754D6]/80 transition-colors",
+          pathname?.includes('/terms') && "font-semibold",
+          isMobile && "py-2"
+        )}
+      >
+        {content.terms}
       </Link>
 
       <Link 
