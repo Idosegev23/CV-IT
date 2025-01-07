@@ -514,35 +514,43 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                     </div>
                   </div>
 
-                  <div className="mb-6">
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                        placeholder={isRTL ? 'הכנס קוד קופון' : 'Enter coupon code'}
-                        className="flex-1 px-4 py-2 border border-[#4754D7] rounded-full text-[#4754D7] placeholder-[#4754D7]/50"
-                        disabled={isValidatingCoupon || appliedCoupon !== null}
-                      />
-                      <button
-                        onClick={() => validateCoupon(couponCode)}
-                        disabled={isValidatingCoupon || !couponCode || appliedCoupon !== null}
-                        className="px-4 py-2 bg-[#4754D7] text-white rounded-full hover:bg-[#4754D7]/90 transition-colors disabled:opacity-50"
-                      >
-                        {isValidatingCoupon ? (
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : isRTL ? 'הפעל' : 'Apply'}
-                      </button>
+                  {!paymentIframe && (
+                    <div className="mt-4">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder={isRTL ? "קוד קופון" : "Coupon Code"}
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value)}
+                          className="flex-1 p-2 border rounded-md"
+                        />
+                        <button
+                          onClick={() => validateCoupon(couponCode)}
+                          disabled={isValidatingCoupon || !couponCode}
+                          className={cn(
+                            "px-4 py-2 text-white rounded-md",
+                            isValidatingCoupon ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
+                          )}
+                        >
+                          {isValidatingCoupon ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                          ) : (
+                            isRTL ? "החל" : "Apply"
+                          )}
+                        </button>
+                      </div>
+                      {appliedCoupon && (
+                        <div className="mt-2 text-green-600 flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>
+                            {isRTL
+                              ? `קופון ${appliedCoupon.code} הוחל בהצלחה!`
+                              : `Coupon ${appliedCoupon.code} applied successfully!`}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    {appliedCoupon && (
-                      <button
-                        onClick={() => setAppliedCoupon(null)}
-                        className="mt-2 text-sm text-red-500 hover:text-red-600"
-                      >
-                        {isRTL ? 'הסר קופון' : 'Remove coupon'}
-                      </button>
-                    )}
-                  </div>
+                  )}
 
                   {paymentIframe ? (
                     <div className="w-full aspect-[4/3] rounded-lg overflow-hidden">

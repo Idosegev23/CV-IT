@@ -1459,6 +1459,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
               onClick={handlePreviewPdf}
               disabled={isGenerating}
               className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+              aria-label={lang === 'he' ? 'צפייה בקובץ' : 'View file'}
             >
               {isGenerating ? (
                 <Loader2 className="h-6 w-6 animate-spin" />
@@ -1467,7 +1468,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
               )}
             </Button>
             <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-              {lang === 'he' ? 'לצפייה בקובץ' : 'View file'}
+              {lang === 'he' ? 'צפייה' : 'View'}
             </span>
           </div>
         )}
@@ -1481,6 +1482,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
               "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
               isEditing && "opacity-50 cursor-not-allowed"
             )}
+            aria-label={lang === 'he' ? 'הורדת קובץ PDF' : 'Download PDF'}
           >
             {isDownloadingPdf ? (
               <Loader2 className="h-6 w-6 animate-spin" />
@@ -1489,7 +1491,21 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
             )}
           </Button>
           <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-            {lang === 'he' ? 'הורדת קובץ PDF' : 'Download PDF'}
+            {lang === 'he' ? 'שמירה' : 'Save'}
+          </span>
+        </div>
+
+        {/* כפתור המשך לדף סיום */}
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => router.push(`/${lang}/finish/${sessionId}`)}
+            className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+            aria-label={lang === 'he' ? 'המשך לדף סיום' : 'Continue to finish page'}
+          >
+            <FileText className="h-6 w-6" />
+          </Button>
+          <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+            {lang === 'he' ? 'המשך' : 'Continue'}
           </span>
         </div>
       </div>

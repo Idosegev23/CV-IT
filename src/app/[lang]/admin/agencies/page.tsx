@@ -38,6 +38,10 @@ interface Agency {
   send_cv_template: {
     subject: string;
     body: string;
+    template_text: string;
+    html_template: string;
+    attach_cv_file: boolean;
+    include_cv_analysis: boolean;
   };
 }
 
@@ -67,6 +71,7 @@ export default function AgenciesManagement({
     key: 'created_at',
     direction: 'desc'
   });
+  const [isConverting, setIsConverting] = useState(false);
 
   const supabase = createClientComponentClient();
 
@@ -84,7 +89,24 @@ export default function AgenciesManagement({
 
       if (error) throw error;
 
-      setAgencies(data || []);
+      const defaultTemplateValues = {
+        subject: '',
+        body: '',
+        template_text: '',
+        html_template: '',
+        attach_cv_file: true,
+        include_cv_analysis: false
+      };
+
+      const normalizedData = (data || []).map(agency => ({
+        ...agency,
+        send_cv_template: {
+          ...defaultTemplateValues,
+          ...agency.send_cv_template
+        }
+      }));
+
+      setAgencies(normalizedData);
     } catch (error) {
       console.error('Error loading agencies:', error);
     } finally {
@@ -126,9 +148,35 @@ export default function AgenciesManagement({
     regions: [],
     send_cv_template: {
       subject: '',
-      body: ''
+      body: '',
+      template_text: '',
+      html_template: '',
+      attach_cv_file: true,
+      include_cv_analysis: false
     }
   });
+
+  const handleNewTemplateTextChange = async (text: string) => {
+    setNewAgency(prev => ({
+      ...prev,
+      send_cv_template: {
+        ...prev.send_cv_template,
+        template_text: text,
+      },
+    }));
+
+    const htmlTemplate = await convertTemplateToHtml(text);
+    if (htmlTemplate) {
+      setNewAgency(prev => ({
+        ...prev,
+        send_cv_template: {
+          ...prev.send_cv_template,
+          html_template: htmlTemplate,
+        },
+      }));
+      toast.success('התבנית הומרה בהצלחה');
+    }
+  };
 
   const handleAddAgency = async () => {
     try {
@@ -157,7 +205,11 @@ export default function AgenciesManagement({
         regions: [],
         send_cv_template: {
           subject: '',
-          body: ''
+          body: '',
+          template_text: '',
+          html_template: '',
+          attach_cv_file: true,
+          include_cv_analysis: false
         }
       });
       toast.success('חברת ההשמה נוספה בהצלחה');
@@ -232,6 +284,56 @@ export default function AgenciesManagement({
       ...selectedAgency,
       [field]: value
     });
+  };
+
+  const convertTemplateToHtml = async (text: string) => {
+    try {
+      setIsConverting(true);
+      const response = await fetch('/api/convert-template', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) throw new Error('Failed to convert template');
+
+      const { htmlTemplate } = await response.json();
+      return htmlTemplate;
+    } catch (error) {
+      console.error('Error converting template:', error);
+      toast.error('אירעה שגיאה בהמרת התבנית');
+      return null;
+    } finally {
+      setIsConverting(false);
+    }
+  };
+
+  const handleTemplateTextChange = async (text: string) => {
+    if (!selectedAgency) return;
+
+    const updatedTemplate = {
+      ...selectedAgency.send_cv_template,
+      template_text: text
+    };
+
+    setSelectedAgency({
+      ...selectedAgency,
+      send_cv_template: updatedTemplate
+    });
+
+    const htmlTemplate = await convertTemplateToHtml(text);
+    if (htmlTemplate) {
+      setSelectedAgency(prev => ({
+        ...prev!,
+        send_cv_template: {
+          ...updatedTemplate,
+          html_template: htmlTemplate
+        }
+      }));
+      toast.success('התבנית הומרה בהצלחה');
+    }
   };
 
   if (loading) {
@@ -488,11 +590,16 @@ export default function AgenciesManagement({
                   }}
                   className="w-full border rounded-lg p-2"
                 >
+                  <option value="general">כללי - כל התחומים</option>
                   <option value="tech">היי-טק</option>
                   <option value="finance">פיננסים</option>
                   <option value="medical">רפואה</option>
                   <option value="sales">מכירות</option>
                   <option value="marketing">שיווק</option>
+                  <option value="hr">משאבי אנוש</option>
+                  <option value="legal">משפטים</option>
+                  <option value="education">חינוך</option>
+                  <option value="industry">תעשייה</option>
                 </select>
               </div>
 
@@ -509,11 +616,14 @@ export default function AgenciesManagement({
                   }}
                   className="w-full border rounded-lg p-2"
                 >
+                  <option value="all">כל הארץ</option>
                   <option value="north">צפון</option>
-                  <option value="center">מרכז</option>
-                  <option value="south">דרום</option>
-                  <option value="jerusalem">ירושלים</option>
+                  <option value="haifa">חיפה והקריות</option>
                   <option value="sharon">השרון</option>
+                  <option value="center">מרכז</option>
+                  <option value="tel_aviv">תל אביב</option>
+                  <option value="jerusalem">ירושלים</option>
+                  <option value="south">דרום</option>
                 </select>
               </div>
 
@@ -527,6 +637,115 @@ export default function AgenciesManagement({
                   />
                   <span className="text-sm font-medium text-gray-700">חברה פעילה</span>
                 </label>
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  נושא המייל
+                </label>
+                <input
+                  type="text"
+                  value={newAgency.send_cv_template.subject}
+                  onChange={(e) => setNewAgency(prev => ({
+                    ...prev,
+                    send_cv_template: {
+                      ...prev.send_cv_template,
+                      subject: e.target.value
+                    }
+                  }))}
+                  className="w-full border rounded-lg p-2"
+                  placeholder="נושא המייל שישלח למגייס"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  תבנית מייל (טקסט חופשי)
+                </label>
+                <textarea
+                  className="w-full p-2 border rounded-md"
+                  rows={4}
+                  value={newAgency.send_cv_template.template_text}
+                  onChange={(e) => handleNewTemplateTextChange(e.target.value)}
+                  placeholder="תאר את הדרישות לתבנית המייל..."
+                />
+                {isConverting && (
+                  <div className="mt-2 text-sm text-gray-500">
+                    ממיר את התבנית...
+                  </div>
+                )}
+                {newAgency.send_cv_template.html_template && (
+                  <div className="mt-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      תבנית HTML מוכנה
+                    </label>
+                    <textarea
+                      className="w-full p-2 border rounded-md bg-gray-50"
+                      rows={4}
+                      value={newAgency.send_cv_template.html_template}
+                      readOnly
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  תוכן המייל
+                </label>
+                <textarea
+                  className="w-full p-2 border rounded-md"
+                  rows={4}
+                  value={newAgency.send_cv_template.body}
+                  onChange={(e) => setNewAgency(prev => ({
+                    ...prev,
+                    send_cv_template: {
+                      ...prev.send_cv_template,
+                      body: e.target.value
+                    }
+                  }))}
+                  placeholder="תוכן המייל הבסיסי שישלח למגייס"
+                />
+              </div>
+
+              <div className="md:col-span-2 space-y-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="attach_cv_file"
+                    checked={newAgency.send_cv_template.attach_cv_file}
+                    onChange={(e) => setNewAgency(prev => ({
+                      ...prev,
+                      send_cv_template: {
+                        ...prev.send_cv_template,
+                        attach_cv_file: e.target.checked
+                      }
+                    }))}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="attach_cv_file" className="text-sm font-medium text-gray-700">
+                    צרף קובץ קו״ח למייל
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="include_cv_analysis"
+                    checked={newAgency.send_cv_template.include_cv_analysis}
+                    onChange={(e) => setNewAgency(prev => ({
+                      ...prev,
+                      send_cv_template: {
+                        ...prev.send_cv_template,
+                        include_cv_analysis: e.target.checked
+                      }
+                    }))}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="include_cv_analysis" className="text-sm font-medium text-gray-700">
+                    כלול ניתוח קו״ח במייל
+                  </label>
+                </div>
               </div>
             </div>
 
@@ -649,11 +868,16 @@ export default function AgenciesManagement({
                   onChange={(e) => handleEditAgencyField('specialties', Array.from(e.target.selectedOptions, option => option.value))}
                   className="w-full border rounded-lg p-2"
                 >
+                  <option value="general">כללי - כל התחומים</option>
                   <option value="tech">היי-טק</option>
                   <option value="finance">פיננסים</option>
                   <option value="medical">רפואה</option>
                   <option value="sales">מכירות</option>
                   <option value="marketing">שיווק</option>
+                  <option value="hr">משאבי אנוש</option>
+                  <option value="legal">משפטים</option>
+                  <option value="education">חינוך</option>
+                  <option value="industry">תעשייה</option>
                 </select>
               </div>
 
@@ -667,11 +891,14 @@ export default function AgenciesManagement({
                   onChange={(e) => handleEditAgencyField('regions', Array.from(e.target.selectedOptions, option => option.value))}
                   className="w-full border rounded-lg p-2"
                 >
+                  <option value="all">כל הארץ</option>
                   <option value="north">צפון</option>
-                  <option value="center">מרכז</option>
-                  <option value="south">דרום</option>
-                  <option value="jerusalem">ירושלים</option>
+                  <option value="haifa">חיפה והקריות</option>
                   <option value="sharon">השרון</option>
+                  <option value="center">מרכז</option>
+                  <option value="tel_aviv">תל אביב</option>
+                  <option value="jerusalem">ירושלים</option>
+                  <option value="south">דרום</option>
                 </select>
               </div>
 
@@ -685,6 +912,77 @@ export default function AgenciesManagement({
                   />
                   <span className="text-sm font-medium text-gray-700">חברה פעילה</span>
                 </label>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  תבנית מייל (טקסט חופשי)
+                </label>
+                <textarea
+                  className="w-full p-2 border rounded-md"
+                  rows={4}
+                  value={selectedAgency?.send_cv_template?.template_text || ''}
+                  onChange={(e) => handleTemplateTextChange(e.target.value)}
+                  placeholder="תאר את הדרישות לתבנית המייל..."
+                />
+                {isConverting && (
+                  <div className="mt-2 text-sm text-gray-500">
+                    ממיר את התבנית...
+                  </div>
+                )}
+                {selectedAgency?.send_cv_template?.html_template && (
+                  <div className="mt-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      תבנית HTML מוכנה
+                    </label>
+                    <textarea
+                      className="w-full p-2 border rounded-md bg-gray-50"
+                      rows={4}
+                      value={selectedAgency.send_cv_template.html_template}
+                      readOnly
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="md:col-span-2 space-y-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="edit_attach_cv_file"
+                    checked={selectedAgency.send_cv_template.attach_cv_file}
+                    onChange={(e) => setSelectedAgency(prev => ({
+                      ...prev!,
+                      send_cv_template: {
+                        ...prev!.send_cv_template,
+                        attach_cv_file: e.target.checked
+                      }
+                    }))}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="edit_attach_cv_file" className="text-sm font-medium text-gray-700">
+                    צרף קובץ קו״ח למייל
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="edit_include_cv_analysis"
+                    checked={selectedAgency.send_cv_template.include_cv_analysis}
+                    onChange={(e) => setSelectedAgency(prev => ({
+                      ...prev!,
+                      send_cv_template: {
+                        ...prev!.send_cv_template,
+                        include_cv_analysis: e.target.checked
+                      }
+                    }))}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <label htmlFor="edit_include_cv_analysis" className="text-sm font-medium text-gray-700">
+                    כלול ניתוח קו״ח במייל
+                  </label>
+                </div>
               </div>
             </div>
 

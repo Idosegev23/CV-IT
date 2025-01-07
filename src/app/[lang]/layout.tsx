@@ -30,6 +30,7 @@ export default function RootLayout({
           {children}
         </ClientLayout>
         <Analytics />
+        <div id="cookie-consent-root" />
       </body>
     </html>
   );
