@@ -71,9 +71,9 @@ const sections: Section[] = [
     },
     examples: {
       he: [
-        '💡 על משכורת של 10,000₪, רק 600₪ יוצאים מהכיס שלך!',
+        '💡 עבור משכורת של 10,000₪, רק 600₪ יוצאים מהכיס שלך!',
         '🎮 זה כמו לצבור XP למשחק של החיים',
-        '🚀 בגיל 67 יכול להיות לך מיליונים בחשבון!',
+        '🚀 בגיל 67 יכולים להיות לך מיליונים בחשבון!',
         '💸 קצבת זקנה מביטוח לאומי היא רק כ-2,000₪ בחודש'
       ],
       en: [
@@ -693,7 +693,7 @@ export default function PensionGuide({ lang = 'he' }: { lang?: 'he' | 'en' }) {
                       <div className="text-center">
                         <p className="text-sm text-gray-500">
                           {isRTL ? 
-                            '* זו הערכה כללית בלבד. התוצאה והחלוקה המוצעת יכולות להשתנות בהתאם לגורמים רבים ולסגנון החיים שלך.' :
+                            '* זו הערכה כללית בלבד. התוצאה והחלוקה המוצעת יכולים להשתנות בהתאם לגורמים רבים ולסגנון החיים שלך.' :
                             '* This is a general estimate only. Results and suggested allocation may vary based on many factors and your lifestyle.'}
                         </p>
                         <Button
