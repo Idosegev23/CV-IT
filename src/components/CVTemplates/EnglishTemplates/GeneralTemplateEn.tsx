@@ -36,6 +36,7 @@ const translations = {
     workExperience: 'Work Experience',
     education: 'Education',
     militaryService: 'Military Service',
+    nationalService: 'National Service',
     professionalSummary: 'Professional Summary',
     email: 'Email',
     phone: 'Phone',
@@ -173,11 +174,14 @@ const GeneralTemplateEn: React.FC<GeneralTemplateEnProps> = ({ data, lang }) => 
                     </h4>
                   </div>
                   {job.description && job.description.length > 0 && (
-                    <ul className="timeline-content-en">
-                      {job.description.map((desc: string, i: number) => (
-                        <li key={i}>{desc}</li>
+                    <div className="timeline-content-en">
+                      {job.description.map((desc: string, i: number, arr: string[]) => (
+                        <React.Fragment key={i}>
+                          <span>{desc}</span>
+                          {i < arr.length - 1 && <span className="description-separator">|</span>}
+                        </React.Fragment>
                       ))}
-                    </ul>
+                    </div>
                   )}
                 </div>
               ))}
@@ -231,7 +235,7 @@ const GeneralTemplateEn: React.FC<GeneralTemplateEnProps> = ({ data, lang }) => 
               <div className="section-icon-en">
                 <Image src={MilIcon} alt="military" width={48} height={48} />
               </div>
-              {t.militaryService}
+              {data.military.role?.toLowerCase().includes('national') ? t.nationalService : t.militaryService}
             </h3>
             <div className="timeline-container-en">
               <div className="timeline-item-en">
@@ -252,11 +256,14 @@ const GeneralTemplateEn: React.FC<GeneralTemplateEnProps> = ({ data, lang }) => 
                   </h4>
                 </div>
                 {data.military.description && data.military.description.length > 0 && (
-                  <ul className="timeline-content-en">
-                    {data.military.description.map((desc: string, i: number) => (
-                      <li key={i}>{desc}</li>
+                  <div className="timeline-content-en">
+                    {data.military.description.map((desc: string, i: number, arr: string[]) => (
+                      <React.Fragment key={i}>
+                        <span>{desc}</span>
+                        {i < arr.length - 1 && <span className="description-separator">|</span>}
+                      </React.Fragment>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </div>
             </div>

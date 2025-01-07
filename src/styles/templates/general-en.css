@@ -76,22 +76,28 @@
 }
 
 .general-header-name-en h1 {
-  font-size: 38px;
+  font-size: clamp(24px, 38px, 38px);
   margin: 0;
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
   color: var(--primary-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .firstname-en {
   font-weight: 600;
   color: var(--primary-color);
+  white-space: nowrap;
 }
 
 .lastname-en {
   font-weight: 300;
   color: var(--primary-color);
+  white-space: nowrap;
 }
 
 /* Contact Info */
@@ -101,6 +107,7 @@
   justify-content: flex-end;
   order: 2;
   margin-left: 2rem;
+  flex-shrink: 0;
 }
 
 .contact-item-en {
@@ -108,7 +115,8 @@
   align-items: center;
   gap: 0.3rem;
   color: var(--primary-color);
-  font-size: 18px;
+  font-size: 14px;
+  white-space: nowrap;
 }
 
 .contact-item-icon-en {
@@ -245,9 +253,12 @@
 
 .timeline-content-en {
   margin-top: 0.3rem;
-  padding-left: 1rem;
   font-size: 14px;
   line-height: 1.4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  align-items: center;
 }
 
 .timeline-content-en ul {
@@ -417,13 +428,15 @@
 }
 
 .summary-content-en {
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
   color: var(--primary-color);
   white-space: pre-line;
   padding-left: 3rem;
-  font-weight: 600;
-  max-width: 90%;
+  font-weight: 500;
+  max-width: 95%;
+  text-align: justify;
+  hyphens: auto;
 }
 
 /* Skill Levels */
@@ -444,4 +457,10 @@
 
 .skill-dot-en.filled {
   background-color: #4B4553;
+}
+
+.description-separator {
+  margin: 0 0.5rem;
+  color: var(--primary-color);
+  opacity: 0.5;
 } 

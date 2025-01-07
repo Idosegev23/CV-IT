@@ -5,6 +5,9 @@ import { ResumeData } from '../../../types/resume';
 import '../../../styles/templates/creative-en.css';
 import Image from 'next/image';
 import { Assistant } from 'next/font/google';
+import MailIcon from '../../../../public/design/general/MailIcon.svg';
+import PhoneIcon from '../../../../public/design/general/PhoneIcon.svg';
+import LocIcon from '../../../../public/design/general/LocIcon.svg';
 
 const assistant = Assistant({ 
   subsets: ['hebrew', 'latin'],
@@ -19,6 +22,7 @@ const translations = {
     workExperience: 'Work Experience',
     education: 'Education',
     militaryService: 'Military Service',
+    nationalService: 'National Service',
     professionalSummary: 'Professional Summary',
     email: 'Email',
     phone: 'Phone',
@@ -117,9 +121,24 @@ const CreativeTemplateEn: React.FC<CreativeTemplateEnProps> = ({ data, lang }) =
           </h1>
           <div className="creative-separator-en" />
           <div className="creative-contact-info-en">
-            <div>{data.personalInfo.email && `${t.email}: ${data.personalInfo.email}`}</div>
-            <div>{data.personalInfo.phone && `${t.phone}: ${data.personalInfo.phone}`}</div>
-            <div>{data.personalInfo.address && `${t.address}: ${data.personalInfo.address}`}</div>
+            {data.personalInfo.email && (
+              <div className="contact-item">
+                <Image src={MailIcon} alt="Email" width={16} height={16} />
+                <span>{data.personalInfo.email}</span>
+              </div>
+            )}
+            {data.personalInfo.phone && (
+              <div className="contact-item">
+                <Image src={PhoneIcon} alt="Phone" width={16} height={16} />
+                <span>{data.personalInfo.phone}</span>
+              </div>
+            )}
+            {data.personalInfo.address && (
+              <div className="contact-item">
+                <Image src={LocIcon} alt="Address" width={16} height={16} />
+                <span>{data.personalInfo.address}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -278,8 +297,12 @@ const CreativeTemplateEn: React.FC<CreativeTemplateEnProps> = ({ data, lang }) =
 
         {/* Military Service */}
         {military && (
-          <div className="creative-experience-en">
-            <h2 className="creative-section-title-en dark">{t.militaryService}</h2>
+          <div className="creative-section-en creative-experience-en">
+            <h2 className="creative-section-title-en">
+              {military.unit && military.unit.toLowerCase().includes('national') 
+                ? translations.en.nationalService 
+                : translations.en.militaryService}
+            </h2>
             <div className="creative-experience-items-en">
               <div className="creative-experience-item-en">
                 <div className="creative-experience-header-en">
@@ -293,8 +316,8 @@ const CreativeTemplateEn: React.FC<CreativeTemplateEnProps> = ({ data, lang }) =
                 </div>
                 {military.description && (
                   <ul className="creative-experience-description-en">
-                    {military.description.map((item: string, i: number) => (
-                      <li key={i}>{item}</li>
+                    {military.description.map((desc: string, i: number) => (
+                      <li key={i}>{desc}</li>
                     ))}
                   </ul>
                 )}

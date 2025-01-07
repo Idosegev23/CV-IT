@@ -6,9 +6,44 @@ import Image from 'next/image';
 import { Assistant } from 'next/font/google';
 import { formatDescription } from '../utils';
 
+interface Military {
+  role: string;
+  unit: string;
+  startDate: string;
+  endDate: string;
+  description: string[];
+}
+
 interface ClassicTemplateProps {
-  data: ResumeData;
+  data: {
+    personalInfo: any;
+    experience: any[];
+    education: {
+      degrees: any[];
+    };
+    skills: {
+      technical: TechnicalSkill[];
+      soft: SoftSkill[];
+      languages: LanguageSkill[];
+    };
+    military?: Military;
+  };
   lang: string;
+}
+
+interface TechnicalSkill {
+  name: string;
+  level: number;
+}
+
+interface SoftSkill {
+  name: string;
+  level: number;
+}
+
+interface LanguageSkill {
+  language: string;
+  level: string;
 }
 
 const assistant = Assistant({ 
@@ -24,6 +59,7 @@ const translations = {
     workExperience: 'Work Experience',
     education: 'Education',
     militaryService: 'Military Service',
+    nationalService: 'National Service',
     professionalSummary: 'Professional Summary',
     email: 'Email',
     phone: 'Phone',
@@ -50,7 +86,7 @@ const formatDate = (startDate: string, endDate: string) => {
 };
 
 const formatSummary = (summary: string) => {
-  return summary.split('.').filter(Boolean).map((sentence, index) => (
+  return summary.split('.').filter(Boolean).map((sentence: string, index: number) => (
     <React.Fragment key={index}>
       {sentence.trim()}.
       <br />
@@ -59,7 +95,12 @@ const formatSummary = (summary: string) => {
 };
 
 const ClassicTemplateEn: React.FC<ClassicTemplateProps> = ({ data }) => {
-  const { personalInfo, experience, education, skills, military } = data;
+  const { personalInfo, experience, education, military } = data;
+  
+  console.log('Full data:', data);
+  console.log('Skills data:', data.skills);
+  console.log('Technical skills:', data.skills?.technical);
+  console.log('Soft skills:', data.skills?.soft);
 
   const splitName = (fullName: string) => {
     const nameParts = fullName.trim().split(/\s+/);
@@ -72,23 +113,25 @@ const ClassicTemplateEn: React.FC<ClassicTemplateProps> = ({ data }) => {
   const { firstName, lastName } = splitName(personalInfo.name);
 
   useEffect(() => {
-    const adjustSize = () => {
+    const adjustFontSize = () => {
       const content = document.querySelector('.classic-template') as HTMLElement;
       if (!content) return;
 
-      // A4 size in pixels (approximate)
-      const A4_HEIGHT = 1123; // 297mm
       const contentHeight = content.scrollHeight;
+      const containerHeight = content.clientHeight;
       
-      if (contentHeight > A4_HEIGHT) {
-        const scale = A4_HEIGHT / contentHeight;
-        document.documentElement.style.setProperty('--scale-factor', scale.toString());
+      if (contentHeight > containerHeight) {
+        const ratio = containerHeight / contentHeight;
+        const currentFontSize = parseFloat(getComputedStyle(content).fontSize);
+        const newFontSize = currentFontSize * ratio * 0.95; // 0.95 for some padding
+        
+        content.style.fontSize = `${newFontSize}px`;
       }
     };
 
-    adjustSize();
-    window.addEventListener('resize', adjustSize);
-    return () => window.removeEventListener('resize', adjustSize);
+    adjustFontSize();
+    window.addEventListener('resize', adjustFontSize);
+    return () => window.removeEventListener('resize', adjustFontSize);
   }, [data]);
 
   const getSkillLevel = (level: number) => {
@@ -101,10 +144,41 @@ const ClassicTemplateEn: React.FC<ClassicTemplateProps> = ({ data }) => {
     }
   };
 
+  const shouldPreventWordWrap = (text: string) => {
+    const wordCount = text.trim().split(/\s+/).length;
+    return wordCount <= 5;
+  };
+
+  const truncateText = (text: string, maxLength: number = 100) => {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 3) + '...';
+  };
+
+  const truncateDescription = (descriptions: string[]) => {
+    if (!descriptions || descriptions.length === 0) return [];
+    if (descriptions.length > 5) return descriptions.slice(0, 5);
+    return descriptions.map(desc => truncateText(desc, 100));
+  };
+
+  const limitItems = (items: any[], maxItems: number = 4) => {
+    if (!items || items.length === 0) return [];
+    return items.slice(0, maxItems);
+  };
+
   return (
     <div 
       className={`${assistant.className} classic-template`}
       dir="ltr"
+      style={{
+        width: '210mm',
+        height: '297mm',
+        margin: '0 auto',
+        padding: '0',
+        background: 'white',
+        boxSizing: 'border-box',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
     >
       <div className="classic-header relative">
         <div className="relative z-10">
@@ -149,25 +223,31 @@ const ClassicTemplateEn: React.FC<ClassicTemplateProps> = ({ data }) => {
           <section className="experience-section">
             <h2 className="section-title">{translations.en.workExperience}</h2>
             <div className="experience-items">
-              {data.experience.map((exp, index) => (
+              {limitItems(data.experience).map((exp: any, index: number) => (
                 <div key={index} className="experience-item">
                   <div className="experience-header">
                     <div className="experience-title-wrapper">
                       <h3 className="experience-title">{exp.position}</h3>
                       {exp.company && (
-                        <span className="experience-company">{exp.company}</span>
+                        <>
+                          <span className="separator">|</span>
+                          <span className="experience-company">{exp.company}</span>
+                        </>
                       )}
                     </div>
                     <div className="experience-date">
-                      {exp.startDate} - {exp.endDate}
+                      {formatDate(exp.startDate, exp.endDate)}
                     </div>
                   </div>
                   {exp.description && exp.description.length > 0 && (
-                    <ul className="experience-description">
-                      {formatDescription(exp.description, data.experience.length).map((desc, i) => (
-                        <li key={i}>{desc}</li>
+                    <div className="experience-description">
+                      {truncateDescription(exp.description).map((desc: string, i: number, arr: string[]) => (
+                        <React.Fragment key={i}>
+                          <span>{desc}</span>
+                          {i < arr.length - 1 && <span className="separator">|</span>}
+                        </React.Fragment>
                       ))}
-                    </ul>
+                    </div>
                   )}
                 </div>
               ))}
@@ -180,15 +260,15 @@ const ClassicTemplateEn: React.FC<ClassicTemplateProps> = ({ data }) => {
           <section className="education-section">
             <h2 className="section-title">{translations.en.education}</h2>
             <div className="education-items">
-              {data.education.degrees.map((degree, index) => (
+              {limitItems(data.education.degrees, 3).map((degree, index) => (
                 <div key={index} className="education-item">
                   <div className="education-header">
                     <div className="education-title-wrapper">
-                      <span className="education-degree">
+                      <span className="education-degree" style={{ whiteSpace: shouldPreventWordWrap(`${degree.type} ${degree.field}`) ? 'nowrap' : 'normal' }}>
                         {`${degree.type} ${degree.field}`}
                       </span>
-                      <span className="experience-separator">|</span>
-                      <span className="education-institution">{degree.institution}</span>
+                      <span className="separator">|</span>
+                      <span className="education-institution" style={{ whiteSpace: 'nowrap' }}>{degree.institution}</span>
                     </div>
                     <div className="education-date">{degree.years}</div>
                   </div>
@@ -203,16 +283,18 @@ const ClassicTemplateEn: React.FC<ClassicTemplateProps> = ({ data }) => {
           </section>
         )}
 
-        {/* Military Service */}
+        {/* Military/National Service */}
         {military && (
           <section className="military-section">
-            <h2 className="section-title">{translations.en.militaryService}</h2>
+            <h2 className="section-title">
+              {military.unit.toLowerCase().includes('national') ? translations.en.nationalService : translations.en.militaryService}
+            </h2>
             <div className="experience-items">
               <div className="experience-item">
                 <div className="experience-header">
                   <div className="experience-title-wrapper">
                     <span className="experience-title">{military.role}</span>
-                    <span className="experience-separator">|</span>
+                    <span className="separator">|</span>
                     <span className="experience-company">{military.unit}</span>
                   </div>
                   <div className="experience-date">
@@ -220,68 +302,67 @@ const ClassicTemplateEn: React.FC<ClassicTemplateProps> = ({ data }) => {
                   </div>
                 </div>
                 {military.description && military.description.length > 0 && (
-                  <ul className="experience-description">
-                    {formatDescription(military.description, 4).map((desc, i) => (
-                      <li key={i}>{desc}</li>
+                  <div className="experience-description">
+                    {truncateDescription(military.description).map((desc: string, i: number, arr: string[]) => (
+                      <React.Fragment key={i}>
+                        <span>{desc}</span>
+                        {i < arr.length - 1 && <span className="separator">|</span>}
+                      </React.Fragment>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </div>
             </div>
           </section>
         )}
         
-        {/* Skills */}
-        {data.skills && (
+        {/* Skills and Languages */}
+        {(data.skills && (data.skills.technical?.length > 0 || data.skills.soft?.length > 0 || data.skills.languages?.length > 0)) && (
           <section className="skills-section">
-            <h2 className="section-title">{translations.en.skills}</h2>
-            {/* לוגים */}
-            <>{console.log('Skills data:', data.skills)}</>
-            
+            <h2 className="section-title">{translations.en.skills} & {translations.en.languages}</h2>
             <div className="skills-items">
               {/* Technical Skills */}
               {data.skills.technical && data.skills.technical.length > 0 && (
-                <>
-                  <>{console.log('Technical skills:', data.skills.technical)}</>
-                  {data.skills.technical.map((skill, index) => (
-                    <span key={`tech-${index}`} className="skill-item">
-                      {skill.name}
-                      {index < data.skills.technical.length - 1 && (
-                        <span className="experience-separator">|</span>
-                      )}
-                    </span>
-                  ))}
-                </>
+                <div className="technical-skills">
+                  <h3 className="sub-title">{translations.en.technicalSkills}</h3>
+                  <div className="skills-list">
+                    {limitItems(data.skills.technical, 8).map((skill: TechnicalSkill, index: number, arr: TechnicalSkill[]) => (
+                      <span key={`tech-${index}`}>
+                        {skill.name}
+                        {index < arr.length - 1 && ' | '}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* Soft Skills */}
               {data.skills.soft && data.skills.soft.length > 0 && (
-                <>
-                  <>{console.log('Soft skills:', data.skills.soft)}</>
-                  {data.skills.soft.map((skill, index) => (
-                    <span key={`soft-${index}`} className="skill-item">
-                      {skill.name}
-                      {index < data.skills.soft.length - 1 && (
-                        <span className="experience-separator">|</span>
-                      )}
-                    </span>
-                  ))}
-                </>
+                <div className="soft-skills">
+                  <h3 className="sub-title">{translations.en.softSkills}</h3>
+                  <div className="skills-list">
+                    {limitItems(data.skills.soft, 6).map((skill: SoftSkill, index: number, arr: SoftSkill[]) => (
+                      <span key={`soft-${index}`}>
+                        {skill.name}
+                        {index < arr.length - 1 && ' | '}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               )}
 
               {/* Languages */}
-              {data.skills.languages && data.skills.languages.length > 0 && (
-                <>
-                  <>{console.log('Languages:', data.skills.languages)}</>
-                  {data.skills.languages.map((lang, index) => (
-                    <span key={`lang-${index}`} className="skill-item">
-                      {`${lang.language} - ${lang.level}`}
-                      {index < data.skills.languages.length - 1 && (
-                        <span className="experience-separator">|</span>
-                      )}
-                    </span>
-                  ))}
-                </>
+              {data.skills?.languages && data.skills.languages.length > 0 && (
+                <div className="languages-skills">
+                  <h3 className="sub-title">{translations.en.languages}</h3>
+                  <div className="skills-list">
+                    {data.skills.languages.map((lang: LanguageSkill, index: number) => (
+                      <span key={`lang-${index}`} className="skill-item">
+                        {lang.language} - {lang.level}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               )}
             </div>
           </section>

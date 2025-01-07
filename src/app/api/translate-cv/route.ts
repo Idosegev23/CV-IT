@@ -68,7 +68,7 @@ export async function POST(req: Request) {
         { 
           role: 'user', 
           content: `
-            Translate this CV from Hebrew to English. Follow these strict rules:
+            Translate this CV from Hebrew to English and optimize it for A4 format. Follow these strict rules:
             1. Translate EVERYTHING - no Hebrew characters should remain
             2. For dates: if "היום" appears, always translate to "Present"
             3. Keep the exact same structure and format
@@ -83,11 +83,24 @@ export async function POST(req: Request) {
               }
             }
 
+            Content length limits for A4 format:
+            1. Professional Summary: Maximum 3-4 sentences
+            2. Work Experience: 
+               - Maximum 4-5 positions
+               - Each position: 2-3 bullet points
+               - Each bullet point: 100-120 characters max
+            3. Education: Maximum 3 degrees
+            4. Skills:
+               - Technical: Maximum 8 skills
+               - Soft: Maximum 6 skills
+            5. Languages: Maximum 4 languages
+            6. Military/National Service: Maximum 2-3 bullet points
+
             The CV data is: ${JSON.stringify(cvData.format_cv)}
           `
         }
       ],
-      system: `You are a professional CV translator specializing in Hebrew to English translation.
+      system: `You are a professional CV translator and optimizer specializing in Hebrew to English translation.
                Your primary rules:
                1. NEVER leave any Hebrew text in the output
                2. Always translate "היום" to "Present"
@@ -96,7 +109,12 @@ export async function POST(req: Request) {
                5. Use professional CV terminology in English
                6. Ensure section titles match the provided mapping exactly
                7. Return only valid JSON matching the input structure
-               8. Double-check that no Hebrew characters remain in the final output`
+               8. Double-check that no Hebrew characters remain in the final output
+               9. If content exceeds the specified limits, prioritize:
+                  - Most recent and relevant experience
+                  - Highest education level
+                  - Most relevant skills for the position
+                  - Current or highest language proficiency`
     });
 
     const translatedCV = completion.content[0].type === 'text' 

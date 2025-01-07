@@ -24,6 +24,7 @@ const translations = {
     workExperience: 'Work Experience',
     education: 'Education',
     militaryService: 'Military Service',
+    nationalService: 'National Service',
     professionalSummary: 'Professional Summary',
     email: 'Email',
     phone: 'Phone',
@@ -44,6 +45,11 @@ const formatDate = (startDate: string, endDate: string) => {
     endDate;
   
   return `${startDate} ${translations.en.to} ${formattedEnd}`;
+};
+
+const shouldPreventWordWrap = (text: string = '') => {
+  const wordCount = text.trim().split(/\s+/).length;
+  return wordCount <= 5;
 };
 
 const ProfessionalTemplateEn: React.FC<ProfessionalTemplateProps> = ({ data }) => {
@@ -149,7 +155,8 @@ const ProfessionalTemplateEn: React.FC<ProfessionalTemplateProps> = ({ data }) =
               {/* Languages */}
               {skills.languages && skills.languages.length > 0 && (
                 <div className="professional-languages">
-                  <h3 className="professional-subsection-title">{translations.en.languages}</h3>
+                  <h2 className="professional-section-title">{translations.en.languages}</h2>
+                  <div className="professional-separator" />
                   {skills.languages.map((lang, index) => (
                     <div key={`lang-${index}`} className="professional-skill-item">
                       <div className="professional-skill-content">
@@ -171,7 +178,7 @@ const ProfessionalTemplateEn: React.FC<ProfessionalTemplateProps> = ({ data }) =
         </div>
       </div>
 
-      {/* Right Column (was left in RTL) */}
+      {/* Right Column */}
       <div className="professional-right-column">
         {/* Professional Summary */}
         {personalInfo.summary && (
@@ -191,11 +198,21 @@ const ProfessionalTemplateEn: React.FC<ProfessionalTemplateProps> = ({ data }) =
               <div key={index} className="professional-experience-item">
                 <div className="professional-experience-header">
                   <div className="professional-experience-title-wrapper">
-                    <span className="professional-experience-title">{exp.position}</span>
+                    <span 
+                      className="professional-experience-title"
+                      style={{ whiteSpace: shouldPreventWordWrap(exp.position) ? 'nowrap' : 'normal' }}
+                    >
+                      {exp.position}
+                    </span>
                     {exp.company && (
                       <>
                         <span className="professional-experience-separator">|</span>
-                        <span className="professional-experience-company">{exp.company}</span>
+                        <span 
+                          className="professional-experience-company"
+                          style={{ whiteSpace: 'nowrap' }}
+                        >
+                          {exp.company}
+                        </span>
                       </>
                     )}
                   </div>
@@ -204,11 +221,14 @@ const ProfessionalTemplateEn: React.FC<ProfessionalTemplateProps> = ({ data }) =
                   </span>
                 </div>
                 {exp.description && exp.description.length > 0 && (
-                  <ul className="professional-experience-description">
-                    {exp.description.map((desc, i) => (
-                      <li key={i}>{desc}</li>
+                  <div className="professional-experience-description">
+                    {exp.description.map((desc, i, arr) => (
+                      <React.Fragment key={i}>
+                        <span style={{ display: 'inline' }}>{desc}</span>
+                        {i < arr.length - 1 && <span className="professional-description-separator">|</span>}
+                      </React.Fragment>
                     ))}
-                  </ul>
+                  </div>
                 )}
               </div>
             ))}
@@ -217,28 +237,36 @@ const ProfessionalTemplateEn: React.FC<ProfessionalTemplateProps> = ({ data }) =
 
         {/* Education */}
         {education?.degrees && education.degrees.length > 0 && (
-          <section className="professional-education">
+          <section className="professional-experience">
             <h2 className="professional-section-title">{translations.en.education}</h2>
             {education.degrees.map((degree, index) => (
-              <div key={index} className="professional-education-item">
-                <div className="professional-education-header">
-                  <div className="professional-education-title-wrapper">
-                    <span className="professional-education-title">
+              <div key={index} className="professional-experience-item">
+                <div className="professional-experience-header">
+                  <div className="professional-experience-title-wrapper">
+                    <span 
+                      className="professional-experience-title"
+                      style={{ whiteSpace: shouldPreventWordWrap(`${degree.type} ${degree.field}`) ? 'nowrap' : 'normal' }}
+                    >
                       {degree.type} {degree.field}
                     </span>
                     {degree.institution && (
                       <>
                         <span className="professional-experience-separator">|</span>
-                        <span className="professional-education-institution">{degree.institution}</span>
+                        <span 
+                          className="professional-experience-company"
+                          style={{ whiteSpace: 'nowrap' }}
+                        >
+                          {degree.institution}
+                        </span>
                       </>
                     )}
                   </div>
                   {degree.years && (
-                    <span className="professional-education-date">{degree.years}</span>
+                    <span className="professional-experience-date">{degree.years}</span>
                   )}
                 </div>
                 {degree.specialization && (
-                  <div className="professional-education-specialization">
+                  <div className="professional-experience-description">
                     Specialization: {degree.specialization}
                   </div>
                 )}
@@ -249,29 +277,44 @@ const ProfessionalTemplateEn: React.FC<ProfessionalTemplateProps> = ({ data }) =
 
         {/* Military Service */}
         {military && (
-          <section className="professional-military-section">
-            <h2 className="professional-section-title">{translations.en.militaryService}</h2>
-            <div className="professional-military-item">
-              <div className="professional-military-header">
-                <div className="professional-military-title-wrapper">
-                  <span className="professional-military-title">{military.role}</span>
+          <section className="professional-experience">
+            <h2 className="professional-section-title">
+              {military.role?.toLowerCase().includes('national') ? translations.en.nationalService : translations.en.militaryService}
+            </h2>
+            <div className="professional-experience-item">
+              <div className="professional-experience-header">
+                <div className="professional-experience-title-wrapper">
+                  <span 
+                    className="professional-experience-title"
+                    style={{ whiteSpace: shouldPreventWordWrap(military.role) ? 'nowrap' : 'normal' }}
+                  >
+                    {military.role}
+                  </span>
                   {military.unit && (
                     <>
                       <span className="professional-experience-separator">|</span>
-                      <span className="professional-military-unit">{military.unit}</span>
+                      <span 
+                        className="professional-experience-company"
+                        style={{ whiteSpace: 'nowrap' }}
+                      >
+                        {military.unit}
+                      </span>
                     </>
                   )}
                 </div>
-                <span className="professional-military-date">
+                <span className="professional-experience-date">
                   {formatDate(military.startDate, military.endDate)}
                 </span>
               </div>
               {military.description && military.description.length > 0 && (
-                <ul className="professional-experience-description">
-                  {military.description.map((desc, i) => (
-                    <li key={i}>{desc}</li>
+                <div className="professional-experience-description">
+                  {military.description.map((desc, i, arr) => (
+                    <React.Fragment key={i}>
+                      <span style={{ display: 'inline' }}>{desc}</span>
+                      {i < arr.length - 1 && <span className="professional-description-separator">|</span>}
+                    </React.Fragment>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
           </section>

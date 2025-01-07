@@ -1,13 +1,17 @@
 /* Dynamic sizing system */
 :root {
-  --scale-factor: 0.99;
   --base-font-size: 16px;
   --base-spacing: 0.1rem;
   --a4-width: 210mm;
   --a4-height: 297mm;
-  --header-height: 160px;
-  --content-height: calc(var(--a4-height) - var(--header-height));
+  --header-height: 120px;
+  --footer-height: 45px;
+  --content-height: calc(var(--a4-height) - var(--header-height) - var(--footer-height));
   --font-family: 'Assistant', sans-serif;
+  --text-sm: 0.8rem;
+  --text-base: 0.85rem;
+  --text-lg: 0.9rem;
+  --text-xl: 1rem;
 }
 
 .classic-template {
@@ -17,19 +21,19 @@
   width: var(--a4-width);
   height: var(--a4-height);
   margin: 0 auto;
-  background: #F3F4F1;
+  background: white;
   font-family: var(--font-family);
   overflow: hidden;
-  transform-origin: top center;
-  transform: scale(var(--scale-factor));
   
   /* Dynamic font size calculation */
-  --adjusted-font-size: calc(var(--base-font-size) * var(--scale-factor));
-  --adjusted-spacing: calc(var(--base-spacing) * var(--scale-factor));
+  --adjusted-font-size: var(--base-font-size);
+  --adjusted-spacing: var(--base-spacing);
 }
 
 .classic-header {
   height: var(--header-height);
+  min-height: var(--header-height);
+  max-height: var(--header-height);
   background: #1F1B2F;
   position: relative;
   width: 100%;
@@ -41,6 +45,7 @@
   overflow: hidden;
   border-bottom-right-radius: 45px;
   border-bottom-left-radius: 0;
+  flex-shrink: 0;
 }
 
 .classic-header::after,
@@ -109,23 +114,29 @@
 
 .classic-content {
   flex: 1;
+  height: var(--content-height);
+  min-height: var(--content-height);
+  max-height: var(--content-height);
   padding: 1rem 2rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.3rem;
   width: 100%;
-  overflow: visible;
-  margin-bottom: 2rem;
+  overflow-y: auto;
   font-family: var(--font-family);
+  font-size: var(--text-base);
 }
 
 .section-title {
-  font-size: 1.1rem;
+  font-size: var(--text-xl);
   font-weight: 600;
   color: #1F1B2F;
-  margin-bottom: 0.3rem;
-  padding-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
+  padding-bottom: 0.2rem;
   border-bottom: 1px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .section-title::after {
@@ -155,23 +166,19 @@
 
 .experience-section {
   min-height: 0;
-  overflow: hidden;
-  margin-left: 0;
+  margin-bottom: 0.5rem;
   width: 100%;
-  margin-bottom: 1rem;
 }
 
 .experience-items {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  padding-right: 0;
-  padding-left: 0;
+  gap: 0.4rem;
   width: 100%;
 }
 
 .experience-item {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .experience-header {
@@ -187,13 +194,13 @@
 
 .experience-title {
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-family: var(--font-family);
 }
 
 .experience-company {
   font-weight: 300;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-family: var(--font-family);
 }
 
@@ -208,29 +215,26 @@
   min-width: 150px;
   margin-left: 20px;
   font-weight: 200;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #666;
   white-space: nowrap;
 }
 
 .experience-description {
-  list-style: none;
-  padding-left: 1.2rem;
+  font-size: 0.8rem;
+  line-height: 1.4;
   margin-top: 0.3rem;
+  margin-bottom: 0.2rem;
+  padding-right: 0.8rem;
+  padding-left: 0.8rem;
 }
 
 .experience-description li {
-  position: relative;
-  margin-bottom: calc(0.15rem * var(--scale-factor));
-  font-weight: 200;
-  font-size: clamp(0.85rem, 1.5vw, 0.95rem);
-  line-height: 1.4;
+  display: inline;
+  font-weight: 300;
   color: #333;
-  list-style: none;
-  word-break: normal;
-  overflow-wrap: break-word;
-  hyphens: none;
-  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .experience-description li::before {
@@ -239,18 +243,15 @@
 
 .education-section {
   min-height: 0;
-  margin-left: 0;
   margin-bottom: 0.5rem;
   width: 100%;
-  margin-bottom: 1rem;
+  position: relative;
 }
 
 .education-items {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
-  padding-right: 0;
-  padding-left: 0;
+  gap: 0.4rem;
   width: 100%;
 }
 
@@ -258,8 +259,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
-  margin-bottom: 0.2rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .education-header {
@@ -275,12 +275,12 @@
 
 .education-degree {
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .education-institution {
   font-weight: 300;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .education-date {
@@ -288,7 +288,7 @@
   min-width: 150px;
   margin-left: 20px;
   font-weight: 200;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   color: #666;
   white-space: nowrap;
 }
@@ -302,25 +302,24 @@
 
 .skills-section, .languages-section {
   margin-bottom: 0.5rem;
-  width: 100%;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .skills-items {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.5rem;
-  padding-right: 0;
-  padding-left: 0;
   width: 100%;
 }
 
 .skill-item {
-  font-weight: 200;
-  font-size: 0.9rem;
+  font-weight: 300;
+  font-size: 0.8rem;
   color: #333;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
 }
 
 .summary-section {
@@ -371,12 +370,15 @@
 } 
 
 .classic-footer {
+  height: var(--footer-height);
+  min-height: var(--footer-height);
+  max-height: var(--footer-height);
   position: relative;
   width: 100%;
-  height: 45px;
   background: #1F1B2F;
   border-top-left-radius: 45px;
   border-top-right-radius: 0;
+  flex-shrink: 0;
 }
 
 /* מסיר את הקווים והנקודות מהפטר */
@@ -425,8 +427,10 @@
 
 /* Skills Section Styles */
 .skills-section {
-  margin-bottom: 1rem;
-  width: 100%;
+  margin-bottom: 0.5rem;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .skills-group {
@@ -441,30 +445,67 @@
 }
 
 .skills-items {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.technical-skills,
+.soft-skills,
+.languages-skills {
+  width: 100%;
+}
+
+.skills-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+  padding: 0.2rem 0;
+  font-size: var(--text-sm);
 }
 
 .skill-item {
   font-weight: 300;
-  font-size: 0.9rem;
   color: #333;
-  display: flex;
+  display: inline-flex;
   align-items: center;
 }
 
-.skill-separator {
-  margin: 0 0.5rem;
+.separator {
+  margin: 0 0.4rem;
   color: #666;
-  opacity: 0.6;
+  opacity: 0.4;
+  font-weight: 200;
+  display: inline-block;
+}
+
+/* מסיר את כל הסגנונות הישנים של המפרידים */
+.experience-separator,
+.skill-separator,
+.contact-separator {
+  display: none;
 }
 
 /* Languages Section */
 .languages-section {
-  margin-bottom: 1rem;
-  width: 100%;
+  margin-bottom: 0.5rem;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.sub-title {
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.2rem;
+  padding-bottom: 0.2rem;
+  border-bottom: 1px solid #eee;
+  position: sticky;
+  top: 2rem;
+  z-index: 9;
 }
 
 /* Print Styles */
@@ -477,4 +518,55 @@
   .skills-items {
     break-inside: avoid;
   }
+}
+
+/* עדכון סגנון המפריד */
+.separator {
+  margin: 0 0.4rem;
+  color: #666;
+  opacity: 0.4;
+  font-weight: 200;
+  display: inline-block;
+}
+
+/* מסיר את כל הסגנונות הישנים של המפרידים */
+.experience-separator,
+.skill-separator,
+.contact-separator {
+  display: none;
+}
+
+/* עדכון מרווחים בתיאור */
+.experience-description p {
+  margin: 0.3rem 0;
+  padding: 0.2rem 0;
+}
+
+/* Remove any duplicate margin-bottom */
+.education-item,
+.experience-item,
+.skills-section,
+.languages-section {
+  margin-bottom: 0.3rem !important;
+}
+
+/* Ensure content doesn't overlap with footer */
+.classic-content > :last-child {
+  margin-bottom: 1rem;
+}
+
+/* Languages */
+.languages-skills {
+  width: 100%;
+  margin-bottom: 0.3rem;
+}
+
+.languages-skills .skills-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.languages-skills .skill-item {
+  white-space: nowrap;
 }

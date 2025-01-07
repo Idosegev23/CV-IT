@@ -268,20 +268,27 @@
   list-style-type: none;
   padding: 0;
   margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
 }
 
 .creative-experience-description-en li {
   position: relative;
-  padding-left: 1rem;
-  margin-bottom: 0.5rem;
+  padding: 0;
+  margin: 0;
   font-size: 0.9rem;
   line-height: 1.4;
+  display: inline;
 }
 
 .creative-experience-description-en li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
+  content: none;
+}
+
+.creative-experience-description-en li:not(:last-child)::after {
+  content: " | ";
+  margin: 0 0.3rem;
   color: var(--primary-blue);
 }
 
@@ -330,17 +337,28 @@
 /* Education bullets */
 .creative-education-description-en {
   position: relative;
-  padding-left: 1rem;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.2rem;
   font-size: 0.9rem;
-  line-height: 1.4;
+  line-height: 1.2;
+  display: inline;
+  padding-left: 0;
 }
 
 .creative-education-description-en::before {
-  content: "•";
-  position: absolute;
-  left: 0;
+  content: none;
+}
+
+.creative-education-description-en:not(:last-child)::after {
+  content: " | ";
+  margin: 0 0.3rem;
   color: var(--primary-blue);
+}
+
+.creative-education-container-en {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  padding-left: 0;
 }
 
 /* Skills spacing */
@@ -354,19 +372,24 @@
 
 /* Different spacing for different skill types */
 .creative-skill-item-en:has(.creative-skill-level-en) {
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.6rem;
 }
 
 .creative-skill-item-en:not(:has(.creative-skill-level-en)) {
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.3rem;
 }
 
 /* Section titles in right column */
 .creative-right-column-en .creative-section-title-en {
   font-size: 1.2rem;
   font-weight: 500;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.2rem;
   color: #4B4553;
+}
+
+/* Add spacing between sections in right column */
+.creative-right-column-en .creative-section-en {
+  margin-bottom: 0.4rem;
 }
 
 /* Section titles in left column */
@@ -400,4 +423,53 @@
 
 .creative-right-column-en .creative-skill-name-en.smaller {
   font-size: 0.9rem;
+}
+
+.creative-contact-info-en {
+  font-size: clamp(0.5rem, 0.7rem, 0.7rem);
+  line-height: 1.4;
+  max-width: 100%;
+  color: white;
+}
+
+.creative-contact-info-en .contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 0.5rem;
+}
+
+.creative-contact-info-en .contact-item span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  color: white;
+}
+
+.creative-contact-info-en .contact-item img,
+.creative-contact-info-en .contact-item .contact-label,
+.creative-contact-info-en .contact-item .contact-icon,
+.creative-contact-info-en .contact-item .contact-title {
+  display: none !important;
+}
+
+/* Remove any potential pseudo-elements */
+.creative-contact-info-en .contact-item span::before,
+.creative-contact-info-en .contact-item span::after {
+  display: none;
+  content: none;
+}
+
+@media screen and (max-width: 1200px) {
+  .creative-contact-info-en {
+    font-size: clamp(0.5rem, 0.7rem, 0.7rem);
+  }
+}
+
+@media screen and (max-width: 400px), 
+       screen and (min-width: 401px) and (max-width: 800px) {
+  .creative-contact-info-en .contact-item span::before {
+    content: none !important;
+  }
 } 
