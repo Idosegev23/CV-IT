@@ -93,6 +93,7 @@ export async function POST(request: Request) {
       amount: amount,
       maxPayments: 1,
       pluginId: GREEN_INVOICE_PLUGIN_ID,
+      group: 100,
       client: {
         name: client.name,
         emails: [client.email],
