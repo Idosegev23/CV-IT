@@ -247,29 +247,34 @@ export const AddItemPopup: React.FC<AddItemPopupProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className={className}
+          className={cn(
+            "fixed inset-0 z-50",
+            "flex items-center justify-center",
+            "p-4 md:p-0",
+            className
+          )}
         >
           {/* רקע מטושטש */}
-          <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
 
           {/* תוכן הפופאפ */}
           <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
             className={cn(
-              "relative",
+              "relative z-50",
               "w-full max-w-[500px]",
               "bg-white",
               "rounded-3xl",
               "shadow-xl",
               "overflow-hidden",
-              "mx-4",
+              "mx-auto",
               "max-h-[90vh]",
               "overflow-y-auto"
             )}
           >
-            {/* כותרת */}
+            {/*כותרת */}
             <div className="p-6 pb-0">
               <h2 className="text-2xl font-bold text-[#4754D7] mb-4">
                 {isRTL ? 'הוספת פריט חדש' : 'Add New Item'}
