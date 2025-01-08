@@ -127,10 +127,10 @@ export async function POST(request: Request) {
     };
 
     console.log('Payment request data:', JSON.stringify(paymentData, null, 2));
-    console.log('Sending request to:', `${GREEN_INVOICE_URL}/payments/form`);
+    console.log('Sending request to:', `${GREEN_INVOICE_URL}/payments/payment-page`);
     
     try {
-      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payments/form`, {
+      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payments/payment-page`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
