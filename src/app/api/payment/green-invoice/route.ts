@@ -103,34 +103,41 @@ export async function POST(request: Request) {
     
     const paymentData = {
       description: lang === 'he' ? `חבילת ${packageType}` : `${packageType} Package`,
-      type: "320",
+      type: 320,
       lang: lang === 'he' ? 'he' : 'en',
       currency: 'ILS',
       vatType: 0,
       amount: Number(amount),
       maxPayments: 1,
       pluginId: GREEN_INVOICE_PLUGIN_ID,
+      group: 100,
       client: {
         name: client.name,
         emails: client.email ? [client.email] : [],
-        phone: client.phone || '',
         taxId: client.taxId || '',
+        phone: client.phone || '',
         country: 'IL',
         add: true
       },
+      income: [{
+        description: lang === 'he' ? `חבילת ${packageType}` : `${packageType} Package`,
+        quantity: 1,
+        price: Number(amount),
+        currency: 'ILS',
+        vatType: 0
+      }],
+      remarks: lang === 'he' ? 'הזמנת חבילת קורות חיים' : 'CV Package Order',
       successUrl: `${appUrl}/api/payment/success`,
       failureUrl: `${appUrl}/api/payment/failure`,
       notifyUrl: `${appUrl}/api/payment/notify`,
-      custom: sessionId,
-      redirectUrl: `${appUrl}/api/payment/success`,
-      theme: 'light'
+      custom: sessionId
     };
 
     console.log('Payment request data:', JSON.stringify(paymentData, null, 2));
-    console.log('Sending request to:', `${GREEN_INVOICE_URL}/payments/payment-page`);
+    console.log('Sending request to:', `${GREEN_INVOICE_URL}/payment/form`);
     
     try {
-      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payments/payment-page`, {
+      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payment/form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
