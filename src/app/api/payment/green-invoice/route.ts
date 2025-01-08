@@ -134,10 +134,10 @@ export async function POST(request: Request) {
     };
 
     console.log('Payment request data:', JSON.stringify(paymentData, null, 2));
-    console.log('Sending request to:', `${GREEN_INVOICE_URL}/payment/form`);
+    console.log('Sending request to:', `${GREEN_INVOICE_URL}/payments/form`);
     
     try {
-      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payment/form`, {
+      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payments/form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -152,9 +152,14 @@ export async function POST(request: Request) {
       if (!paymentResponse.ok) {
         const paymentError = await paymentResponse.text();
         console.error('Payment Error Response:', paymentError);
+        console.error('Response Headers:', Object.fromEntries(paymentResponse.headers.entries()));
+        console.error('Response Status:', paymentResponse.status);
+        console.error('Response Status Text:', paymentResponse.statusText);
         try {
           const errorJson = JSON.parse(paymentError);
           console.error('Parsed Error:', errorJson);
+          console.error('Error Code:', errorJson.errorCode);
+          console.error('Error Message:', errorJson.errorMessage);
         } catch (e) {
           console.error('Could not parse error as JSON');
         }

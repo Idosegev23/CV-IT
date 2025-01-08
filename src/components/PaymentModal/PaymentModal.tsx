@@ -658,6 +658,75 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                           isRTL ? 'המשך לתשלום' : 'Continue to Payment'
                         )}
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            setIsLoading(true);
+                            setPaymentStatus('success');
+                            
+                            setTimeout(async () => {
+                              setPaymentStatus('generating');
+                              
+                              if (currentSessionId) {
+                                try {
+                                  const generateResponse = await fetch('/api/generate-cv', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({ 
+                                      sessionId: currentSessionId,
+                                      lang
+                                    }),
+                                  });
+
+                                  if (!generateResponse.ok) {
+                                    throw new Error('Failed to start CV generation');
+                                  }
+
+                                  console.log('Started CV generation process');
+                                  checkCVStatus(currentSessionId);
+                                } catch (error) {
+                                  console.error('Failed to start CV generation:', error);
+                                  toast.error(
+                                    isRTL 
+                                      ? 'אירעה שגיאה בהתחלת תהליך יצירת קורות החיים' 
+                                      : 'Error starting CV generation'
+                                  );
+                                  setPaymentStatus('idle');
+                                }
+                              }
+                            }, 2000);
+                          } catch (error) {
+                            console.error('Process failed:', error);
+                            toast.error(
+                              isRTL 
+                                ? 'אירעה שגיאה בתהליך' 
+                                : 'An error occurred'
+                            );
+                            setPaymentStatus('idle');
+                          } finally {
+                            setIsLoading(false);
+                          }
+                        }}
+                        className={cn(
+                          "w-full",
+                          "mt-2",
+                          "px-6 py-3",
+                          "bg-gray-200",
+                          "text-gray-700",
+                          "rounded-full",
+                          "font-medium",
+                          "transition-all",
+                          "hover:bg-gray-300",
+                          "disabled:opacity-50",
+                          "flex items-center justify-center gap-2"
+                        )}
+                      >
+                        {isRTL ? 'בדיקות' : 'Testing'}
+                      </button>
                     </form>
                   )}
                 </div>
