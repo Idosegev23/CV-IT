@@ -97,53 +97,66 @@ export async function POST(request: Request) {
       lang: lang === 'he' ? 'he' : 'en',
       currency: 'ILS',
       vatType: 0,
-      amount: amount,
+      amount: Number(amount),
       maxPayments: 1,
       pluginId: GREEN_INVOICE_PLUGIN_ID,
-      group: 100,
       client: {
         name: client.name,
-        emails: [client.email],
-        phone: client.phone,
-        taxId: client.taxId,
+        emails: client.email ? [client.email] : [],
+        phone: client.phone || '',
+        taxId: client.taxId || '',
         country: 'IL',
         add: true
       },
       successUrl: `${appUrl}/api/payment/success`,
       failureUrl: `${appUrl}/api/payment/failure`,
       notifyUrl: `${appUrl}/api/payment/notify`,
-      custom: sessionId
+      custom: sessionId,
+      redirectUrl: `${appUrl}/api/payment/success`,
+      theme: 'light'
     };
 
     console.log('Payment request data:', JSON.stringify(paymentData, null, 2));
     console.log('Sending request to:', `${GREEN_INVOICE_URL}/payments/form`);
     
-    const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payments/form`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(paymentData)
-    });
+    try {
+      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payments/form`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentData)
+      });
 
-    console.log('Payment Response Status:', paymentResponse.status);
+      console.log('Payment Response Status:', paymentResponse.status);
+      console.log('Payment Response Headers:', Object.fromEntries(paymentResponse.headers.entries()));
 
-    if (!paymentResponse.ok) {
-      const paymentError = await paymentResponse.text();
-      console.error('Payment Error Response:', paymentError);
-      throw new Error(`Green Invoice payment form creation failed: ${paymentError}`);
+      if (!paymentResponse.ok) {
+        const paymentError = await paymentResponse.text();
+        console.error('Payment Error Response:', paymentError);
+        try {
+          const errorJson = JSON.parse(paymentError);
+          console.error('Parsed Error:', errorJson);
+        } catch (e) {
+          console.error('Could not parse error as JSON');
+        }
+        throw new Error(`Green Invoice payment form creation failed: ${paymentError}`);
+      }
+
+      const paymentResult = await paymentResponse.json();
+      console.log('Payment response:', JSON.stringify(paymentResult, null, 2));
+      
+      if (!paymentResult.url) {
+        throw new Error(`Invalid payment form response: ${JSON.stringify(paymentResult)}`);
+      }
+
+      console.log('Payment process completed successfully');
+      return NextResponse.json({ success: true, paymentUrl: paymentResult.url });
+    } catch (fetchError) {
+      console.error('Fetch error:', fetchError);
+      throw fetchError;
     }
-
-    const paymentResult = await paymentResponse.json();
-    console.log('Payment response:', JSON.stringify(paymentResult, null, 2));
-    
-    if (!paymentResult.url) {
-      throw new Error(`Invalid payment form response: ${JSON.stringify(paymentResult)}`);
-    }
-
-    console.log('Payment process completed successfully');
-    return NextResponse.json({ success: true, paymentUrl: paymentResult.url });
 
   } catch (error) {
     console.error('Payment error:', error instanceof Error ? error.message : 'Unknown error');
