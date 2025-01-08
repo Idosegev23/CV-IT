@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-const GREEN_INVOICE_URL = `${process.env.GREEN_INVOICE_URL}/api/v1`;
+// וידוא שה-URL מסתיים ללא /
+const baseUrl = process.env.GREEN_INVOICE_URL?.endsWith('/') 
+  ? process.env.GREEN_INVOICE_URL.slice(0, -1)
+  : process.env.GREEN_INVOICE_URL;
+
+const GREEN_INVOICE_URL = `${baseUrl}/api/v1`;
 const GREEN_INVOICE_API_KEY = process.env.GREEN_INVOICE_API_KEY;
 const GREEN_INVOICE_SECRET = process.env.GREEN_INVOICE_SECRET;
 const GREEN_INVOICE_PLUGIN_ID = process.env.GREEN_INVOICE_PLUGIN_ID;
@@ -9,21 +14,19 @@ const GREEN_INVOICE_PLUGIN_ID = process.env.GREEN_INVOICE_PLUGIN_ID;
 export async function POST(request: Request) {
   try {
     console.log('Starting Green Invoice payment process...');
-    
-    // בדיקת משתני הסביבה
-    console.log('Checking environment variables...');
-    console.log('GREEN_INVOICE_URL:', GREEN_INVOICE_URL ? 'exists' : 'missing');
-    console.log('GREEN_INVOICE_API_KEY:', GREEN_INVOICE_API_KEY ? 'exists' : 'missing');
-    console.log('GREEN_INVOICE_SECRET:', GREEN_INVOICE_SECRET ? 'exists' : 'missing');
-    console.log('GREEN_INVOICE_PLUGIN_ID:', GREEN_INVOICE_PLUGIN_ID ? 'exists' : 'missing');
-    console.log('NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL ? 'exists' : 'missing');
+    console.log('Environment Variables Values:');
+    console.log('GREEN_INVOICE_URL:', GREEN_INVOICE_URL);
+    console.log('GREEN_INVOICE_API_KEY:', GREEN_INVOICE_API_KEY ? 'exists (hidden)' : 'missing');
+    console.log('GREEN_INVOICE_SECRET:', GREEN_INVOICE_SECRET ? 'exists (hidden)' : 'missing');
+    console.log('GREEN_INVOICE_PLUGIN_ID:', GREEN_INVOICE_PLUGIN_ID);
+    console.log('NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
+
+    // בדיקה שה-URL של האפליקציה מוגדר נכון
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.cvit.co.il';
+    console.log('Using APP_URL:', appUrl);
 
     if (!GREEN_INVOICE_URL || !GREEN_INVOICE_API_KEY || !GREEN_INVOICE_SECRET || !GREEN_INVOICE_PLUGIN_ID) {
       throw new Error('Missing required environment variables');
-    }
-
-    if (!process.env.NEXT_PUBLIC_APP_URL) {
-      throw new Error('Missing NEXT_PUBLIC_APP_URL');
     }
 
     // קבלת נתוני הבקשה
@@ -47,6 +50,7 @@ export async function POST(request: Request) {
 
     // יצירת טוקן הזדהות מול Green Invoice
     console.log('Authenticating with Green Invoice...');
+    console.log('Auth URL:', `${GREEN_INVOICE_URL}/account/token`);
     
     const authResponse = await fetch(`${GREEN_INVOICE_URL}/account/token`, {
       method: 'POST',
@@ -59,8 +63,11 @@ export async function POST(request: Request) {
       })
     });
 
+    console.log('Auth Response Status:', authResponse.status);
+    
     if (!authResponse.ok) {
       const authError = await authResponse.text();
+      console.error('Auth Error Response:', authError);
       throw new Error(`Green Invoice authentication failed: ${authError}`);
     }
 
@@ -102,9 +109,9 @@ export async function POST(request: Request) {
         country: 'IL',
         add: true
       },
-      successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payment/success`,
-      failureUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payment/failure`,
-      notifyUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/payment/notify`,
+      successUrl: `${appUrl}/api/payment/success`,
+      failureUrl: `${appUrl}/api/payment/failure`,
+      notifyUrl: `${appUrl}/api/payment/notify`,
       custom: sessionId
     };
 
@@ -120,8 +127,11 @@ export async function POST(request: Request) {
       body: JSON.stringify(paymentData)
     });
 
+    console.log('Payment Response Status:', paymentResponse.status);
+
     if (!paymentResponse.ok) {
       const paymentError = await paymentResponse.text();
+      console.error('Payment Error Response:', paymentError);
       throw new Error(`Green Invoice payment form creation failed: ${paymentError}`);
     }
 
