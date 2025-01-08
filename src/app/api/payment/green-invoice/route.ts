@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-const GREEN_INVOICE_URL = process.env.GREEN_INVOICE_URL;
+const GREEN_INVOICE_URL = `${process.env.GREEN_INVOICE_URL}/api/v1`;
 const GREEN_INVOICE_API_KEY = process.env.GREEN_INVOICE_API_KEY;
 const GREEN_INVOICE_SECRET = process.env.GREEN_INVOICE_SECRET;
 const GREEN_INVOICE_PLUGIN_ID = process.env.GREEN_INVOICE_PLUGIN_ID;
