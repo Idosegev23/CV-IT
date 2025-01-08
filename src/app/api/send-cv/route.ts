@@ -4,6 +4,7 @@ import Mail from 'nodemailer/lib/mailer';
 import { createClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
 import { CV_ANALYSIS_SYSTEM_PROMPT } from '@/lib/prompts';
+import puppeteer from 'puppeteer';
 
 // בדיקת קיום משתני סביבה נדרשים
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) throw new Error('Missing SUPABASE_URL');
@@ -44,6 +45,73 @@ interface Agency {
   };
 }
 
+async function generatePDF(sessionId: string, cvData: any) {
+  try {
+    console.log('Starting PDF generation...');
+    
+    // קבלת מידע על התבנית הנבחרת
+    const { data: sessionData, error: sessionError } = await supabase
+      .from('sessions')
+      .select('template_id')
+      .eq('id', sessionId)
+      .single();
+
+    if (sessionError) throw sessionError;
+
+    const templateId = sessionData.template_id;
+    if (!templateId) throw new Error('No template selected');
+
+    // יצירת PDF באמצעות puppeteer
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: ['--no-sandbox']
+    });
+
+    const page = await browser.newPage();
+    
+    // טעינת הדף של התבנית
+    await page.goto(`${process.env.NEXT_PUBLIC_APP_URL}/he/cv/${templateId}?sessionId=${sessionId}`, {
+      waitUntil: 'networkidle0'
+    });
+
+    // יצירת PDF
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '0', right: '0', bottom: '0', left: '0' }
+    });
+
+    await browser.close();
+
+    // שמירת הקובץ ב-Storage
+    const fileName = `cv_${sessionId}_${Date.now()}.pdf`;
+    const { error: uploadError } = await supabase.storage
+      .from('CVs')
+      .upload(fileName, pdfBuffer, {
+        contentType: 'application/pdf',
+        cacheControl: '3600'
+      });
+
+    if (uploadError) throw uploadError;
+
+    // עדכון הדאטהבייס
+    const { error: updateError } = await supabase
+      .from('cv_data')
+      .update({
+        pdf_filename: fileName,
+        pdf_url: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/CVs/${fileName}`
+      })
+      .eq('session_id', sessionId);
+
+    if (updateError) throw updateError;
+
+    return { fileName, pdfBuffer };
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    throw error;
+  }
+}
+
 export async function POST(request: Request) {
   try {
     console.log('Starting CV send process...');
@@ -56,40 +124,37 @@ export async function POST(request: Request) {
       .eq('session_id', sessionId)
       .single();
 
-    if (cvError || !cvData?.pdf_filename) {
+    if (cvError) {
       console.error('CV data error:', cvError);
       throw new Error('CV data not found');
     }
 
-    console.log('Found CV data:', { 
-      filename: cvData.pdf_filename,
-      url: cvData.pdf_url 
-    });
+    let pdfBuffer;
+    let fileName = cvData?.pdf_filename;
 
-    // 2. הורדת הקובץ מהאחסון
-    const { data: fileData, error: storageError } = await supabase.storage
-      .from('CVs')
-      .download(cvData.pdf_filename);
+    // אם אין PDF, ניצור אחד
+    if (!fileName) {
+      console.log('No PDF found, generating new one...');
+      const pdfData = await generatePDF(sessionId, cvData);
+      pdfBuffer = pdfData.pdfBuffer;
+      fileName = pdfData.fileName;
+    } else {
+      // הורדת הקובץ הקיים מהאחסון
+      const { data: fileData, error: storageError } = await supabase.storage
+        .from('CVs')
+        .download(fileName);
 
-    if (storageError || !fileData) {
-      console.error('Storage error:', storageError);
-      throw new Error('Failed to download CV file');
+      if (storageError || !fileData) {
+        console.error('Storage error:', storageError);
+        throw new Error('Failed to download CV file');
+      }
+
+      const arrayBuffer = await fileData.arrayBuffer();
+      pdfBuffer = Buffer.from(arrayBuffer);
     }
 
     // בדיקה שהקובץ תקין
-    console.log('File data type:', fileData.type);
-    console.log('File size:', fileData.size);
-
-    // המרה לבאפר בצורה בטוחה יותר
-    let buffer;
-    try {
-      const arrayBuffer = await fileData.arrayBuffer();
-      buffer = Buffer.from(arrayBuffer);
-      console.log('Buffer size:', buffer.length);
-    } catch (error) {
-      console.error('Buffer conversion error:', error);
-      throw new Error('Failed to convert file to buffer');
-    }
+    console.log('File size:', pdfBuffer.length);
 
     // 3. ניתוח הקו"ח
     const analysisCompletion = await anthropic.messages.create({
@@ -158,7 +223,7 @@ export async function POST(request: Request) {
           attachments: [
             {
               filename: `${analysis.candidate_info.full_name || 'CV'}.pdf`,
-              content: buffer,
+              content: pdfBuffer,
               contentType: 'application/pdf',
               encoding: 'base64'
             }

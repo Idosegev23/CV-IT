@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
-const GREEN_INVOICE_SANDBOX_URL = process.env.GREEN_INVOICE_SANDBOX_URL;
-const GREEN_INVOICE_SANDBOX_KEY = process.env.GREEN_INVOICE_SANDBOX_KEY;
-const GREEN_INVOICE_SANDBOX_SECRET = process.env.GREEN_INVOICE_SANDBOX_SECRET;
+const GREEN_INVOICE_URL = process.env.GREEN_INVOICE_URL;
+const GREEN_INVOICE_API_KEY = process.env.GREEN_INVOICE_API_KEY;
+const GREEN_INVOICE_SECRET = process.env.GREEN_INVOICE_SECRET;
 const GREEN_INVOICE_PLUGIN_ID = process.env.GREEN_INVOICE_PLUGIN_ID;
 
 export async function POST(request: Request) {
@@ -12,13 +12,13 @@ export async function POST(request: Request) {
     
     // בדיקת משתני הסביבה
     console.log('Checking environment variables...');
-    console.log('GREEN_INVOICE_SANDBOX_URL:', GREEN_INVOICE_SANDBOX_URL ? 'exists' : 'missing');
-    console.log('GREEN_INVOICE_SANDBOX_KEY:', GREEN_INVOICE_SANDBOX_KEY ? 'exists' : 'missing');
-    console.log('GREEN_INVOICE_SANDBOX_SECRET:', GREEN_INVOICE_SANDBOX_SECRET ? 'exists' : 'missing');
+    console.log('GREEN_INVOICE_URL:', GREEN_INVOICE_URL ? 'exists' : 'missing');
+    console.log('GREEN_INVOICE_API_KEY:', GREEN_INVOICE_API_KEY ? 'exists' : 'missing');
+    console.log('GREEN_INVOICE_SECRET:', GREEN_INVOICE_SECRET ? 'exists' : 'missing');
     console.log('GREEN_INVOICE_PLUGIN_ID:', GREEN_INVOICE_PLUGIN_ID ? 'exists' : 'missing');
     console.log('NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL ? 'exists' : 'missing');
 
-    if (!GREEN_INVOICE_SANDBOX_URL || !GREEN_INVOICE_SANDBOX_KEY || !GREEN_INVOICE_SANDBOX_SECRET || !GREEN_INVOICE_PLUGIN_ID) {
+    if (!GREEN_INVOICE_URL || !GREEN_INVOICE_API_KEY || !GREEN_INVOICE_SECRET || !GREEN_INVOICE_PLUGIN_ID) {
       throw new Error('Missing required environment variables');
     }
 
@@ -48,14 +48,14 @@ export async function POST(request: Request) {
     // יצירת טוקן הזדהות מול Green Invoice
     console.log('Authenticating with Green Invoice...');
     
-    const authResponse = await fetch(`${GREEN_INVOICE_SANDBOX_URL}/account/token`, {
+    const authResponse = await fetch(`${GREEN_INVOICE_URL}/account/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        id: GREEN_INVOICE_SANDBOX_KEY,
-        secret: GREEN_INVOICE_SANDBOX_SECRET
+        id: GREEN_INVOICE_API_KEY,
+        secret: GREEN_INVOICE_SECRET
       })
     });
 
@@ -108,9 +108,9 @@ export async function POST(request: Request) {
     };
 
     console.log('Payment request data:', JSON.stringify(paymentData, null, 2));
-    console.log('Sending request to:', `${GREEN_INVOICE_SANDBOX_URL}/payments/form`);
+    console.log('Sending request to:', `${GREEN_INVOICE_URL}/payments/form`);
     
-    const paymentResponse = await fetch(`${GREEN_INVOICE_SANDBOX_URL}/payments/form`, {
+    const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payments/form`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
