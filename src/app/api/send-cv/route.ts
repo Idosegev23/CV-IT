@@ -39,9 +39,21 @@ interface Agency {
   name: string;
   email: string;
   is_active: boolean;
-  send_cv_template: {
-    subject: string;
-    body: string;
+  email_format: {
+    subject_template: string;
+    body_template: string;
+    include_analysis: boolean;
+    analysis_format: {
+      include_full_name: boolean;
+      include_city: boolean;
+      include_phone: boolean;
+      include_email: boolean;
+      include_last_position: boolean;
+      include_experience_years: boolean;
+      include_relevant_positions: boolean;
+      include_search_area: boolean;
+    };
+    custom_fields: Record<string, string>;
   };
 }
 
@@ -110,6 +122,74 @@ async function generatePDF(sessionId: string, cvData: any) {
     console.error('Error generating PDF:', error);
     throw error;
   }
+}
+
+function replaceTemplateVariables(template: string, data: any, customFields: Record<string, string> = {}) {
+  let result = template;
+  
+  // החלפת משתנים סטנדרטיים
+  const standardReplacements: Record<string, string> = {
+    '{{candidate_name}}': data.candidate_info?.full_name || '',
+    '{{candidate_phone}}': data.candidate_info?.phone || '',
+    '{{candidate_email}}': data.candidate_info?.email || '',
+    '{{candidate_city}}': data.candidate_info?.city || '',
+    '{{candidate_experience}}': data.candidate_info?.experience_in_role || '',
+    '{{candidate_last_position}}': data.candidate_info?.last_position || '',
+    '{{candidate_search_area}}': data.candidate_info?.search_area || '',
+    '{{relevant_positions}}': Array.isArray(data.candidate_info?.relevant_positions) 
+      ? data.candidate_info.relevant_positions.join(', ') 
+      : ''
+  };
+
+  // החלפת משתנים סטנדרטיים
+  Object.entries(standardReplacements).forEach(([key, value]) => {
+    result = result.replace(new RegExp(key, 'g'), value);
+  });
+
+  // החלפת שדות מותאמים אישית
+  Object.entries(customFields).forEach(([key, value]) => {
+    result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
+  });
+
+  return result;
+}
+
+function generateAnalysisSection(analysis: any, format: Agency['email_format']['analysis_format']) {
+  const sections: string[] = [];
+
+  if (format.include_full_name && analysis.candidate_info?.full_name) {
+    sections.push(`שם מלא: ${analysis.candidate_info.full_name}`);
+  }
+
+  if (format.include_city && analysis.candidate_info?.city) {
+    sections.push(`עיר מגורים: ${analysis.candidate_info.city}`);
+  }
+
+  if (format.include_phone && analysis.candidate_info?.phone) {
+    sections.push(`טלפון: ${analysis.candidate_info.phone}`);
+  }
+
+  if (format.include_email && analysis.candidate_info?.email) {
+    sections.push(`דוא"ל: ${analysis.candidate_info.email}`);
+  }
+
+  if (format.include_last_position && analysis.candidate_info?.last_position) {
+    sections.push(`תפקיד אחרון: ${analysis.candidate_info.last_position}`);
+  }
+
+  if (format.include_experience_years && analysis.candidate_info?.experience_in_role) {
+    sections.push(`שנות ניסיון: ${analysis.candidate_info.experience_in_role}`);
+  }
+
+  if (format.include_relevant_positions && analysis.candidate_info?.relevant_positions) {
+    sections.push(`תפקידים רלוונטיים: ${analysis.candidate_info.relevant_positions.join(', ')}`);
+  }
+
+  if (format.include_search_area && analysis.candidate_info?.search_area) {
+    sections.push(`אזור חיפוש עבודה: ${analysis.candidate_info.search_area}`);
+  }
+
+  return sections.join('\n');
 }
 
 export async function POST(request: Request) {
@@ -184,7 +264,7 @@ export async function POST(request: Request) {
     if (agencyIds && agencyIds.length > 0) {
       const { data: selectedAgencies, error: agenciesError } = await supabase
         .from('agencies')
-        .select('id, name, email, is_active, send_cv_template')
+        .select('id, name, email, is_active, email_format')
         .in('id', agencyIds)
         .eq('is_active', true);
 
@@ -193,7 +273,7 @@ export async function POST(request: Request) {
     } else {
       const { data: allAgencies, error: agenciesError } = await supabase
         .from('agencies')
-        .select('id, name, email, is_active, send_cv_template')
+        .select('id, name, email, is_active, email_format')
         .eq('is_active', true);
 
       if (agenciesError) throw agenciesError;
@@ -204,22 +284,29 @@ export async function POST(request: Request) {
     const sendResults = await Promise.all(agencies.map(async (agency) => {
       try {
         // החלפת משתנים בתבנית
-        const emailSubject = agency.send_cv_template.subject
-          .replace('{{candidate_name}}', analysis.candidate_info.full_name)
-          .replace('{{agency_name}}', agency.name);
+        const emailSubject = replaceTemplateVariables(
+          agency.email_format.subject_template,
+          analysis,
+          agency.email_format.custom_fields
+        );
 
-        const emailBody = agency.send_cv_template.body
-          .replace(/{{candidate_name}}/g, analysis.candidate_info.full_name)
-          .replace(/{{candidate_phone}}/g, analysis.candidate_info.phone)
-          .replace(/{{candidate_email}}/g, analysis.candidate_info.email)
-          .replace(/{{candidate_experience}}/g, analysis.candidate_info.experience_in_role)
-          .replace(/{{agency_name}}/g, agency.name);
+        let emailBody = replaceTemplateVariables(
+          agency.email_format.body_template,
+          analysis,
+          agency.email_format.custom_fields
+        );
+
+        // הוספת ניתוח קורות החיים אם נדרש
+        if (agency.email_format.include_analysis) {
+          const analysisSection = generateAnalysisSection(analysis, agency.email_format.analysis_format);
+          emailBody += '\n\nניתוח קורות החיים:\n' + analysisSection;
+        }
 
         const mailOptions: Mail.Options = {
           from: `"CVIT Resume System" <${process.env.ZOHO_MAIL_USER}>`,
           to: agency.email,
           subject: emailSubject,
-          html: emailBody,
+          html: emailBody.replace(/\n/g, '<br>'),
           attachments: [
             {
               filename: `${analysis.candidate_info.full_name || 'CV'}.pdf`,

@@ -15,6 +15,23 @@ import {
   UserIcon,
 } from '@heroicons/react/24/outline';
 
+interface EmailTemplate {
+  subject_template: string;
+  body_template: string;
+  include_analysis: boolean;
+  analysis_format: {
+    include_full_name: boolean;
+    include_city: boolean;
+    include_phone: boolean;
+    include_email: boolean;
+    include_last_position: boolean;
+    include_experience_years: boolean;
+    include_relevant_positions: boolean;
+    include_search_area: boolean;
+  };
+  custom_fields: Record<string, string>;
+}
+
 interface Agency {
   id: string;
   name: string;
@@ -35,14 +52,7 @@ interface Agency {
     linkedin?: string;
     twitter?: string;
   };
-  send_cv_template: {
-    subject: string;
-    body: string;
-    template_text: string;
-    html_template: string;
-    attach_cv_file: boolean;
-    include_cv_analysis: boolean;
-  };
+  email_format: EmailTemplate;
 }
 
 interface NewAgency extends Omit<Agency, 'id' | 'created_at' | 'updated_at'> {
@@ -89,20 +99,28 @@ export default function AgenciesManagement({
 
       if (error) throw error;
 
-      const defaultTemplateValues = {
-        subject: '',
-        body: '',
-        template_text: '',
-        html_template: '',
-        attach_cv_file: true,
-        include_cv_analysis: false
+      const defaultEmailFormat: EmailTemplate = {
+        subject_template: '',
+        body_template: '',
+        include_analysis: false,
+        analysis_format: {
+          include_full_name: true,
+          include_city: true,
+          include_phone: true,
+          include_email: true,
+          include_last_position: true,
+          include_experience_years: true,
+          include_relevant_positions: true,
+          include_search_area: true
+        },
+        custom_fields: {}
       };
 
       const normalizedData = (data || []).map(agency => ({
         ...agency,
-        send_cv_template: {
-          ...defaultTemplateValues,
-          ...agency.send_cv_template
+        email_format: {
+          ...defaultEmailFormat,
+          ...agency.email_format
         }
       }));
 
@@ -146,36 +164,32 @@ export default function AgenciesManagement({
     notes: '',
     specialties: [],
     regions: [],
-    send_cv_template: {
-      subject: '',
-      body: '',
-      template_text: '',
-      html_template: '',
-      attach_cv_file: true,
-      include_cv_analysis: false
+    email_format: {
+      subject_template: '',
+      body_template: '',
+      include_analysis: false,
+      analysis_format: {
+        include_full_name: true,
+        include_city: true,
+        include_phone: true,
+        include_email: true,
+        include_last_position: true,
+        include_experience_years: true,
+        include_relevant_positions: true,
+        include_search_area: true
+      },
+      custom_fields: {}
     }
   });
 
   const handleNewTemplateTextChange = async (text: string) => {
     setNewAgency(prev => ({
       ...prev,
-      send_cv_template: {
-        ...prev.send_cv_template,
-        template_text: text,
-      },
+      email_format: {
+        ...prev.email_format,
+        body_template: text
+      }
     }));
-
-    const htmlTemplate = await convertTemplateToHtml(text);
-    if (htmlTemplate) {
-      setNewAgency(prev => ({
-        ...prev,
-        send_cv_template: {
-          ...prev.send_cv_template,
-          html_template: htmlTemplate,
-        },
-      }));
-      toast.success('התבנית הומרה בהצלחה');
-    }
   };
 
   const handleAddAgency = async () => {
@@ -203,13 +217,21 @@ export default function AgenciesManagement({
         notes: '',
         specialties: [],
         regions: [],
-        send_cv_template: {
-          subject: '',
-          body: '',
-          template_text: '',
-          html_template: '',
-          attach_cv_file: true,
-          include_cv_analysis: false
+        email_format: {
+          subject_template: '',
+          body_template: '',
+          include_analysis: false,
+          analysis_format: {
+            include_full_name: true,
+            include_city: true,
+            include_phone: true,
+            include_email: true,
+            include_last_position: true,
+            include_experience_years: true,
+            include_relevant_positions: true,
+            include_search_area: true
+          },
+          custom_fields: {}
         }
       });
       toast.success('חברת ההשמה נוספה בהצלחה');
@@ -256,9 +278,11 @@ export default function AgenciesManagement({
 
       if (error) throw error;
 
-      loadAgencies();
+      setAgencies(prev => prev.filter(agency => agency.id !== agencyId));
+      toast.success('חברת ההשמה נמחקה בהצלחה');
     } catch (error) {
       console.error('Error deleting agency:', error);
+      toast.error('אירעה שגיאה במחיקת חברת ההשמה');
     }
   };
 
@@ -271,19 +295,22 @@ export default function AgenciesManagement({
 
       if (error) throw error;
 
-      loadAgencies();
+      setAgencies(prev => prev.map(agency => 
+        agency.id === agencyId ? { ...agency, is_active: !isActive } : agency
+      ));
+      toast.success(`חברת ההשמה ${isActive ? 'הושבתה' : 'הופעלה'} בהצלחה`);
     } catch (error) {
       console.error('Error toggling agency status:', error);
+      toast.error('אירעה שגיאה בעדכון סטטוס חברת ההשמה');
     }
   };
 
   const handleEditAgencyField = (field: keyof Agency, value: any) => {
     if (!selectedAgency) return;
-    
-    setSelectedAgency({
-      ...selectedAgency,
+    setSelectedAgency(prev => ({
+      ...prev!,
       [field]: value
-    });
+    }));
   };
 
   const convertTemplateToHtml = async (text: string) => {
@@ -314,26 +341,177 @@ export default function AgenciesManagement({
     if (!selectedAgency) return;
 
     const updatedTemplate = {
-      ...selectedAgency.send_cv_template,
-      template_text: text
+      ...selectedAgency.email_format,
+      body_template: text
     };
 
     setSelectedAgency({
       ...selectedAgency,
-      send_cv_template: updatedTemplate
+      email_format: updatedTemplate
     });
+  };
 
-    const htmlTemplate = await convertTemplateToHtml(text);
-    if (htmlTemplate) {
-      setSelectedAgency(prev => ({
-        ...prev!,
-        send_cv_template: {
-          ...updatedTemplate,
-          html_template: htmlTemplate
+  const EmailTemplateForm = ({ template, onChange }: { 
+    template: EmailTemplate; 
+    onChange: (template: EmailTemplate) => void;
+  }) => {
+    const [showCustomField, setShowCustomField] = useState(false);
+    const [newFieldKey, setNewFieldKey] = useState('');
+    const [newFieldValue, setNewFieldValue] = useState('');
+
+    const handleCustomFieldAdd = () => {
+      if (!newFieldKey) return;
+      
+      onChange({
+        ...template,
+        custom_fields: {
+          ...template.custom_fields,
+          [newFieldKey]: newFieldValue
         }
-      }));
-      toast.success('התבנית הומרה בהצלחה');
-    }
+      });
+      
+      setNewFieldKey('');
+      setNewFieldValue('');
+      setShowCustomField(false);
+    };
+
+    return (
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700">תבנית נושא המייל</label>
+          <input
+            type="text"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            value={template.subject_template}
+            onChange={(e) => onChange({ ...template, subject_template: e.target.value })}
+            placeholder="לדוגמה: מספר משרה: {{job_id}} | גורם מפנה: CVIT"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700">תבנית גוף המייל</label>
+          <textarea
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            rows={5}
+            value={template.body_template}
+            onChange={(e) => onChange({ ...template, body_template: e.target.value })}
+            placeholder="תוכן המייל עם משתנים כמו {{candidate_name}}"
+          />
+        </div>
+
+        <div>
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              checked={template.include_analysis}
+              onChange={(e) => onChange({ ...template, include_analysis: e.target.checked })}
+            />
+            <span className="mr-2">כלול ניתוח קורות חיים</span>
+          </label>
+        </div>
+
+        {template.include_analysis && (
+          <div className="border rounded p-4 space-y-2">
+            <h4 className="font-medium">פרטים לכלול בניתוח</h4>
+            {Object.entries(template.analysis_format).map(([key, value]) => (
+              <label key={key} className="flex items-center">
+                <input
+                  type="checkbox"
+                  className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                  checked={value}
+                  onChange={(e) => onChange({
+                    ...template,
+                    analysis_format: {
+                      ...template.analysis_format,
+                      [key]: e.target.checked
+                    }
+                  })}
+                />
+                <span className="mr-2">{getAnalysisFieldLabel(key)}</span>
+              </label>
+            ))}
+          </div>
+        )}
+
+        <div className="border rounded p-4">
+          <h4 className="font-medium mb-2">שדות מותאמים אישית</h4>
+          {Object.entries(template.custom_fields).map(([key, value]) => (
+            <div key={key} className="flex items-center gap-2 mb-2">
+              <span className="font-medium">{key}:</span>
+              <span>{value}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  const newCustomFields = { ...template.custom_fields };
+                  delete newCustomFields[key];
+                  onChange({ ...template, custom_fields: newCustomFields });
+                }}
+                className="text-red-600 hover:text-red-800"
+              >
+                <TrashIcon className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+
+          {showCustomField ? (
+            <div className="flex items-center gap-2 mt-2">
+              <input
+                type="text"
+                placeholder="שם השדה"
+                className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                value={newFieldKey}
+                onChange={(e) => setNewFieldKey(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="ערך"
+                className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                value={newFieldValue}
+                onChange={(e) => setNewFieldValue(e.target.value)}
+              />
+              <button
+                type="button"
+                onClick={handleCustomFieldAdd}
+                className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                הוסף
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowCustomField(false)}
+                className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              >
+                ביטול
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setShowCustomField(true)}
+              className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            >
+              <PlusIcon className="h-4 w-4 ml-1" />
+              הוסף שדה מותאם אישית
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  const getAnalysisFieldLabel = (key: string): string => {
+    const labels: Record<string, string> = {
+      include_full_name: 'שם מלא',
+      include_city: 'עיר מגורים',
+      include_phone: 'טלפון',
+      include_email: 'דוא"ל',
+      include_last_position: 'תפקיד אחרון',
+      include_experience_years: 'שנות ניסיון',
+      include_relevant_positions: 'תפקידים רלוונטיים',
+      include_search_area: 'אזור חיפוש עבודה'
+    };
+    return labels[key] || key;
   };
 
   if (loading) {
@@ -345,135 +523,68 @@ export default function AgenciesManagement({
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
+    <div className="container mx-auto px-4 py-8">
+      <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">ניהול חברות השמה</h1>
         <button
           onClick={() => setShowAddModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
         >
-          <PlusIcon className="h-5 w-5" />
-          חברה חדשה
+          הוסף חברה חדשה
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <button
-                    className="flex items-center gap-1"
-                    onClick={() => handleSort('name')}
-                  >
-                    שם החברה
-                    {sortConfig.key === 'name' && (
-                      sortConfig.direction === 'asc' ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />
-                    )}
-                  </button>
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  <button
-                    className="flex items-center gap-1"
-                    onClick={() => handleSort('contact_person')}
-                  >
-                    איש קשר
-                    {sortConfig.key === 'contact_person' && (
-                      sortConfig.direction === 'asc' ? <ChevronUpIcon className="h-4 w-4" /> : <ChevronDownIcon className="h-4 w-4" />
-                    )}
-                  </button>
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  פרטי קשר
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  התמחויות
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  אזורים
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  סטטוס
-                </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  פעולות
-                </th>
+      {/* טבלת חברות השמה */}
+      <div className="bg-white shadow-md rounded my-6">
+        <table className="min-w-full table-auto">
+          <thead>
+            <tr className="bg-gray-200 text-gray-600 uppercase text-sm leading-normal">
+              <th className="py-3 px-6 text-right">שם החברה</th>
+              <th className="py-3 px-6 text-right">דוא"ל</th>
+              <th className="py-3 px-6 text-right">טלפון</th>
+              <th className="py-3 px-6 text-right">איש קשר</th>
+              <th className="py-3 px-6 text-right">סטטוס</th>
+              <th className="py-3 px-6 text-right">פעולות</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {sortedAgencies.map((agency) => (
-                <tr key={agency.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {agency.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <UserIcon className="h-4 w-4" />
-                      {agency.contact_person}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <EnvelopeIcon className="h-4 w-4" />
-                        {agency.email}
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <PhoneIcon className="h-4 w-4" />
-                        {agency.phone}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex flex-wrap gap-1">
-                      {agency.specialties.map((specialty, index) => (
+          <tbody className="text-gray-600 text-sm">
+            {agencies.map((agency) => (
+              <tr key={agency.id} className="border-b border-gray-200 hover:bg-gray-100">
+                <td className="py-3 px-6 text-right">{agency.name}</td>
+                <td className="py-3 px-6 text-right">{agency.email}</td>
+                <td className="py-3 px-6 text-right">{agency.phone}</td>
+                <td className="py-3 px-6 text-right">{agency.contact_person}</td>
+                <td className="py-3 px-6 text-right">
                         <span
-                          key={index}
-                          className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full"
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      agency.is_active ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'
+                    }`}
                         >
-                          {specialty}
+                    {agency.is_active ? 'פעיל' : 'לא פעיל'}
                         </span>
-                      ))}
-                    </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <div className="flex flex-wrap gap-1">
-                      {agency.regions.map((region, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full"
-                        >
-                          {region}
-                        </span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => toggleAgencyStatus(agency.id, agency.is_active)}
-                      className={`px-2 py-1 text-xs font-semibold rounded-full
-                        ${agency.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-                    >
-                      {agency.is_active ? 'פעיל' : 'לא פעיל'}
-                    </button>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex gap-3">
+                <td className="py-3 px-6 text-right">
+                  <div className="flex item-center justify-end gap-2">
                       <button
                         onClick={() => {
                           setSelectedAgency(agency);
                           setShowEditModal(true);
                         }}
-                        className="text-blue-600 hover:text-blue-900"
-                        title="עריכה"
+                      className="text-blue-500 hover:text-blue-700"
                       >
                         <PencilIcon className="h-5 w-5" />
                       </button>
+                    <button
+                      onClick={() => toggleAgencyStatus(agency.id, agency.is_active)}
+                      className={`${
+                        agency.is_active ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700'
+                      }`}
+                    >
+                      {agency.is_active ? 'השבת' : 'הפעל'}
+                    </button>
                       <button
                         onClick={() => handleDeleteAgency(agency.id)}
-                        className="text-red-600 hover:text-red-900"
-                        title="מחיקה"
+                      className="text-red-500 hover:text-red-700"
                       >
                         <TrashIcon className="h-5 w-5" />
                       </button>
@@ -483,524 +594,240 @@ export default function AgenciesManagement({
               ))}
             </tbody>
           </table>
-        </div>
       </div>
 
-      {/* מודל הוספת חברת השמה */}
+      {/* מודל הוספת חברה חדשה */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-5xl w-full p-6 max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">הוספת חברת השמה חדשה</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   שם החברה
                 </label>
                 <input
                   type="text"
-                  value={newAgency.name || ''}
+                  value={newAgency.name}
                   onChange={(e) => setNewAgency(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  אימייל
+                  דוא"ל
                 </label>
                 <input
                   type="email"
-                  value={newAgency.email || ''}
+                  value={newAgency.email}
                   onChange={(e) => setNewAgency(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   טלפון
                 </label>
                 <input
                   type="tel"
-                  value={newAgency.phone || ''}
+                  value={newAgency.phone}
                   onChange={(e) => setNewAgency(prev => ({ ...prev, phone: e.target.value }))}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   איש קשר
                 </label>
                 <input
                   type="text"
-                  value={newAgency.contact_person || ''}
+                  value={newAgency.contact_person}
                   onChange={(e) => setNewAgency(prev => ({ ...prev, contact_person: e.target.value }))}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  אתר אינטרנט
-                </label>
-                <input
-                  type="url"
-                  value={newAgency.website || ''}
-                  onChange={(e) => setNewAgency(prev => ({ ...prev, website: e.target.value }))}
-                  className="w-full border rounded-lg p-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  כתובת
-                </label>
-                <input
-                  type="text"
-                  value={newAgency.address || ''}
-                  onChange={(e) => setNewAgency(prev => ({ ...prev, address: e.target.value }))}
-                  className="w-full border rounded-lg p-2"
-                />
-              </div>
-
-              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   הערות
                 </label>
                 <textarea
-                  value={newAgency.notes || ''}
+                  value={newAgency.notes}
                   onChange={(e) => setNewAgency(prev => ({ ...prev, notes: e.target.value }))}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                   rows={3}
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  התמחויות
-                </label>
-                <select
-                  multiple
-                  value={newAgency.specialties || []}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, option => option.value);
-                    setNewAgency(prev => ({ ...prev, specialties: values }));
-                  }}
-                  className="w-full border rounded-lg p-2"
-                >
-                  <option value="general">כללי - כל התחומים</option>
-                  <option value="tech">היי-טק</option>
-                  <option value="finance">פיננסים</option>
-                  <option value="medical">רפואה</option>
-                  <option value="sales">מכירות</option>
-                  <option value="marketing">שיווק</option>
-                  <option value="hr">משאבי אנוש</option>
-                  <option value="legal">משפטים</option>
-                  <option value="education">חינוך</option>
-                  <option value="industry">תעשייה</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  אזורים
-                </label>
-                <select
-                  multiple
-                  value={newAgency.regions || []}
-                  onChange={(e) => {
-                    const values = Array.from(e.target.selectedOptions, option => option.value);
-                    setNewAgency(prev => ({ ...prev, regions: values }));
-                  }}
-                  className="w-full border rounded-lg p-2"
-                >
-                  <option value="all">כל הארץ</option>
-                  <option value="north">צפון</option>
-                  <option value="haifa">חיפה והקריות</option>
-                  <option value="sharon">השרון</option>
-                  <option value="center">מרכז</option>
-                  <option value="tel_aviv">תל אביב</option>
-                  <option value="jerusalem">ירושלים</option>
-                  <option value="south">דרום</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={newAgency.is_active || false}
-                    onChange={(e) => setNewAgency(prev => ({ ...prev, is_active: e.target.checked }))}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">חברה פעילה</span>
-                </label>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  נושא המייל
+                  תחומי התמחות
                 </label>
                 <input
                   type="text"
-                  value={newAgency.send_cv_template.subject}
+                  value={newAgency.specialties.join(', ')}
                   onChange={(e) => setNewAgency(prev => ({
                     ...prev,
-                    send_cv_template: {
-                      ...prev.send_cv_template,
-                      subject: e.target.value
-                    }
+                    specialties: e.target.value.split(',').map(s => s.trim())
                   }))}
-                  className="w-full border rounded-lg p-2"
-                  placeholder="נושא המייל שישלח למגייס"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  תבנית מייל (טקסט חופשי)
-                </label>
-                <textarea
                   className="w-full p-2 border rounded-md"
-                  rows={4}
-                  value={newAgency.send_cv_template.template_text}
-                  onChange={(e) => handleNewTemplateTextChange(e.target.value)}
-                  placeholder="תאר את הדרישות לתבנית המייל..."
+                  placeholder="הפרד תחומים בפסיקים"
                 />
-                {isConverting && (
-                  <div className="mt-2 text-sm text-gray-500">
-                    ממיר את התבנית...
                   </div>
-                )}
-                {newAgency.send_cv_template.html_template && (
-                  <div className="mt-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      תבנית HTML מוכנה
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  אזורים
                     </label>
-                    <textarea
-                      className="w-full p-2 border rounded-md bg-gray-50"
-                      rows={4}
-                      value={newAgency.send_cv_template.html_template}
-                      readOnly
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  תוכן המייל
-                </label>
-                <textarea
+                  <input
+                  type="text"
+                  value={newAgency.regions.join(', ')}
+                    onChange={(e) => setNewAgency(prev => ({
+                      ...prev,
+                    regions: e.target.value.split(',').map(s => s.trim())
+                    }))}
                   className="w-full p-2 border rounded-md"
-                  rows={4}
-                  value={newAgency.send_cv_template.body}
-                  onChange={(e) => setNewAgency(prev => ({
-                    ...prev,
-                    send_cv_template: {
-                      ...prev.send_cv_template,
-                      body: e.target.value
-                    }
-                  }))}
-                  placeholder="תוכן המייל הבסיסי שישלח למגייס"
-                />
-              </div>
-
-              <div className="md:col-span-2 space-y-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="attach_cv_file"
-                    checked={newAgency.send_cv_template.attach_cv_file}
-                    onChange={(e) => setNewAgency(prev => ({
-                      ...prev,
-                      send_cv_template: {
-                        ...prev.send_cv_template,
-                        attach_cv_file: e.target.checked
-                      }
-                    }))}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  placeholder="הפרד אזורים בפסיקים"
                   />
-                  <label htmlFor="attach_cv_file" className="text-sm font-medium text-gray-700">
-                    צרף קובץ קו״ח למייל
-                  </label>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="include_cv_analysis"
-                    checked={newAgency.send_cv_template.include_cv_analysis}
-                    onChange={(e) => setNewAgency(prev => ({
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  תבנית מייל
+                </label>
+                <EmailTemplateForm
+                  template={newAgency.email_format}
+                  onChange={(template) => setNewAgency(prev => ({
                       ...prev,
-                      send_cv_template: {
-                        ...prev.send_cv_template,
-                        include_cv_analysis: e.target.checked
-                      }
+                    email_format: template
                     }))}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-                  <label htmlFor="include_cv_analysis" className="text-sm font-medium text-gray-700">
-                    כלול ניתוח קו״ח במייל
-                  </label>
                 </div>
               </div>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => setShowAddModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border rounded-lg"
+                className="px-4 py-2 border rounded-md hover:bg-gray-100"
               >
                 ביטול
               </button>
               <button
                 onClick={handleAddAgency}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg"
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               >
-                הוספת חברה
+                הוסף
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* מודל עריכת חברת השמה */}
+      {/* מודל עריכת חברה */}
       {showEditModal && selectedAgency && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-5xl w-full p-6 max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold mb-4">עריכת חברת השמה</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   שם החברה
                 </label>
                 <input
                   type="text"
-                  value={selectedAgency.name || ''}
+                  value={selectedAgency.name}
                   onChange={(e) => handleEditAgencyField('name', e.target.value)}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  אימייל
+                  דוא"ל
                 </label>
                 <input
                   type="email"
-                  value={selectedAgency.email || ''}
+                  value={selectedAgency.email}
                   onChange={(e) => handleEditAgencyField('email', e.target.value)}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   טלפון
                 </label>
                 <input
                   type="tel"
-                  value={selectedAgency.phone || ''}
+                  value={selectedAgency.phone}
                   onChange={(e) => handleEditAgencyField('phone', e.target.value)}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   איש קשר
                 </label>
                 <input
                   type="text"
-                  value={selectedAgency.contact_person || ''}
+                  value={selectedAgency.contact_person}
                   onChange={(e) => handleEditAgencyField('contact_person', e.target.value)}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  אתר אינטרנט
-                </label>
-                <input
-                  type="url"
-                  value={selectedAgency.website || ''}
-                  onChange={(e) => handleEditAgencyField('website', e.target.value)}
-                  className="w-full border rounded-lg p-2"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  כתובת
-                </label>
-                <input
-                  type="text"
-                  value={selectedAgency.address || ''}
-                  onChange={(e) => handleEditAgencyField('address', e.target.value)}
-                  className="w-full border rounded-lg p-2"
-                />
-              </div>
-
-              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   הערות
                 </label>
                 <textarea
-                  value={selectedAgency.notes || ''}
+                  value={selectedAgency.notes}
                   onChange={(e) => handleEditAgencyField('notes', e.target.value)}
-                  className="w-full border rounded-lg p-2"
+                  className="w-full p-2 border rounded-md"
                   rows={3}
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  התמחויות
+                  תחומי התמחות
                 </label>
-                <select
-                  multiple
-                  value={selectedAgency.specialties || []}
-                  onChange={(e) => handleEditAgencyField('specialties', Array.from(e.target.selectedOptions, option => option.value))}
-                  className="w-full border rounded-lg p-2"
-                >
-                  <option value="general">כללי - כל התחומים</option>
-                  <option value="tech">היי-טק</option>
-                  <option value="finance">פיננסים</option>
-                  <option value="medical">רפואה</option>
-                  <option value="sales">מכירות</option>
-                  <option value="marketing">שיווק</option>
-                  <option value="hr">משאבי אנוש</option>
-                  <option value="legal">משפטים</option>
-                  <option value="education">חינוך</option>
-                  <option value="industry">תעשייה</option>
-                </select>
+                <input
+                  type="text"
+                  value={selectedAgency.specialties.join(', ')}
+                  onChange={(e) => handleEditAgencyField('specialties', e.target.value.split(',').map(s => s.trim()))}
+                  className="w-full p-2 border rounded-md"
+                  placeholder="הפרד תחומים בפסיקים"
+                />
               </div>
-
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   אזורים
                 </label>
-                <select
-                  multiple
-                  value={selectedAgency.regions || []}
-                  onChange={(e) => handleEditAgencyField('regions', Array.from(e.target.selectedOptions, option => option.value))}
-                  className="w-full border rounded-lg p-2"
-                >
-                  <option value="all">כל הארץ</option>
-                  <option value="north">צפון</option>
-                  <option value="haifa">חיפה והקריות</option>
-                  <option value="sharon">השרון</option>
-                  <option value="center">מרכז</option>
-                  <option value="tel_aviv">תל אביב</option>
-                  <option value="jerusalem">ירושלים</option>
-                  <option value="south">דרום</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="flex items-center gap-2">
                   <input
-                    type="checkbox"
-                    checked={selectedAgency.is_active || false}
-                    onChange={(e) => handleEditAgencyField('is_active', e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-sm font-medium text-gray-700">חברה פעילה</span>
-                </label>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  תבנית מייל (טקסט חופשי)
-                </label>
-                <textarea
+                  type="text"
+                  value={selectedAgency.regions.join(', ')}
+                  onChange={(e) => handleEditAgencyField('regions', e.target.value.split(',').map(s => s.trim()))}
                   className="w-full p-2 border rounded-md"
-                  rows={4}
-                  value={selectedAgency?.send_cv_template?.template_text || ''}
-                  onChange={(e) => handleTemplateTextChange(e.target.value)}
-                  placeholder="תאר את הדרישות לתבנית המייל..."
+                  placeholder="הפרד אזורים בפסיקים"
                 />
-                {isConverting && (
-                  <div className="mt-2 text-sm text-gray-500">
-                    ממיר את התבנית...
                   </div>
-                )}
-                {selectedAgency?.send_cv_template?.html_template && (
-                  <div className="mt-2">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      תבנית HTML מוכנה
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  תבנית מייל
                     </label>
-                    <textarea
-                      className="w-full p-2 border rounded-md bg-gray-50"
-                      rows={4}
-                      value={selectedAgency.send_cv_template.html_template}
-                      readOnly
+                <EmailTemplateForm
+                  template={selectedAgency.email_format}
+                  onChange={(template) => handleEditAgencyField('email_format', template)}
                     />
                   </div>
-                )}
               </div>
-
-              <div className="md:col-span-2 space-y-4">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="edit_attach_cv_file"
-                    checked={selectedAgency.send_cv_template.attach_cv_file}
-                    onChange={(e) => setSelectedAgency(prev => ({
-                      ...prev!,
-                      send_cv_template: {
-                        ...prev!.send_cv_template,
-                        attach_cv_file: e.target.checked
-                      }
-                    }))}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="edit_attach_cv_file" className="text-sm font-medium text-gray-700">
-                    צרף קובץ קו״ח למייל
-                  </label>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="edit_include_cv_analysis"
-                    checked={selectedAgency.send_cv_template.include_cv_analysis}
-                    onChange={(e) => setSelectedAgency(prev => ({
-                      ...prev!,
-                      send_cv_template: {
-                        ...prev!.send_cv_template,
-                        include_cv_analysis: e.target.checked
-                      }
-                    }))}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <label htmlFor="edit_include_cv_analysis" className="text-sm font-medium text-gray-700">
-                    כלול ניתוח קו״ח במייל
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex justify-end gap-2">
               <button
                 onClick={() => {
                   setShowEditModal(false);
                   setSelectedAgency(null);
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 border rounded-lg"
+                className="px-4 py-2 border rounded-md hover:bg-gray-100"
               >
                 ביטול
               </button>
               <button
                 onClick={handleEditAgency}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg"
+                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
               >
-                שמירת שינויים
+                שמור
               </button>
             </div>
           </div>
