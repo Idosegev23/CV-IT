@@ -192,6 +192,57 @@ function generateAnalysisSection(analysis: any, format: Agency['email_format']['
   return sections.join('\n');
 }
 
+function getEmailTemplate(agency: any) {
+  // בדיקה אם יש את המבנה החדש
+  if (agency.email_format) {
+    return {
+      subject: agency.email_format.subject_template,
+      body: agency.email_format.body_template,
+      includeAnalysis: agency.email_format.include_analysis,
+      analysisFormat: agency.email_format.analysis_format,
+      customFields: agency.email_format.custom_fields
+    };
+  }
+  
+  // אם אין, נשתמש במבנה הישן
+  if (agency.send_cv_template) {
+    return {
+      subject: agency.send_cv_template.subject || '',
+      body: agency.send_cv_template.body || '',
+      includeAnalysis: agency.send_cv_template.include_cv_analysis || false,
+      analysisFormat: {
+        include_full_name: true,
+        include_city: true,
+        include_phone: true,
+        include_email: true,
+        include_last_position: true,
+        include_experience_years: true,
+        include_relevant_positions: true,
+        include_search_area: true
+      },
+      customFields: {}
+    };
+  }
+
+  // אם אין אף אחד מהם, נחזיר ערכי ברירת מחדל
+  return {
+    subject: '',
+    body: '',
+    includeAnalysis: false,
+    analysisFormat: {
+      include_full_name: true,
+      include_city: true,
+      include_phone: true,
+      include_email: true,
+      include_last_position: true,
+      include_experience_years: true,
+      include_relevant_positions: true,
+      include_search_area: true
+    },
+    customFields: {}
+  };
+}
+
 export async function POST(request: Request) {
   try {
     console.log('Starting CV send process...');
@@ -283,22 +334,24 @@ export async function POST(request: Request) {
     // 5. שליחת המייל לכל חברת השמה
     const sendResults = await Promise.all(agencies.map(async (agency) => {
       try {
+        const emailTemplate = getEmailTemplate(agency);
+        
         // החלפת משתנים בתבנית
         const emailSubject = replaceTemplateVariables(
-          agency.email_format.subject_template,
+          emailTemplate.subject,
           analysis,
-          agency.email_format.custom_fields
+          emailTemplate.customFields
         );
 
         let emailBody = replaceTemplateVariables(
-          agency.email_format.body_template,
+          emailTemplate.body,
           analysis,
-          agency.email_format.custom_fields
+          emailTemplate.customFields
         );
 
         // הוספת ניתוח קורות החיים אם נדרש
-        if (agency.email_format.include_analysis) {
-          const analysisSection = generateAnalysisSection(analysis, agency.email_format.analysis_format);
+        if (emailTemplate.includeAnalysis) {
+          const analysisSection = generateAnalysisSection(analysis, emailTemplate.analysisFormat);
           emailBody += '\n\nניתוח קורות החיים:\n' + analysisSection;
         }
 
@@ -321,7 +374,11 @@ export async function POST(request: Request) {
         return { agency: agency.name, success: true };
       } catch (error) {
         console.error(`Failed to send email to ${agency.name}:`, error);
-        return { agency: agency.name, success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+        return { 
+          agency: agency.name, 
+          success: false, 
+          error: error instanceof Error ? error.message : 'Unknown error' 
+        };
       }
     }));
 
