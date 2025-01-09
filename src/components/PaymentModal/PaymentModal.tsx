@@ -452,7 +452,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                   <div className="text-center mb-6">
                     <div className="inline-flex items-baseline gap-1">
                       <span className="text-3xl font-bold text-[#4754D7]">
-                        {finalPrice}
+                        {finalPrice.toFixed(1)}
                       </span>
                       <span className="text-lg text-[#4754D7]">₪</span>
                     </div>
@@ -480,7 +480,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                           {isRTL ? 'מחיר מקורי' : 'Original Price'}
                         </span>
                         <span className={appliedCoupon ? 'line-through text-gray-500' : 'text-gray-900'}>
-                          ₪{originalPrice}
+                          ₪{originalPrice.toFixed(1)}
                         </span>
                       </div>
 
@@ -506,7 +506,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                           {isRTL ? 'מחיר סופי' : 'Final Price'}
                         </span>
                         <span className="font-bold text-[#4754D7]">
-                          ₪{finalPrice}
+                          ₪{finalPrice.toFixed(1)}
                         </span>
                       </div>
                     </div>
@@ -546,24 +546,100 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                       )}
                     </div>
 
-                    {/* כפתור תשלום */}
-                    <button
-                      onClick={handlePayment}
-                      disabled={isLoading || !formData.name || !formData.email || !formData.phone || !formData.id}
-                      className="w-full mt-6 px-6 py-3 bg-[#4754D7] text-white rounded-lg hover:bg-[#4856CD] disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isLoading ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          {isRTL ? 'מעבד...' : 'Processing...'}
-                        </span>
-                      ) : (
-                        isRTL ? 'המשך לתשלום' : 'Proceed to Payment'
-                      )}
-                    </button>
+                    {/* כופס פרטים */}
+                    <form className="space-y-4 mt-6" onSubmit={handlePayment}>
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
+                          {isRTL ? 'שם מלא' : 'Full Name'}
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
+                          placeholder={isRTL ? 'ישראל ישראלי' : 'John Doe'}
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
+                          {isRTL ? 'דוא"ל' : 'Email'}
+                        </label>
+                        <input
+                          type="email"
+                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
+                          placeholder="example@email.com"
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
+                          {isRTL ? 'טלפון' : 'Phone'}
+                        </label>
+                        <input
+                          type="tel"
+                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
+                          placeholder="050-0000000"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
+                          {isRTL ? 'תעודת זהות' : 'ID Number'}
+                        </label>
+                        <input
+                          type="text"
+                          maxLength={9}
+                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
+                          placeholder="123456789"
+                          value={formData.id}
+                          onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+                          required
+                        />
+                      </div>
+
+                      <div className="flex items-start mt-4">
+                        <input
+                          type="checkbox"
+                          id="terms"
+                          required
+                          className="mt-1 h-4 w-4 rounded border-gray-300 text-[#4856CD] focus:ring-[#4856CD]"
+                        />
+                        <label htmlFor="terms" className="mr-2 text-sm text-gray-600">
+                          {isRTL ? (
+                            <span>אני מאשר/ת את <Link href={`/${lang}/terms`} className="text-[#4856CD] hover:underline">תנאי השימוש והתקנון</Link></span>
+                          ) : (
+                            <span>I agree to the <Link href={`/${lang}/terms`} className="text-[#4856CD] hover:underline">Terms and Conditions</Link></span>
+                          )}
+                        </label>
+                      </div>
+
+                      {/* כפתור תשלום */}
+                      <button
+                        type="submit"
+                        disabled={isLoading || !formData.name || !formData.email || !formData.phone || !formData.id}
+                        className="w-full mt-6 px-6 py-3 bg-[#4754D7] text-white rounded-lg hover:bg-[#4856CD] disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isLoading ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            {isRTL ? 'מעבד...' : 'Processing...'}
+                          </span>
+                        ) : (
+                          isRTL ? 'המשך לתשלום' : 'Proceed to Payment'
+                        )}
+                      </button>
+                    </form>
                   </div>
                 </div>
               </>
