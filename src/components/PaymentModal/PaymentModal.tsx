@@ -265,28 +265,29 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
               }
             );
 
-            setTimeout(async () => {
+            // המתנה של 2 שניות לפני המעבר למסך היצירה
+            setTimeout(() => {
               setPaymentStatus('generating');
+              
               if (currentSessionId) {
-                try {
-                  const generateResponse = await fetch('/api/generate-cv', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ 
-                      sessionId: currentSessionId,
-                      lang
-                    }),
-                  });
-
-                  if (!generateResponse.ok) {
+                fetch('/api/generate-cv', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ 
+                    sessionId: currentSessionId,
+                    lang
+                  }),
+                })
+                .then(response => {
+                  if (!response.ok) {
                     throw new Error('Failed to start CV generation');
                   }
-
                   console.log('Started CV generation process');
-                  checkCVStatus(currentSessionId);
-                } catch (error) {
+                  return checkCVStatus(currentSessionId);
+                })
+                .catch(error => {
                   console.error('Failed to start CV generation:', error);
                   toast.error(
                     isRTL 
@@ -294,7 +295,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                       : 'Error starting CV generation'
                   );
                   setPaymentStatus('idle');
-                }
+                });
               }
             }, 2000);
           }
@@ -413,6 +414,28 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                   allow="payment"
                 />
               </div>
+            ) : paymentStatus === 'success' ? (
+              // תצוגת מסך הצלחת תשלום
+              <motion.div 
+                key="payment-success-content"
+                className="p-8 text-center space-y-4"
+              >
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", bounce: 0.5 }}
+                >
+                  <CheckCircle2 className="w-16 h-16 mx-auto text-[#4754D7] mb-4" />
+                  <h2 className="text-xl font-bold mb-2 text-[#4754D7]">
+                    {isRTL ? 'התשלום התקבל בהצלחה!' : 'Payment Successful!'}
+                  </h2>
+                  <p className="text-[#4754D7]/70">
+                    {isRTL 
+                      ? 'מתחילים ביצירת קורות החיים שלך...' 
+                      : 'Starting to generate your CV...'}
+                  </p>
+                </motion.div>
+              </motion.div>
             ) : paymentStatus === 'generating' ? (
               // תצוגת מסך היצירה
               <motion.div 
