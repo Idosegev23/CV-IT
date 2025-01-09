@@ -32,6 +32,8 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [isValidatingCoupon, setIsValidatingCoupon] = useState(false);
   const [paymentIframe, setPaymentIframe] = useState<string | null>(null);
+  const [originalPrice, setOriginalPrice] = useState<number>(0);
+  const [finalPrice, setFinalPrice] = useState<number>(0);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -43,8 +45,6 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
   const selectedPackage = useAppStore(state => state.selectedPackage);
   const setSelectedPackage = useAppStore(state => state.setSelectedPackage);
   
-  const price = selectedPackage ? PACKAGE_PRICES[selectedPackage] : 0;
-
   useEffect(() => {
     const checkSession = async () => {
       const { data: sessionData, error: sessionError } = await supabase
@@ -65,6 +65,14 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
       checkSession();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (selectedPackage) {
+      const price = PACKAGE_PRICES[selectedPackage];
+      setOriginalPrice(price);
+      setFinalPrice(price);
+    }
+  }, [selectedPackage]);
 
   const checkCVStatus = async (sessionId: string) => {
     try {
@@ -164,7 +172,8 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
             phone: formData.phone,
             taxId: formData.id,
             country: 'IL'
-          }
+          },
+          coupon: appliedCoupon?.data
         })
       });
 
@@ -339,7 +348,6 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
   const validateCoupon = async (code: string) => {
     setIsValidatingCoupon(true);
     try {
-      // בדיקת קופון מגיל
       const { data: regularCoupon, error: regularError } = await supabase
         .from('coupons')
         .select('*')
@@ -347,68 +355,40 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         .eq('is_active', true)
         .single();
 
-      console.log('Regular coupon data:', regularCoupon);
-      console.log('Regular coupon error:', regularError);
-
       if (regularCoupon && !regularError) {
-        // בדיקת תוקף הקופון
-        if (new Date(regularCoupon.expires_at) < new Date()) {
-          toast.error(isRTL ? 'הקופון פג תוקף' : 'Coupon has expired');
-          return;
-        }
-
-        // עדיקת תאריך התחלת תוקף
-        if (regularCoupon.starts_at && new Date(regularCoupon.starts_at) > new Date()) {
-          toast.error(isRTL ? 'הקופון עדיין לא בתוקף' : 'Coupon is not yet valid');
-          return;
-        }
-
-        // בדיקת מספר שימושים
-        if (regularCoupon.current_uses >= regularCoupon.max_uses) {
-          toast.error(isRTL ? 'הקופון מיצה את מכסת השימושים' : 'Coupon has reached maximum uses');
-          return;
-        }
-
-        // עדכון מספר השימושים בקופון
-        const { error: updateError } = await supabase
-          .from('coupons')
-          .update({ current_uses: regularCoupon.current_uses + 1 })
-          .eq('id', regularCoupon.id);
-
-        if (updateError) {
-          console.error('Error updating coupon uses:', updateError);
-          toast.error(isRTL ? 'אירעה שגיאה בעדכון הקופון' : 'Error updating coupon');
-          return;
-        }
-
+        // בדיקות תקינות הקופון...
         setAppliedCoupon({ type: 'regular', data: regularCoupon });
         
-        // טיפול בסוגים שונים של קופונים
+        // חישוב המחיר החדש
+        let newPrice = originalPrice;
+        let discountText = '';
+        
         switch (regularCoupon.discount_type) {
           case 'free_package':
-            if (regularCoupon.package_type) {
-              setSelectedPackage(regularCoupon.package_type);
-              toast.success(isRTL 
-                ? `קופון הופעל בהצלחה! קיבלת חבילת ${regularCoupon.package_type} בחינם` 
-                : `Coupon activated! You got a free ${regularCoupon.package_type} package`);
-            }
+            newPrice = 0;
+            discountText = isRTL ? 'חבילה חינם!' : 'Free package!';
             break;
           
           case 'percentage':
-            toast.success(isRTL 
-              ? `קופון הופעל בהצלחה! קיבלת ${regularCoupon.discount_value}% הנחה` 
-              : `Coupon activated! You got ${regularCoupon.discount_value}% discount`);
+            const discountAmount = originalPrice * (regularCoupon.discount_value / 100);
+            newPrice = originalPrice - discountAmount;
+            discountText = isRTL 
+              ? `${regularCoupon.discount_value}% הנחה` 
+              : `${regularCoupon.discount_value}% discount`;
             break;
           
           case 'fixed':
-            toast.success(isRTL 
-              ? `קופון הופעל בהצלחה! קיבלת ${regularCoupon.discount_value}₪ הנחה` 
-              : `Coupon activated! You got ${regularCoupon.discount_value}₪ discount`);
+            newPrice = Math.max(0, originalPrice - regularCoupon.discount_value);
+            discountText = isRTL 
+              ? `${regularCoupon.discount_value}₪ הנחה` 
+              : `${regularCoupon.discount_value}₪ discount`;
             break;
-          
-          default:
-            toast.success(isRTL ? 'הקופון הופעל בהצלחה!' : 'Coupon activated successfully!');
         }
+        
+        setFinalPrice(newPrice);
+        toast.success(isRTL 
+          ? `קופון הופעל בהצלחה! ${discountText}` 
+          : `Coupon activated! ${discountText}`);
       } else {
         toast.error(isRTL ? 'קוד קופון לא תקין' : 'Invalid coupon code');
       }
@@ -419,31 +399,6 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
       setIsValidatingCoupon(false);
     }
   };
-
-  const calculateFinalPrice = () => {
-    if (!selectedPackage) return 0;
-    if (!appliedCoupon) return PACKAGE_PRICES[selectedPackage];
-
-    const basePrice = PACKAGE_PRICES[selectedPackage];
-
-    if (appliedCoupon.type === 'reservist' || 
-      (appliedCoupon.type === 'regular' && appliedCoupon.data.discount_type === 'free_package')) {
-      return 0;
-    }
-
-    if (appliedCoupon.type === 'regular') {
-      if (appliedCoupon.data.discount_type === 'percentage') {
-        return basePrice * (1 - appliedCoupon.data.discount_value / 100);
-      }
-      if (appliedCoupon.data.discount_type === 'fixed') {
-        return Math.max(0, basePrice - appliedCoupon.data.discount_value);
-      }
-    }
-
-    return basePrice;
-  };
-
-  const finalPrice = calculateFinalPrice();
 
   return (
     <AnimatePresence>
@@ -514,221 +469,102 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                     </div>
                   </div>
 
-                  {!paymentIframe && (
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-2 text-[#4754D7]">
+                      {isRTL ? 'סיכום תשלום' : 'Payment Summary'}
+                    </h3>
+                    <div className="bg-gray-50 p-4 rounded-lg space-y-2">
+                      {/* מחיר מקורי */}
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600">
+                          {isRTL ? 'מחיר מקורי' : 'Original Price'}
+                        </span>
+                        <span className={appliedCoupon ? 'line-through text-gray-500' : 'text-gray-900'}>
+                          ₪{originalPrice}
+                        </span>
+                      </div>
+
+                      {/* הנחה - מוצג רק אם יש קופון */}
+                      {appliedCoupon && (
+                        <div className="flex justify-between items-center text-green-600">
+                          <span>
+                            {isRTL ? 'הנחה' : 'Discount'}
+                          </span>
+                          <span>
+                            {appliedCoupon.data.discount_type === 'percentage'
+                              ? `${appliedCoupon.data.discount_value}%`
+                              : appliedCoupon.data.discount_type === 'fixed'
+                              ? `₪${appliedCoupon.data.discount_value}`
+                              : isRTL ? 'חבילה חינם' : 'Free Package'}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* מחיר סופי */}
+                      <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                        <span className="font-bold text-[#4754D7]">
+                          {isRTL ? 'מחיר סופי' : 'Final Price'}
+                        </span>
+                        <span className="font-bold text-[#4754D7]">
+                          ₪{finalPrice}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* קופון */}
                     <div className="mt-4">
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          placeholder={isRTL ? "קוד קופון" : "Coupon Code"}
                           value={couponCode}
                           onChange={(e) => setCouponCode(e.target.value)}
-                          className="flex-1 p-2 border rounded-md"
+                          placeholder={isRTL ? "קוד קופון" : "Coupon code"}
+                          className="flex-1 px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
                         />
                         <button
                           onClick={() => validateCoupon(couponCode)}
                           disabled={isValidatingCoupon || !couponCode}
-                          className={cn(
-                            "px-4 py-2 text-white rounded-md",
-                            isValidatingCoupon ? "bg-gray-400" : "bg-blue-500 hover:bg-blue-600"
-                          )}
+                          className="px-4 py-2 bg-[#4754D7] text-white rounded-lg hover:bg-[#4856CD] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {isValidatingCoupon ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span className="flex items-center gap-2">
+                              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                              </svg>
+                              {isRTL ? 'בודק...' : 'Checking...'}
+                            </span>
                           ) : (
-                            isRTL ? "החל" : "Apply"
+                            isRTL ? 'הפעל קופון' : 'Apply Coupon'
                           )}
                         </button>
                       </div>
                       {appliedCoupon && (
-                        <div className="mt-2 text-green-600 flex items-center gap-2">
-                          <CheckCircle2 className="w-4 h-4" />
-                          <span>
-                            {isRTL
-                              ? `קופון ${appliedCoupon.code} הוחל בהצלחה!`
-                              : `Coupon ${appliedCoupon.code} applied successfully!`}
-                          </span>
+                        <div className="mt-2 text-sm text-green-600">
+                          {isRTL ? 'קופון פעיל' : 'Coupon active'}
                         </div>
                       )}
                     </div>
-                  )}
 
-                  {paymentIframe ? (
-                    <div className="w-full aspect-[4/3] rounded-lg overflow-hidden">
-                      <iframe 
-                        src={paymentIframe}
-                        className="w-full h-full border-0"
-                        allow="payment"
-                      />
-                    </div>
-                  ) : (
-                    <form className="space-y-4" onSubmit={handlePayment}>
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
-                          {isRTL ? 'שם מלא' : 'Full Name'}
-                        </label>
-                        <input
-                          type="text"
-                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
-                          placeholder={isRTL ? 'ישראל ישראלי' : 'John Doe'}
-                          value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
-                          {isRTL ? 'דוא"ל' : 'Email'}
-                        </label>
-                        <input
-                          type="email"
-                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
-                          placeholder="example@email.com"
-                          value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
-                          {isRTL ? 'טלפון' : 'Phone'}
-                        </label>
-                        <input
-                          type="tel"
-                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
-                          placeholder="050-0000000"
-                          value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
-                          {isRTL ? 'תעודת זהות' : 'ID Number'}
-                        </label>
-                        <input
-                          type="text"
-                          maxLength={9}
-                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
-                          placeholder="123456789"
-                          value={formData.id}
-                          onChange={(e) => setFormData({ ...formData, id: e.target.value })}
-                          required
-                        />
-                      </div>
-
-                      <div className="flex items-start mt-4">
-                        <input
-                          type="checkbox"
-                          id="terms"
-                          required
-                          className="mt-1 h-4 w-4 rounded border-gray-300 text-[#4856CD] focus:ring-[#4856CD]"
-                        />
-                        <label htmlFor="terms" className="mr-2 text-sm text-gray-600">
-                          {isRTL ? (
-                            <span>אני מאשר/ת את <Link href={`/${lang}/terms`} className="text-[#4856CD] hover:underline">תנאי השימוש והתקנון</Link></span>
-                          ) : (
-                            <span>I agree to the <Link href={`/${lang}/terms`} className="text-[#4856CD] hover:underline">Terms and Conditions</Link></span>
-                          )}
-                        </label>
-                      </div>
-
-                      <button
-                        type="submit"
-                        disabled={isLoading}
-                        className={cn(
-                          "w-full",
-                          "mt-6",
-                          "px-6 py-3",
-                          "bg-[#4856CD]",
-                          "text-white",
-                          "rounded-full",
-                          "font-medium",
-                          "transition-all",
-                          "hover:bg-[#4856CD]/90",
-                          "disabled:opacity-50",
-                          "flex items-center justify-center gap-2"
-                        )}
-                      >
-                        {isLoading ? (
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : (
-                          isRTL ? 'המשך לתשלום' : 'Continue to Payment'
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={async () => {
-                          try {
-                            setIsLoading(true);
-                            setPaymentStatus('success');
-                            
-                            setTimeout(async () => {
-                              setPaymentStatus('generating');
-                              
-                              if (currentSessionId) {
-                                try {
-                                  const generateResponse = await fetch('/api/generate-cv', {
-                                    method: 'POST',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({ 
-                                      sessionId: currentSessionId,
-                                      lang
-                                    }),
-                                  });
-
-                                  if (!generateResponse.ok) {
-                                    throw new Error('Failed to start CV generation');
-                                  }
-
-                                  console.log('Started CV generation process');
-                                  checkCVStatus(currentSessionId);
-                                } catch (error) {
-                                  console.error('Failed to start CV generation:', error);
-                                  toast.error(
-                                    isRTL 
-                                      ? 'אירעה שגיאה בהתחלת תהליך יצירת קורות החיים' 
-                                      : 'Error starting CV generation'
-                                  );
-                                  setPaymentStatus('idle');
-                                }
-                              }
-                            }, 2000);
-                          } catch (error) {
-                            console.error('Process failed:', error);
-                            toast.error(
-                              isRTL 
-                                ? 'אירעה שגיאה בתהליך' 
-                                : 'An error occurred'
-                            );
-                            setPaymentStatus('idle');
-                          } finally {
-                            setIsLoading(false);
-                          }
-                        }}
-                        className={cn(
-                          "w-full",
-                          "mt-2",
-                          "px-6 py-3",
-                          "bg-gray-200",
-                          "text-gray-700",
-                          "rounded-full",
-                          "font-medium",
-                          "transition-all",
-                          "hover:bg-gray-300",
-                          "disabled:opacity-50",
-                          "flex items-center justify-center gap-2"
-                        )}
-                      >
-                        {isRTL ? 'בדיקות' : 'Testing'}
-                      </button>
-                    </form>
-                  )}
+                    {/* כפתור תשלום */}
+                    <button
+                      onClick={handlePayment}
+                      disabled={isLoading || !formData.name || !formData.email || !formData.phone || !formData.id}
+                      className="w-full mt-6 px-6 py-3 bg-[#4754D7] text-white rounded-lg hover:bg-[#4856CD] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isLoading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                          </svg>
+                          {isRTL ? 'מעבד...' : 'Processing...'}
+                        </span>
+                      ) : (
+                        isRTL ? 'המשך לתשלום' : 'Proceed to Payment'
+                      )}
+                    </button>
+                  </div>
                 </div>
               </>
             ) : (

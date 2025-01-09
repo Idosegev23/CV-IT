@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     
     const paymentData = {
       description: lang === 'he' ? `חבילת ${packageType}` : `${packageType} Package`,
-      type: "400",
+      type: "320",
       lang: lang === 'he' ? 'he' : 'en',
       currency: 'ILS',
       vatType: 0,
