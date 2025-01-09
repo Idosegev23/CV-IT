@@ -74,6 +74,48 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
     }
   }, [selectedPackage]);
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const success = urlParams.get('success');
+    
+    if (success === 'true') {
+      setPaymentStatus('success');
+      setTimeout(async () => {
+        setPaymentStatus('generating');
+        
+        if (currentSessionId) {
+          try {
+            const generateResponse = await fetch('/api/generate-cv', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ 
+                sessionId: currentSessionId,
+                lang
+              }),
+            });
+
+            if (!generateResponse.ok) {
+              throw new Error('Failed to start CV generation');
+            }
+
+            console.log('Started CV generation process');
+            checkCVStatus(currentSessionId);
+          } catch (error) {
+            console.error('Failed to start CV generation:', error);
+            toast.error(
+              isRTL 
+                ? 'אירעה שגיאה בהתחלת תהליך יצירת קורות החיים' 
+                : 'Error starting CV generation'
+            );
+            setPaymentStatus('idle');
+          }
+        }
+      }, 2000);
+    }
+  }, []);
+
   const checkCVStatus = async (sessionId: string) => {
     try {
       const response = await fetch(`/api/generate-cv/status?sessionId=${sessionId}`);
@@ -238,11 +280,15 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
           console.log('Received message from iframe:', event.data);
           let data;
           
-          // אם זה אובייקט רגיל (לא JSON string)
           if (typeof event.data === 'object' && event.data !== null) {
             data = event.data;
+            if (data.action === 'payment') {
+              data = {
+                success: data.status === 1,
+                error: data.status !== 1 ? 'Payment failed' : undefined
+              };
+            }
           } else {
-            // אם זה JSON string
             try {
               data = JSON.parse(event.data);
             } catch (e) {
@@ -264,30 +310,30 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                 duration: 3000,
               }
             );
-
-            // המתנה של 2 שניות לפני המעבר למסך היצירה
-            setTimeout(() => {
+            
+            setTimeout(async () => {
               setPaymentStatus('generating');
               
               if (currentSessionId) {
-                fetch('/api/generate-cv', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ 
-                    sessionId: currentSessionId,
-                    lang
-                  }),
-                })
-                .then(response => {
-                  if (!response.ok) {
+                try {
+                  const generateResponse = await fetch('/api/generate-cv', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                      sessionId: currentSessionId,
+                      lang
+                    }),
+                  });
+
+                  if (!generateResponse.ok) {
                     throw new Error('Failed to start CV generation');
                   }
+
                   console.log('Started CV generation process');
-                  return checkCVStatus(currentSessionId);
-                })
-                .catch(error => {
+                  checkCVStatus(currentSessionId);
+                } catch (error) {
                   console.error('Failed to start CV generation:', error);
                   toast.error(
                     isRTL 
@@ -295,7 +341,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                       : 'Error starting CV generation'
                   );
                   setPaymentStatus('idle');
-                });
+                }
               }
             }, 2000);
           }
