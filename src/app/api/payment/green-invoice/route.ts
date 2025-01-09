@@ -2,16 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 // וביעת ה-URL הבסיסי של Green Invoice
-const DEFAULT_GREEN_INVOICE_URL = 'https://api.greeninvoice.co.il';
-
-// וידוא שה-URL מסתיים ללא /
-const baseUrl = process.env.GREEN_INVOICE_URL 
-  ? (process.env.GREEN_INVOICE_URL.endsWith('/') 
-    ? process.env.GREEN_INVOICE_URL.slice(0, -1) 
-    : process.env.GREEN_INVOICE_URL)
-  : DEFAULT_GREEN_INVOICE_URL;
-
-const GREEN_INVOICE_URL = `${baseUrl}/api/v1`;
+const GREEN_INVOICE_URL = process.env.GREEN_INVOICE_URL || 'https://api.greeninvoice.co.il';
 const GREEN_INVOICE_API_KEY = process.env.GREEN_INVOICE_API_KEY;
 const GREEN_INVOICE_SECRET = process.env.GREEN_INVOICE_SECRET;
 const GREEN_INVOICE_PLUGIN_ID = process.env.GREEN_INVOICE_PLUGIN_ID;
@@ -20,7 +11,6 @@ export async function POST(request: Request) {
   try {
     console.log('Starting Green Invoice payment process...');
     console.log('Environment Variables Values:');
-    console.log('Base URL:', baseUrl);
     console.log('GREEN_INVOICE_URL:', GREEN_INVOICE_URL);
     console.log('GREEN_INVOICE_API_KEY:', GREEN_INVOICE_API_KEY ? 'exists (hidden)' : 'missing');
     console.log('GREEN_INVOICE_SECRET:', GREEN_INVOICE_SECRET ? 'exists (hidden)' : 'missing');
@@ -60,9 +50,9 @@ export async function POST(request: Request) {
 
     // יצירת טוקן הזדהות מול Green Invoice
     console.log('Authenticating with Green Invoice...');
-    console.log('Auth URL:', `${GREEN_INVOICE_URL}/account/token`);
+    console.log('Auth URL:', `${GREEN_INVOICE_URL}/api/v1/account/token`);
     
-    const authResponse = await fetch(`${GREEN_INVOICE_URL}/account/token`, {
+    const authResponse = await fetch(`${GREEN_INVOICE_URL}/api/v1/account/token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -113,7 +103,7 @@ export async function POST(request: Request) {
       group: 100,
       client: {
         name: client.name,
-        emails: client.email ? [client.email] : [],
+        emails: client.emails || [],
         taxId: client.taxId || '',
         phone: client.phone || '',
         country: 'IL',
@@ -134,10 +124,10 @@ export async function POST(request: Request) {
     };
 
     console.log('Payment request data:', JSON.stringify(paymentData, null, 2));
-    console.log('Sending request to:', `${GREEN_INVOICE_URL}/payments/form`);
+    console.log('Sending request to:', `${GREEN_INVOICE_URL}/api/v1/payments/form`);
     
     try {
-      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/payments/form`, {
+      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/api/v1/payments/form`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
