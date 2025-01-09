@@ -241,13 +241,6 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
           // אם זה אובייקט רגיל (לא JSON string)
           if (typeof event.data === 'object' && event.data !== null) {
             data = event.data;
-            // אם זה הודעת תשלום מהשרת של Green Invoice
-            if (data.action === 'payment') {
-              data = {
-                success: data.status === 1,
-                error: data.status !== 1 ? 'Payment failed' : undefined
-              };
-            }
           } else {
             // אם זה JSON string
             try {
@@ -260,14 +253,9 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
           
           if (data.success) {
             console.log('Payment successful');
-            
-            // סגירת ה-iframe של התשלום
             setPaymentIframe(null);
-            
-            // עדכון סטטוס התשלום
             setPaymentStatus('success');
             
-            // הצגת הודעת הצלחה
             toast.success(
               isRTL 
                 ? 'התשלום התקבל בהצלחה!' 
@@ -276,15 +264,11 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                 duration: 3000,
               }
             );
-            
-            // המתנה קצרה לפני המעבר לשלב הבא
+
             setTimeout(async () => {
               setPaymentStatus('generating');
-              
-              // התחלת תהליך יצירת קורות החיים
               if (currentSessionId) {
                 try {
-                  // קריאה ל-API ליצירת קורות החיים
                   const generateResponse = await fetch('/api/generate-cv', {
                     method: 'POST',
                     headers: {
@@ -301,8 +285,6 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                   }
 
                   console.log('Started CV generation process');
-                  
-                  // התחלת בדיקת הסטטוס
                   checkCVStatus(currentSessionId);
                 } catch (error) {
                   console.error('Failed to start CV generation:', error);
@@ -313,71 +295,23 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                   );
                   setPaymentStatus('idle');
                 }
-              } else {
-                console.error('No session ID available');
-                toast.error(isRTL ? 'אירעה שגיאה בתהליך' : 'An error occurred');
               }
             }, 2000);
-            
-          } else if (data.error) {
-            console.error('Payment error from iframe:', data.error);
-            // סגירת ה-iframe של התשלום
-            setPaymentIframe(null);
-            
-            // הצגת הודעת שגיאה
-            toast.error(
-              isRTL 
-                ? 'התשלום לא התקבל. אנא נסה שוב או צור קשר עם התמיכה.' 
-                : 'Payment failed. Please try again or contact support.',
-              {
-                duration: 5000,
-              }
-            );
-            
-            // איפוס הטופס
-            setPaymentStatus('idle');
           }
         } catch (error) {
-          console.error('Error handling message:', error);
-          // סגירת ה-iframe של התשלום
-          setPaymentIframe(null);
-          
-          // הצגת הודעת שגיאה
-          toast.error(
-            isRTL 
-              ? 'אירעה שגיאה בתהליך התשלום. אנא נסה שוב.' 
-              : 'An error occurred during payment. Please try again.',
-            {
-              duration: 5000,
-            }
-          );
-          
-          // איפוס הטופס
-          setPaymentStatus('idle');
+          console.error('Error processing message:', error);
         }
       };
 
       window.addEventListener('message', messageHandler);
-
-      // ניקוי המאזין כשהקומפוננטה מתפרקת
-      return () => {
-        window.removeEventListener('message', messageHandler);
-      };
+      return () => window.removeEventListener('message', messageHandler);
 
     } catch (error) {
       console.error('Process failed:', error);
-      setCvStatus('error');
-      
-      let errorMessage = 'An unknown error occurred';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-        console.error('Error details:', error.stack);
-      }
-      
       toast.error(
         isRTL 
-          ? `שגיאה בתהליך: ${errorMessage}` 
-          : `Error in process: ${errorMessage}`
+          ? 'אירעה שגיאה בתהליך התשלום' 
+          : 'Payment process failed'
       );
       setPaymentStatus('idle');
     } finally {
@@ -470,7 +404,82 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
               isRTL ? "rtl" : "ltr"
             )}
           >
-            {paymentStatus === 'idle' ? (
+            {paymentIframe ? (
+              // תצוגת ה-iframe של התשלום
+              <div className="w-full h-[600px] rounded-lg overflow-hidden">
+                <iframe 
+                  src={paymentIframe}
+                  className="w-full h-full border-0"
+                  allow="payment"
+                />
+              </div>
+            ) : paymentStatus === 'generating' ? (
+              // תצוגת מסך היצירה
+              <motion.div 
+                key="payment-generating-content"
+                className="p-8 text-center space-y-4"
+              >
+                <div className="relative w-32 h-32 mx-auto">
+                  <Image 
+                    src="/design/CV.svg"
+                    alt="CV"
+                    width={96}
+                    height={96}
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+                  />
+                  
+                  <motion.div
+                    key="blue-wheel"
+                    className="absolute top-0 right-0"
+                    animate={{ 
+                      rotate: 360
+                    }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  >
+                    <Image 
+                      src="/design/wheelblue.svg"
+                      alt="Blue Wheel"
+                      width={48}
+                      height={48}
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    key="white-wheel"
+                    className="absolute bottom-0 left-0"
+                    animate={{ 
+                      rotate: -360
+                    }}
+                    transition={{ 
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  >
+                    <Image 
+                      src="/design/wheelwhite.svg"
+                      alt="White Wheel"
+                      width={48}
+                      height={48}
+                    />
+                  </motion.div>
+                </div>
+                
+                <h2 className="text-xl font-bold text-[#4754D7]">
+                  {isRTL ? 'מכין את קורות החיים שלך...' : 'Generating your CV...'}
+                </h2>
+                <p className="text-[#4754D7]/70">
+                  {isRTL 
+                    ? 'אנא המתן מספר שניות' 
+                    : 'Please wait a few seconds'}
+                </p>
+              </motion.div>
+            ) : (
+              // תצוגת טופס התשלום הרגיל
               <>
                 <div className="relative h-24 md:h-32 bg-white">
                   <div className="absolute -bottom-16 md:-bottom-20 left-1/2 -translate-x-1/2 scale-75 md:scale-100">
@@ -683,93 +692,6 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                   </div>
                 </div>
               </>
-            ) : (
-              <motion.div 
-                key="payment-status-content"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="p-8 text-center"
-              >
-                {paymentStatus === 'success' && (
-                  <motion.div
-                    key="payment-success-content"
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", bounce: 0.5 }}
-                  >
-                    <CheckCircle2 className="w-16 h-16 mx-auto text-[#4754D7] mb-4" />
-                    <h2 className="text-xl font-bold mb-2 text-[#4754D7]">
-                      {isRTL ? 'התשלום התקבל בהצלחה!' : 'Payment Successful!'}
-                    </h2>
-                  </motion.div>
-                )}
-
-                {paymentStatus === 'generating' && (
-                  <motion.div 
-                    key="payment-generating-content"
-                    className="space-y-4"
-                  >
-                    <div className="relative w-32 h-32 mx-auto">
-                      <Image 
-                        src="/design/CV.svg"
-                        alt="CV"
-                        width={96}
-                        height={96}
-                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-                      />
-                      
-                      <motion.div
-                        key="blue-wheel"
-                        className="absolute top-0 right-0"
-                        animate={{ 
-                          rotate: 360
-                        }}
-                        transition={{ 
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "linear"
-                        }}
-                      >
-                        <Image 
-                          src="/design/wheelblue.svg"
-                          alt="Blue Wheel"
-                          width={48}
-                          height={48}
-                        />
-                      </motion.div>
-
-                      <motion.div
-                        key="white-wheel"
-                        className="absolute bottom-0 left-0"
-                        animate={{ 
-                          rotate: -360
-                        }}
-                        transition={{ 
-                          duration: 2,
-                          repeat: Infinity,
-                          ease: "linear"
-                        }}
-                      >
-                        <Image 
-                          src="/design/wheelwhite.svg"
-                          alt="White Wheel"
-                          width={48}
-                          height={48}
-                        />
-                      </motion.div>
-                    </div>
-                    
-                    <h2 className="text-xl font-bold text-[#4754D7]">
-                      {isRTL ? 'מכין את קורות החיים שלך...' : 'Generating your CV...'}
-                    </h2>
-                    <p className="text-[#4754D7]/70">
-                      {isRTL 
-                        ? 'אנא המתן מספר שניות' 
-                        : 'Please wait a few seconds'}
-                    </p>
-                  </motion.div>
-                )}
-              </motion.div>
             )}
           </motion.div>
         </motion.div>
