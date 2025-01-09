@@ -101,13 +101,14 @@ export async function POST(request: Request) {
     
     const paymentData = {
       description: lang === 'he' ? `חבילת ${packageType}` : `${packageType} Package`,
-      type: 1,
+      type: 400,
       lang: lang === 'he' ? 'he' : 'en',
       currency: 'ILS',
       vatType: 0,
       amount: Number(amount),
       maxPayments: 1,
       pluginId: GREEN_INVOICE_PLUGIN_ID,
+      group: 100,
       client: {
         name: client.name,
         emails: Array.isArray(client.emails) ? client.emails : [client.email],
