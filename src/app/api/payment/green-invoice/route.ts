@@ -101,19 +101,20 @@ export async function POST(request: Request) {
     
     const paymentData = {
       description: lang === 'he' ? `חבילת ${packageType}` : `${packageType} Package`,
-      type: 320,
+      type: 1,
       lang: lang === 'he' ? 'he' : 'en',
       currency: 'ILS',
       vatType: 0,
       amount: Number(amount),
       maxPayments: 1,
       pluginId: GREEN_INVOICE_PLUGIN_ID,
-      group: 100,
       client: {
         name: client.name,
-        emails: client.emails || [client.email],
+        emails: Array.isArray(client.emails) ? client.emails : [client.email],
         taxId: client.taxId || '',
         phone: client.phone || '',
+        address: '',
+        city: '',
         country: 'IL',
         add: true
       },
@@ -128,7 +129,9 @@ export async function POST(request: Request) {
       successUrl: `${appUrl}/api/payment/success`,
       failureUrl: `${appUrl}/api/payment/failure`,
       notifyUrl: `${appUrl}/api/payment/notify`,
-      custom: sessionId
+      custom: sessionId,
+      redirectUrl: `${appUrl}/api/payment/success`,
+      theme: 1
     };
 
     const paymentUrl = `https://${GREEN_INVOICE_URL.replace('https://', '')}/api/v1/payments/form`;
