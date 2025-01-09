@@ -142,7 +142,48 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         throw new Error('Please fill in all required fields');
       }
 
-      // יצירת טופס תשלום ב-Green Invoice
+      // אם יש קופון שמעניק חבילה חינם, נדלג על תהליך התשלום
+      if (appliedCoupon?.data?.discount_type === 'free_package' || finalPrice === 0) {
+        console.log('Free package detected, skipping payment process...');
+        setPaymentStatus('success');
+        
+        // התחלת תהליך יצירת קורות החיים
+        setTimeout(async () => {
+          setPaymentStatus('generating');
+          
+          try {
+            const generateResponse = await fetch('/api/generate-cv', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ 
+                sessionId: currentSessionId,
+                lang
+              }),
+            });
+
+            if (!generateResponse.ok) {
+              throw new Error('Failed to start CV generation');
+            }
+
+            console.log('Started CV generation process');
+            checkCVStatus(currentSessionId);
+          } catch (error) {
+            console.error('Failed to start CV generation:', error);
+            toast.error(
+              isRTL 
+                ? 'אירעה שגיאה בהתחלת תהליך יצירת קורות החיים' 
+                : 'Error starting CV generation'
+            );
+            setPaymentStatus('idle');
+          }
+        }, 2000);
+
+        return;
+      }
+
+      // המשך לתהליך התשלום רק אם זו לא חבילה חינם
       console.log('Creating payment form with data:', {
         sessionId: currentSessionId,
         amount: finalPrice,
@@ -172,8 +213,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
             phone: formData.phone,
             taxId: formData.id,
             country: 'IL'
-          },
-          coupon: appliedCoupon?.data
+          }
         })
       });
 

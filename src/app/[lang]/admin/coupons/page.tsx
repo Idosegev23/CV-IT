@@ -390,14 +390,15 @@ export default function CouponsManagement({
                   className="w-full border rounded-lg p-2"
                 >
                   <option value="percentage">אחוזים</option>
+                  <option value="fixed">מחיר קבוע</option>
                   <option value="free_package">חבילה חינם</option>
                 </select>
               </div>
 
-              {newCoupon.discount_type === 'percentage' && (
+              {(newCoupon.discount_type === 'percentage' || newCoupon.discount_type === 'fixed') && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    אחוז הנחה
+                    {newCoupon.discount_type === 'percentage' ? 'אחוז הנחה' : 'מחיר קבוע (₪)'}
                   </label>
                   <input
                     type="number"
@@ -405,7 +406,8 @@ export default function CouponsManagement({
                     onChange={(e) => setNewCoupon(prev => ({ ...prev, discount_value: Number(e.target.value) }))}
                     className="w-full border rounded-lg p-2"
                     min="0"
-                    max="100"
+                    max={newCoupon.discount_type === 'percentage' ? "100" : undefined}
+                    step={newCoupon.discount_type === 'fixed' ? "0.1" : "1"}
                   />
                 </div>
               )}
@@ -500,14 +502,15 @@ export default function CouponsManagement({
                   className="w-full border rounded-lg p-2"
                 >
                   <option value="percentage">אחוזים</option>
+                  <option value="fixed">מחיר קבוע</option>
                   <option value="free_package">חבילה חינם</option>
                 </select>
               </div>
 
-              {selectedCoupon.discount_type === 'percentage' && (
+              {(selectedCoupon.discount_type === 'percentage' || selectedCoupon.discount_type === 'fixed') && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    אחוז הנחה
+                    {selectedCoupon.discount_type === 'percentage' ? 'אחוז הנחה' : 'מחיר קבוע (₪)'}
                   </label>
                   <input
                     type="number"
@@ -515,7 +518,8 @@ export default function CouponsManagement({
                     onChange={(e) => handleEditCouponField('discount_value', Number(e.target.value))}
                     className="w-full border rounded-lg p-2"
                     min="0"
-                    max="100"
+                    max={selectedCoupon.discount_type === 'percentage' ? "100" : undefined}
+                    step={selectedCoupon.discount_type === 'fixed' ? "0.1" : "1"}
                   />
                 </div>
               )}
