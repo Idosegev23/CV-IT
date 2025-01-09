@@ -39,7 +39,7 @@ interface FeatureWithUpgrade extends FeatureConfig {
 interface Experience {
   title: string;
   duration: string;
-  // הוסף שדות נו��ם אם יש צורך
+  // הוסף שדות נוסם אם יש צורך
 }
 
 interface PersonalDetails {
@@ -75,6 +75,7 @@ export default function FinishPage() {
   const [currentPackage, setCurrentPackage] = useState<Package>('basic');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showLoadingModal, setShowLoadingModal] = useState(false);
+  const [showSendCVModal, setShowSendCVModal] = useState(true);
   const [selectedFeature, setSelectedFeature] = useState<{
     feature: string;
     requiredPackage: Package;
@@ -440,6 +441,70 @@ export default function FinishPage() {
 
   return (
     <div className="min-h-screen bg-[#EAEAE7]">
+      {showSendCVModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-lg w-full space-y-6 relative">
+            <div className="text-center space-y-4">
+              <Image
+                src="/sendcv.png"
+                alt="Send CV"
+                width={120}
+                height={120}
+                className="mx-auto"
+              />
+              <h2 className="text-2xl font-bold text-gray-800">
+                {isRTL ? 'נמצא לך עבודה!' : "Let's Find You a Job!"}
+              </h2>
+              <p className="text-gray-600 text-lg leading-relaxed">
+                {isRTL 
+                  ? 'בלחיצה אחת אנחנו משגרים את קורות החיים שלך לחברות ההשמה המובילות בארץ ויתחילו לעבוד על הקורות חיים שלך'
+                  : 'With one click, we will send your CV to the leading recruitment companies in Israel and they will start working on your CV'}
+              </p>
+            </div>
+            
+            <div className="flex gap-3 justify-center mt-6">
+              <button
+                onClick={async () => {
+                  try {
+                    setShowLoadingModal(true);
+                    const response = await fetch('/api/send-cv', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({
+                        sessionId,
+                      }),
+                    });
+                    
+                    if (!response.ok) {
+                      throw new Error('Failed to send CV');
+                    }
+                    
+                    toast.success(isRTL ? 'קורות החיים נשלחו בהצלחה!' : 'CV sent successfully!');
+                  } catch (error) {
+                    console.error('Error sending CV:', error);
+                    toast.error(isRTL ? 'אירעה שגיאה בשליחת קורות החיים' : 'Error sending CV');
+                  } finally {
+                    setShowLoadingModal(false);
+                    setShowSendCVModal(false);
+                  }
+                }}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              >
+                {isRTL ? 'יאללה' : "Let's Go"}
+              </button>
+              <button
+                onClick={() => setShowSendCVModal(false)}
+                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+              >
+                {isRTL ? 'לא עכשיו' : 'Not Now'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container mx-auto px-4 py-12">
         <motion.div className="max-w-4xl mx-auto text-center space-y-8">
           <motion.div
