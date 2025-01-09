@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 // וביעת ה-URL הבסיסי של Green Invoice
-const GREEN_INVOICE_URL = process.env.GREEN_INVOICE_URL || 'https://api.greeninvoice.co.il';
+const baseUrl = process.env.GREEN_INVOICE_URL || 'https://api.greeninvoice.co.il';
+// וידוא שה-URL לא מכיל /api/v1 בסופו
+const GREEN_INVOICE_URL = baseUrl.endsWith('/api/v1') ? baseUrl.slice(0, -7) : baseUrl;
 const GREEN_INVOICE_API_KEY = process.env.GREEN_INVOICE_API_KEY;
 const GREEN_INVOICE_SECRET = process.env.GREEN_INVOICE_SECRET;
 const GREEN_INVOICE_PLUGIN_ID = process.env.GREEN_INVOICE_PLUGIN_ID;
@@ -11,11 +13,13 @@ export async function POST(request: Request) {
   try {
     console.log('Starting Green Invoice payment process...');
     console.log('Environment Variables Values:');
-    console.log('GREEN_INVOICE_URL:', GREEN_INVOICE_URL);
+    console.log('Base URL:', baseUrl);
+    console.log('Cleaned URL:', GREEN_INVOICE_URL);
     console.log('GREEN_INVOICE_API_KEY:', GREEN_INVOICE_API_KEY ? 'exists (hidden)' : 'missing');
     console.log('GREEN_INVOICE_SECRET:', GREEN_INVOICE_SECRET ? 'exists (hidden)' : 'missing');
     console.log('GREEN_INVOICE_PLUGIN_ID:', GREEN_INVOICE_PLUGIN_ID);
     console.log('NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
+    console.log('NODE_ENV:', process.env.NODE_ENV);
 
     // בדיקה שה-URL של האפליקציה מוגדר נכון
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.cvit.co.il';
@@ -49,10 +53,11 @@ export async function POST(request: Request) {
     const supabase = createClientComponentClient();
 
     // יצירת טוקן הזדהות מול Green Invoice
+    const authUrl = `${GREEN_INVOICE_URL}/api/v1/account/token`;
     console.log('Authenticating with Green Invoice...');
-    console.log('Auth URL:', `${GREEN_INVOICE_URL}/api/v1/account/token`);
+    console.log('Auth URL:', authUrl);
     
-    const authResponse = await fetch(`${GREEN_INVOICE_URL}/api/v1/account/token`, {
+    const authResponse = await fetch(authUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -103,7 +108,7 @@ export async function POST(request: Request) {
       group: 100,
       client: {
         name: client.name,
-        emails: client.emails || [],
+        emails: client.emails || [client.email],
         taxId: client.taxId || '',
         phone: client.phone || '',
         country: 'IL',
@@ -123,11 +128,12 @@ export async function POST(request: Request) {
       custom: sessionId
     };
 
+    const paymentUrl = `${GREEN_INVOICE_URL}/api/v1/payments/form`;
     console.log('Payment request data:', JSON.stringify(paymentData, null, 2));
-    console.log('Sending request to:', `${GREEN_INVOICE_URL}/api/v1/payments/form`);
+    console.log('Sending request to:', paymentUrl);
     
     try {
-      const paymentResponse = await fetch(`${GREEN_INVOICE_URL}/api/v1/payments/form`, {
+      const paymentResponse = await fetch(paymentUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
