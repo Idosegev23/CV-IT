@@ -453,12 +453,20 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
           >
             {paymentIframe ? (
               // תצוגת ה-iframe של התשלום
-              <div className="w-full h-[600px] rounded-lg overflow-hidden">
-                <iframe 
-                  src={paymentIframe}
-                  className="w-full h-full border-0"
-                  allow="payment"
-                />
+              <div className="relative">
+                <button
+                  onClick={() => setPaymentIframe(null)}
+                  className="absolute top-4 right-4 px-4 py-2 bg-white text-[#4754D7] rounded-lg shadow-md hover:bg-gray-50 transition-colors z-10"
+                >
+                  {isRTL ? 'חזרה' : 'Back'}
+                </button>
+                <div className="w-full h-[600px] rounded-lg overflow-hidden">
+                  <iframe 
+                    src={paymentIframe}
+                    className="w-full h-full border-0"
+                    allow="payment"
+                  />
+                </div>
               </div>
             ) : paymentStatus === 'success' ? (
               // תצוגת מסך הצלחת תשלום
