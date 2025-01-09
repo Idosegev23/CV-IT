@@ -39,21 +39,9 @@ interface Agency {
   name: string;
   email: string;
   is_active: boolean;
-  email_format: {
-    subject_template: string;
-    body_template: string;
-    include_analysis: boolean;
-    analysis_format: {
-      include_full_name: boolean;
-      include_city: boolean;
-      include_phone: boolean;
-      include_email: boolean;
-      include_last_position: boolean;
-      include_experience_years: boolean;
-      include_relevant_positions: boolean;
-      include_search_area: boolean;
-    };
-    custom_fields: Record<string, string>;
+  send_cv_template: {
+    subject: string;
+    body: string;
   };
 }
 
@@ -122,125 +110,6 @@ async function generatePDF(sessionId: string, cvData: any) {
     console.error('Error generating PDF:', error);
     throw error;
   }
-}
-
-function replaceTemplateVariables(template: string, data: any, customFields: Record<string, string> = {}) {
-  let result = template;
-  
-  // החלפת משתנים סטנדרטיים
-  const standardReplacements: Record<string, string> = {
-    '{{candidate_name}}': data.candidate_info?.full_name || '',
-    '{{candidate_phone}}': data.candidate_info?.phone || '',
-    '{{candidate_email}}': data.candidate_info?.email || '',
-    '{{candidate_city}}': data.candidate_info?.city || '',
-    '{{candidate_experience}}': data.candidate_info?.experience_in_role || '',
-    '{{candidate_last_position}}': data.candidate_info?.last_position || '',
-    '{{candidate_search_area}}': data.candidate_info?.search_area || '',
-    '{{relevant_positions}}': Array.isArray(data.candidate_info?.relevant_positions) 
-      ? data.candidate_info.relevant_positions.join(', ') 
-      : ''
-  };
-
-  // החלפת משתנים סטנדרטיים
-  Object.entries(standardReplacements).forEach(([key, value]) => {
-    result = result.replace(new RegExp(key, 'g'), value);
-  });
-
-  // החלפת שדות מותאמים אישית
-  Object.entries(customFields).forEach(([key, value]) => {
-    result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
-  });
-
-  return result;
-}
-
-function generateAnalysisSection(analysis: any, format: Agency['email_format']['analysis_format']) {
-  const sections: string[] = [];
-
-  if (format.include_full_name && analysis.candidate_info?.full_name) {
-    sections.push(`שם מלא: ${analysis.candidate_info.full_name}`);
-  }
-
-  if (format.include_city && analysis.candidate_info?.city) {
-    sections.push(`עיר מגורים: ${analysis.candidate_info.city}`);
-  }
-
-  if (format.include_phone && analysis.candidate_info?.phone) {
-    sections.push(`טלפון: ${analysis.candidate_info.phone}`);
-  }
-
-  if (format.include_email && analysis.candidate_info?.email) {
-    sections.push(`דוא"ל: ${analysis.candidate_info.email}`);
-  }
-
-  if (format.include_last_position && analysis.candidate_info?.last_position) {
-    sections.push(`תפקיד אחרון: ${analysis.candidate_info.last_position}`);
-  }
-
-  if (format.include_experience_years && analysis.candidate_info?.experience_in_role) {
-    sections.push(`שנות ניסיון: ${analysis.candidate_info.experience_in_role}`);
-  }
-
-  if (format.include_relevant_positions && analysis.candidate_info?.relevant_positions) {
-    sections.push(`תפקידים רלוונטיים: ${analysis.candidate_info.relevant_positions.join(', ')}`);
-  }
-
-  if (format.include_search_area && analysis.candidate_info?.search_area) {
-    sections.push(`אזור חיפוש עבודה: ${analysis.candidate_info.search_area}`);
-  }
-
-  return sections.join('\n');
-}
-
-function getEmailTemplate(agency: any) {
-  // בדיקה אם יש את המבנה החדש
-  if (agency.email_format) {
-    return {
-      subject: agency.email_format.subject_template,
-      body: agency.email_format.body_template,
-      includeAnalysis: agency.email_format.include_analysis,
-      analysisFormat: agency.email_format.analysis_format,
-      customFields: agency.email_format.custom_fields
-    };
-  }
-  
-  // אם אין, נשתמש במבנה הישן
-  if (agency.send_cv_template) {
-    return {
-      subject: agency.send_cv_template.subject || '',
-      body: agency.send_cv_template.body || '',
-      includeAnalysis: agency.send_cv_template.include_cv_analysis || false,
-      analysisFormat: {
-        include_full_name: true,
-        include_city: true,
-        include_phone: true,
-        include_email: true,
-        include_last_position: true,
-        include_experience_years: true,
-        include_relevant_positions: true,
-        include_search_area: true
-      },
-      customFields: {}
-    };
-  }
-
-  // אם אין אף אחד מהם, נחזיר ערכי ברירת מחדל
-  return {
-    subject: '',
-    body: '',
-    includeAnalysis: false,
-    analysisFormat: {
-      include_full_name: true,
-      include_city: true,
-      include_phone: true,
-      include_email: true,
-      include_last_position: true,
-      include_experience_years: true,
-      include_relevant_positions: true,
-      include_search_area: true
-    },
-    customFields: {}
-  };
 }
 
 export async function POST(request: Request) {
@@ -315,7 +184,7 @@ export async function POST(request: Request) {
     if (agencyIds && agencyIds.length > 0) {
       const { data: selectedAgencies, error: agenciesError } = await supabase
         .from('agencies')
-        .select('id, name, email, is_active, email_format')
+        .select('id, name, email, is_active, send_cv_template')
         .in('id', agencyIds)
         .eq('is_active', true);
 
@@ -324,7 +193,7 @@ export async function POST(request: Request) {
     } else {
       const { data: allAgencies, error: agenciesError } = await supabase
         .from('agencies')
-        .select('id, name, email, is_active, email_format')
+        .select('id, name, email, is_active, send_cv_template')
         .eq('is_active', true);
 
       if (agenciesError) throw agenciesError;
@@ -334,32 +203,23 @@ export async function POST(request: Request) {
     // 5. שליחת המייל לכל חברת השמה
     const sendResults = await Promise.all(agencies.map(async (agency) => {
       try {
-        const emailTemplate = getEmailTemplate(agency);
-        
         // החלפת משתנים בתבנית
-        const emailSubject = replaceTemplateVariables(
-          emailTemplate.subject,
-          analysis,
-          emailTemplate.customFields
-        );
+        const emailSubject = agency.send_cv_template.subject
+          .replace('{{candidate_name}}', analysis.candidate_info.full_name)
+          .replace('{{agency_name}}', agency.name);
 
-        let emailBody = replaceTemplateVariables(
-          emailTemplate.body,
-          analysis,
-          emailTemplate.customFields
-        );
-
-        // הוספת ניתוח קורות החיים אם נדרש
-        if (emailTemplate.includeAnalysis) {
-          const analysisSection = generateAnalysisSection(analysis, emailTemplate.analysisFormat);
-          emailBody += '\n\nניתוח קורות החיים:\n' + analysisSection;
-        }
+        const emailBody = agency.send_cv_template.body
+          .replace(/{{candidate_name}}/g, analysis.candidate_info.full_name)
+          .replace(/{{candidate_phone}}/g, analysis.candidate_info.phone)
+          .replace(/{{candidate_email}}/g, analysis.candidate_info.email)
+          .replace(/{{candidate_experience}}/g, analysis.candidate_info.experience_in_role)
+          .replace(/{{agency_name}}/g, agency.name);
 
         const mailOptions: Mail.Options = {
           from: `"CVIT Resume System" <${process.env.ZOHO_MAIL_USER}>`,
           to: agency.email,
           subject: emailSubject,
-          html: emailBody.replace(/\n/g, '<br>'),
+          html: emailBody,
           attachments: [
             {
               filename: `${analysis.candidate_info.full_name || 'CV'}.pdf`,
@@ -374,11 +234,7 @@ export async function POST(request: Request) {
         return { agency: agency.name, success: true };
       } catch (error) {
         console.error(`Failed to send email to ${agency.name}:`, error);
-        return { 
-          agency: agency.name, 
-          success: false, 
-          error: error instanceof Error ? error.message : 'Unknown error' 
-        };
+        return { agency: agency.name, success: false, error: error instanceof Error ? error.message : 'Unknown error' };
       }
     }));
 

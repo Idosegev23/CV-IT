@@ -39,7 +39,7 @@ interface FeatureWithUpgrade extends FeatureConfig {
 interface Experience {
   title: string;
   duration: string;
-  // הוסף שדות נוסם אם יש צורך
+  // הוסף שדות נו��ם אם יש צורך
 }
 
 interface PersonalDetails {
@@ -75,7 +75,6 @@ export default function FinishPage() {
   const [currentPackage, setCurrentPackage] = useState<Package>('basic');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showLoadingModal, setShowLoadingModal] = useState(false);
-  const [showSendCVModal, setShowSendCVModal] = useState(true);
   const [selectedFeature, setSelectedFeature] = useState<{
     feature: string;
     requiredPackage: Package;
@@ -441,86 +440,6 @@ export default function FinishPage() {
 
   return (
     <div className="min-h-screen bg-[#EAEAE7]">
-      {showSendCVModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-[32px] overflow-hidden max-w-4xl w-full relative flex">
-            {/* צד שמאל - תמונה */}
-            <div className="w-1/2 bg-[#F3F4F1] p-8 flex items-center justify-center">
-              <div className="relative w-full aspect-square">
-                <Image
-                  src="/sendcv.png"
-                  alt="Send CV"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-            </div>
-            
-            {/* צד ימין - תוכן */}
-            <div className="w-1/2 p-8 flex flex-col justify-center">
-              <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-gray-800 leading-tight">
-                  {isRTL ? 'נמצא לך עבודה!' : "Let's Find You a Job!"}
-                </h2>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  {isRTL 
-                    ? 'בלחיצה אחת אנחנו משגרים את קורות החיים שלך לחברות ההשמה המובילות בארץ ויתחילו לעבוד על הקורות חיים שלך'
-                    : 'With one click, we will send your CV to the leading recruitment companies in Israel and they will start working on your CV'}
-                </p>
-                
-                <div className="flex gap-4 pt-4">
-                  <button
-                    onClick={async () => {
-                      try {
-                        setShowLoadingModal(true);
-                        
-                        // קודם כל מוודאים שיש PDF
-                        const pdfResponse = await fetch(`/api/generate-pdf?sessionId=${sessionId}`);
-                        if (!pdfResponse.ok) {
-                          throw new Error('Failed to generate PDF');
-                        }
-                        
-                        // אחרי שיש PDF, שולחים את קורות החיים
-                        const response = await fetch('/api/send-cv', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            sessionId,
-                          }),
-                        });
-                        
-                        if (!response.ok) {
-                          throw new Error('Failed to send CV');
-                        }
-                        
-                        toast.success(isRTL ? 'קורות החיים נשלחו בהצלחה!' : 'CV sent successfully!');
-                      } catch (error) {
-                        console.error('Error:', error);
-                        toast.error(isRTL ? 'אירעה שגיאה בשליחת קורות החיים' : 'Error sending CV');
-                      } finally {
-                        setShowLoadingModal(false);
-                        setShowSendCVModal(false);
-                      }
-                    }}
-                    className="flex-1 px-6 py-4 bg-[#4754D6] text-white rounded-full font-medium hover:bg-[#3A45C0] transition-colors text-lg"
-                  >
-                    {isRTL ? 'יאללה' : "Let's Go"}
-                  </button>
-                  <button
-                    onClick={() => setShowSendCVModal(false)}
-                    className="flex-1 px-6 py-4 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors text-lg"
-                  >
-                    {isRTL ? 'לא עכשיו' : 'Not Now'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="container mx-auto px-4 py-12">
         <motion.div className="max-w-4xl mx-auto text-center space-y-8">
           <motion.div
