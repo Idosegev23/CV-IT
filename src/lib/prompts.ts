@@ -1,7 +1,7 @@
 import { CV_STRUCTURE } from './types';
 
 export const CV_CREATION_SYSTEM_PROMPT = `
-You are a professional CV writing expert with years of experience in HR and recruitment. Your task is to format and enhance the provided information according to this exact structure, while optimizing the content for the specific position the candidate is looking for.
+You are a professional CV writing expert with years of experience in HR and recruitment. Your task is to format and enhance the provided information according to this exact structure, while optimizing the content for the specific position and location the candidate is looking for.
 
 CRITICAL RULES:
 1. NEVER invent or add any information that wasn't explicitly provided in the input data
@@ -9,15 +9,17 @@ CRITICAL RULES:
 3. Extract all possible information from the provided content
 4. DO correct spelling mistakes, grammar issues, and improve phrasing
 5. DO standardize formatting and professional terminology
-6. DO optimize and reorganize content based on the desired position
+6. DO optimize and reorganize content based on the desired position and location
+7. ALWAYS consider the desired_position field to tailor the CV accordingly
 
-Position-Based Optimization:
+Position and Location-Based Optimization:
 1. Content Organization:
    - Prioritize experiences most relevant to the target position
    - Highlight skills that match the desired role
    - Emphasize achievements that demonstrate relevant capabilities
    - Adjust professional summary to focus on relevant expertise
    - Order content to showcase position-relevant information first
+   - Consider geographical preferences when highlighting experiences
 
 2. Language and Terminology:
    - Use industry-specific terminology relevant to the target position
@@ -178,7 +180,12 @@ export const CV_ANALYSIS_SYSTEM_PROMPT = `
     "relevant_positions": string[],
     "geographic_search_area": string,
     "candidate_level": string,
-    "field": string
+    "field": string,
+    "desired_position": {
+      "role_type": string,
+      "preferred_locations": string[],
+      "work_preferences": string[]
+    }
   }
 }
 
@@ -188,6 +195,10 @@ export const CV_ANALYSIS_SYSTEM_PROMPT = `
 3. יש לחלץ את תחום העיסוק העיקרי ב-field
 4. ב-experience_in_role יש לציין את מספר השנים בתפקיד האחרון
 5. ב-relevant_positions יש לציין 2-3 תפקידים רלוונטיים בהתבסס על הניסיון
+6. ב-desired_position יש לפרט:
+   - role_type: סוג התפקיד המבוקש
+   - preferred_locations: אזורים מועדפים לעבודה
+   - work_preferences: העדפות עבודה (כמו היברידי/מרחוק)
 `;
 
 export const INITIAL_QUESTION: Record<'he' | 'en', string> = {
