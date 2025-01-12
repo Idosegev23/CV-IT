@@ -384,8 +384,11 @@ export default function AgenciesManagement({
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
             value={template.subject_template}
             onChange={(e) => onChange({ ...template, subject_template: e.target.value })}
-            placeholder="לדוגמה: מספר משרה: {{job_id}} | גורם מפנה: CVIT"
+            placeholder='לדוגמה: "מספר משרה: {{job_id}} | גורם מפנה: CVIT"'
           />
+          <p className="mt-1 text-sm text-gray-500">
+            ניתן להשתמש במשתנים כתוך סוגריים מסולסלים כפולים
+          </p>
         </div>
 
         <div>
@@ -395,11 +398,14 @@ export default function AgenciesManagement({
             rows={5}
             value={template.body_template}
             onChange={(e) => onChange({ ...template, body_template: e.target.value })}
-            placeholder="תוכן המייל עם משתנים כמו {{candidate_name}}"
+            placeholder="תוכן המייל. לדוגמה: referid={{referid}}"
           />
+          <p className="mt-1 text-sm text-gray-500">
+            השאר ריק אם ברצונך להשתמש בניתוח קורות החיים האוטומטי
+          </p>
         </div>
 
-        <div>
+        <div className="space-y-2">
           <label className="flex items-center">
             <input
               type="checkbox"
@@ -407,66 +413,74 @@ export default function AgenciesManagement({
               checked={template.include_analysis}
               onChange={(e) => onChange({ ...template, include_analysis: e.target.checked })}
             />
-            <span className="mr-2">כלול ניתוח קורות חיים</span>
+            <span className="mr-2">כלול ניתוח קורות חיים אוטומטי</span>
           </label>
+          
+          <div className="text-sm text-gray-500">
+            בחר אפשרות זו אם ברצונך לקבל ניתוח מפורט של קורות החיים
+          </div>
         </div>
 
         {template.include_analysis && (
           <div className="border rounded p-4 space-y-2">
             <h4 className="font-medium">פרטים לכלול בניתוח</h4>
-            {Object.entries(template.analysis_format).map(([key, value]) => (
-              <label key={key} className="flex items-center">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  checked={value}
-                  onChange={(e) => onChange({
-                    ...template,
-                    analysis_format: {
-                      ...template.analysis_format,
-                      [key]: e.target.checked
-                    }
-                  })}
-                />
-                <span className="mr-2">{getAnalysisFieldLabel(key)}</span>
-              </label>
-            ))}
+            <div className="grid grid-cols-2 gap-2">
+              {Object.entries(template.analysis_format).map(([key, value]) => (
+                <label key={key} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    checked={value}
+                    onChange={(e) => onChange({
+                      ...template,
+                      analysis_format: {
+                        ...template.analysis_format,
+                        [key]: e.target.checked
+                      }
+                    })}
+                  />
+                  <span className="mr-2">{getAnalysisFieldLabel(key)}</span>
+                </label>
+              ))}
+            </div>
           </div>
         )}
 
         <div className="border rounded p-4">
           <h4 className="font-medium mb-2">שדות מותאמים אישית</h4>
-          {Object.entries(template.custom_fields).map(([key, value]) => (
-            <div key={key} className="flex items-center gap-2 mb-2">
-              <span className="font-medium">{key}:</span>
-              <span>{value}</span>
-              <button
-                type="button"
-                onClick={() => {
-                  const newCustomFields = { ...template.custom_fields };
-                  delete newCustomFields[key];
-                  onChange({ ...template, custom_fields: newCustomFields });
-                }}
-                className="text-red-600 hover:text-red-800"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </button>
-            </div>
-          ))}
+          <div className="space-y-2">
+            {Object.entries(template.custom_fields).map(([key, value]) => (
+              <div key={key} className="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                <span className="font-medium min-w-[100px]">{key}:</span>
+                <span className="flex-1">{value}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newCustomFields = { ...template.custom_fields };
+                    delete newCustomFields[key];
+                    onChange({ ...template, custom_fields: newCustomFields });
+                  }}
+                  className="text-red-600 hover:text-red-800"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
 
           {showCustomField ? (
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-4">
               <input
                 type="text"
-                placeholder="שם השדה"
-                className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                placeholder="שם השדה (לדוגמה: referid)"
+                className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 value={newFieldKey}
                 onChange={(e) => setNewFieldKey(e.target.value)}
               />
               <input
                 type="text"
-                placeholder="ערך"
-                className="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                placeholder="ערך (לדוגמה: 8707)"
+                className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 value={newFieldValue}
                 onChange={(e) => setNewFieldValue(e.target.value)}
               />
@@ -489,7 +503,7 @@ export default function AgenciesManagement({
             <button
               type="button"
               onClick={() => setShowCustomField(true)}
-              className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="mt-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
               <PlusIcon className="h-4 w-4 ml-1" />
               הוסף שדה מותאם אישית

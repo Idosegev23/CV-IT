@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import ClassicTemplate from '../CVTemplates/ClassicTemplate';
 import ProfessionalTemplate from '../CVTemplates/ProfessionalTemplate';
@@ -255,7 +255,10 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const [showSavePrompt, setShowSavePrompt] = useState(false);
+  const [isFromFinishPage, setIsFromFinishPage] = useState(false);
+  const mounted = useRef(false);
   const supabase = createClientComponentClient();
   const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
   const selectedPackage = useAppStore(state => state.selectedPackage);
@@ -297,7 +300,13 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   const [isEditable, setIsEditable] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    mounted.current = true;
+    // בדיקה אם המשתמש הגיע מדף הסיום
+    const referrer = document.referrer;
+    setIsFromFinishPage(referrer.includes('/finish/'));
+    return () => {
+      mounted.current = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -341,7 +350,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       }
     };
 
-    if (mounted) {
+    if (mounted.current) {
       fetchData();
     }
   }, [sessionId, lang, mounted]);
@@ -382,6 +391,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     try {
       const typedData = editedData as ResumeDataWithIndex;
       setCvData(editedData);
+      setHasChanges(true);  // מסמן שבוצעו שינויים
       
       const formattedForSave = {
         personal_details: {
@@ -1226,6 +1236,20 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     );
   };
 
+  const handleContinueWithoutDownload = () => {
+    if (hasChanges) {
+      setShowSavePrompt(true);
+    } else {
+      router.push(`/${lang}/finish/${sessionId}`);
+    }
+  };
+
+  const handleDownloadAndContinue = async () => {
+    await handlePdfDownload();
+    setHasChanges(false);
+    router.push(`/${lang}/finish/${sessionId}`);
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -1469,30 +1493,68 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           </div>
         )}
 
-        {/* כפתור הורדה */}
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={async () => {
-              await handlePdfDownload();
-              router.push(`/${lang}/finish/${sessionId}`);
-            }}
-            disabled={isDownloadingPdf || isEditing}
-            className={cn(
-              "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
-              isEditing && "opacity-50 cursor-not-allowed"
+        {/* כפתור הורדה והמשך */}
+        {!isFromFinishPage ? (
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleDownloadAndContinue}
+              disabled={isDownloadingPdf || isEditing}
+              className={cn(
+                "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
+                isEditing && "opacity-50 cursor-not-allowed"
+              )}
+              aria-label={lang === 'he' ? 'הורדת קובץ PDF והמשך' : 'Download PDF and Continue'}
+            >
+              {isDownloadingPdf ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <Download className="h-6 w-6" />
+              )}
+            </Button>
+            <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+              {lang === 'he' ? 'הורדת הקורות חיים והמשך למסך ההטבות' : 'Download CV and Continue to Benefits Screen'}
+            </span>
+          </div>
+        ) : (
+          <>
+            {/* כפתור הורדה - כשחוזרים מדף הסיום */}
+            {hasChanges && (
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handlePdfDownload}
+                  disabled={isDownloadingPdf || isEditing}
+                  className={cn(
+                    "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
+                    isEditing && "opacity-50 cursor-not-allowed"
+                  )}
+                  aria-label={lang === 'he' ? 'הורדת קובץ PDF' : 'Download PDF'}
+                >
+                  {isDownloadingPdf ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    <Download className="h-6 w-6" />
+                  )}
+                </Button>
+                <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                  {lang === 'he' ? 'הורדת הקורות חיים' : 'Download CV'}
+                </span>
+              </div>
             )}
-            aria-label={lang === 'he' ? 'הורדת קובץ PDF והמשך' : 'Download PDF and Continue'}
-          >
-            {isDownloadingPdf ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              <Download className="h-6 w-6" />
-            )}
-          </Button>
-          <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-            {lang === 'he' ? 'הורדת הקורות חיים והמשך למסך ההטבות' : 'Download CV and Continue to Benefits Screen'}
-          </span>
-        </div>
+            {/* כפתור המשך */}
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={handleContinueWithoutDownload}
+                className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+                aria-label={lang === 'he' ? 'המשך למסך ההטבות' : 'Continue to Benefits'}
+              >
+                <FileText className="h-6 w-6" />
+              </Button>
+              <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                {lang === 'he' ? 'המשך למסך ההטבות' : 'Continue to Benefits'}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       <LoadingModal 
@@ -1502,7 +1564,43 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         action="generate-pdf"
       />
 
-      {/* פופאפים */}
+      {/* פופאפ שמירת שינויים */}
+      <Dialog open={showSavePrompt} onOpenChange={setShowSavePrompt}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className={lang === 'he' ? 'text-right' : 'text-left'}>
+              {lang === 'he' ? 'שמירת שינויים' : 'Save Changes'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className={`mt-4 ${lang === 'he' ? 'text-right' : 'text-left'}`}>
+            <p className="text-gray-700">
+              {lang === 'he' 
+                ? 'היי, ערכת את קורות החיים. אולי כדאי לשמור את השינויים?'
+                : 'Hey, you\'ve made changes to your CV. Would you like to save them?'}
+            </p>
+          </div>
+          <div className={`mt-6 flex gap-4 ${lang === 'he' ? 'flex-row-reverse' : ''}`}>
+            <Button
+              onClick={handleDownloadAndContinue}
+              className="flex-1 bg-[#4856CD] text-white hover:opacity-90"
+            >
+              {lang === 'he' ? 'הורד והמשך' : 'Download & Continue'}
+            </Button>
+            <Button
+              onClick={() => {
+                setShowSavePrompt(false);
+                router.push(`/${lang}/finish/${sessionId}`);
+              }}
+              variant="outline"
+              className="flex-1"
+            >
+              {lang === 'he' ? 'המשך בלי להוריד' : 'Continue without Download'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* פופאפים קיימים */}
       {editingItem && (
         <EditPopup
           isOpen={true}
