@@ -20,6 +20,16 @@ function sanitizeFileName(fileName: string): string {
     .replace(/^_|_$/g, '');
 }
 
+export async function GET() {
+  return new NextResponse(null, {
+    status: 405,
+    statusText: 'Method Not Allowed',
+    headers: {
+      'Allow': 'POST'
+    }
+  });
+}
+
 export async function POST(req: Request) {
   let browser;
   console.log('🚀 Starting PDF generation process');

@@ -265,32 +265,51 @@ export default function CVPage({ params }: PageProps) {
           const originalSrc = img.getAttribute('src');
           if (!originalSrc || originalSrc.startsWith('data:')) return;
 
-          const response = await fetch(originalSrc);
-          if (!response.ok) throw new Error(`Failed to fetch image: ${originalSrc}`);
+          // בדיקה אם התמונה היא מהמערכת שלנו
+          if (originalSrc.includes('/design/')) {
+            const imagePath = originalSrc.split('/design/')[1];
+            const response = await fetch(`/design/${imagePath}`, {
+              cache: 'force-cache'
+            });
+            
+            if (!response.ok) {
+              console.warn(`Failed to fetch image: ${originalSrc}, using original source`);
+              return;
+            }
 
-          const blob = await response.blob();
-          const base64 = await new Promise<string>((resolve) => {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-              if (typeof reader.result === 'string') resolve(reader.result);
-            };
-            reader.readAsDataURL(blob);
-          });
+            const blob = await response.blob();
+            const base64 = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => {
+                if (typeof reader.result === 'string') resolve(reader.result);
+              };
+              reader.readAsDataURL(blob);
+            });
 
-          img.removeAttribute('srcset');
-          img.removeAttribute('sizes');
-          img.src = base64;
-          
-          await new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
-          });
+            img.removeAttribute('srcset');
+            img.removeAttribute('sizes');
+            img.src = base64;
+            
+            await new Promise((resolve) => {
+              if (img.complete) {
+                resolve(undefined);
+              } else {
+                img.onload = () => resolve(undefined);
+                img.onerror = () => {
+                  console.warn(`Failed to load image: ${originalSrc}, using original source`);
+                  img.src = originalSrc;
+                  resolve(undefined);
+                };
+              }
+            });
+          }
         } catch (error) {
-          console.error('Failed to convert image:', error);
+          console.warn('Failed to process image:', error);
+          return;
         }
       }));
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
 
       const styles = Array.from(document.styleSheets)
         .map(sheet => {
@@ -330,6 +349,7 @@ export default function CVPage({ params }: PageProps) {
                 margin: 0 !important;
                 padding: 0 !important;
                 background: white !important;
+                font-family: 'Assistant', sans-serif !important;
               }
               #cv-content {
                 width: 210mm !important;
@@ -370,7 +390,8 @@ export default function CVPage({ params }: PageProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate PDF');
+        const errorData = await response.json();
+        throw new Error(errorData.details || 'Failed to generate PDF');
       }
 
       const blob = await response.blob();
