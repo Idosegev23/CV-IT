@@ -236,6 +236,13 @@ export default function TemplatesPage() {
             >
               <div className="bg-white/38 pt-[10px] px-[10px]">
                 <div className="bg-white border border-white rounded-[32px] overflow-hidden relative">
+                  {template.id === 'classic' && (
+                    <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/70 z-10 flex items-center justify-center">
+                      <span className="bg-[#4856CD] text-white px-4 py-2 rounded-lg text-lg font-bold">
+                        {isRTL ? 'בבנייה' : 'Under Construction'}
+                      </span>
+                    </div>
+                  )}
                   <div className="pb-[50%]">
                     <Image
                       src={template.image}

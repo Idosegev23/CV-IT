@@ -330,296 +330,309 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
       data-cv-lang={cvLang}
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <div className="classic-header relative">
-        <Image
-          src="/design/classic/dec.svg"
-          alt="header decoration"
-          width={15}
-          height={15}
-          className="absolute top-1/2 -translate-y-1/2 right-12 header-corner-decoration"
-          priority={true}
-        />
-        <div className="relative z-10">
-          <div className="header-name-wrapper">
-            <h1 className="header-name">
-              <div className="flex items-center gap-1">
-                <span className="header-name-first">{firstName}</span>
-                {lastName && <span className="header-name-last">{lastName}</span>}
-                {isEditing && (
-                  <EditButton
-                    onClick={() => handleEdit('personalInfo', undefined, personalInfo)}
-                    title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
-                    variant="light"
-                  />
-                )}
-              </div>
-            </h1>
-          </div>
-          <div className="header-contact">
-            {personalInfo.email && <span>{personalInfo.email}</span>}
-            {personalInfo.email && personalInfo.phone && <span className="contact-separator">|</span>}
-            {personalInfo.phone && <span>{personalInfo.phone}</span>}
-            {personalInfo.phone && personalInfo.address && <span className="contact-separator">|</span>}
-            {personalInfo.address && <span>{personalInfo.address}</span>}
-          </div>
+      <div className="under-construction">
+        <div className="flex flex-col items-center gap-4">
+          <span className="bg-[#4856CD] text-white px-6 py-3 rounded-lg text-xl font-bold">
+            {cvLang === 'he' ? 'בבנייה' : 'Under Construction'}
+          </span>
+          <span className="text-white text-lg">
+            {cvLang === 'he' ? 'התבנית אינה זמינה כרגע' : 'This template is currently unavailable'}
+          </span>
         </div>
       </div>
-
-      <main className="classic-content">
-        {/* תקציר */}
-        {data.personalInfo.summary && (
-          <section className="summary-section">
-            <div className="summary-content">
-              {data.personalInfo.summary}
-            </div>
-          </section>
-        )}
-
-        {/* ניסיון תעסוקתי */}
-        {experience && experience.length > 0 && (
-          <section className="experience-section">
-            <h2 className="section-title relative flex items-center gap-4">
-              {t.workExperience}
-              {isEditing && (
-                <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('experience')}>
-                  הוסף ניסיון תעסוקתי
-                  <EditButton
-                    onClick={() => handleAdd('experience')}
-                    title={lang === 'he' ? 'הוסף ניסיון תעסוקתי' : 'Add Work Experience'}
-                    variant="dark"
-                  />
-                </span>
-              )}
-            </h2>
-            <div className="experience-items">
-              {experience.map((exp, index) => (
-                <div key={index} className="experience-item relative">
-                  <div className="experience-header">
-                    <div className="experience-title-wrapper">
-                      <div className="flex items-center gap-1">
-                        <span className="experience-title">{exp.position}</span>
-                        {isEditing && (
-                          <EditButton
-                            onClick={() => onEdit('experience', index)}
-                            title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
-                            variant="dark"
-                          />
-                        )}
-                      </div>
-                      {exp.company && (
-                        <>
-                          <span className="experience-separator">|</span>
-                          <span className="experience-company">{exp.company}</span>
-                        </>
-                      )}
-                    </div>
-                    <div className="experience-date">
-                      {formatDate(exp.startDate, exp.endDate, cvLang)}
-                    </div>
-                  </div>
-                  {exp.description && exp.description.length > 0 && (
-                    <ul className="experience-description" style={{ listStyle: 'none', paddingRight: 0 }}>
-                      {formatDescription(exp.description, data.experience.length).map((desc, i) => (
-                        <li key={i}>{desc}</li>
-                      ))}
-                    </ul>
+      {/* מונע אינטראקציה עם התבנית */}
+      <div className="pointer-events-none">
+        <div className="classic-header relative">
+          <Image
+            src="/design/classic/dec.svg"
+            alt="header decoration"
+            width={15}
+            height={15}
+            className="absolute top-1/2 -translate-y-1/2 right-12 header-corner-decoration"
+            priority={true}
+          />
+          <div className="relative z-10">
+            <div className="header-name-wrapper">
+              <h1 className="header-name">
+                <div className="flex items-center gap-1">
+                  <span className="header-name-first">{firstName}</span>
+                  {lastName && <span className="header-name-last">{lastName}</span>}
+                  {isEditing && (
+                    <EditButton
+                      onClick={() => handleEdit('personalInfo', undefined, personalInfo)}
+                      title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
+                      variant="light"
+                    />
                   )}
                 </div>
-              ))}
+              </h1>
             </div>
-          </section>
-        )}
-
-        {/* השכלה */}
-        {education?.degrees && education.degrees.length > 0 && (
-          <section className="education-section">
-            <h2 className="section-title relative flex items-center gap-4">
-              {t.education}
-              {isEditing && (
-                <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('education')}>
-                  הוסף השכלה
-                  <EditButton
-                    onClick={() => handleAdd('education')}
-                    title={lang === 'he' ? 'הוסף השכלה' : 'Add Education'}
-                    variant="dark"
-                  />
-                </span>
-              )}
-            </h2>
-            <div className="education-items">
-              {education.degrees.map((degree, index) => (
-                <div key={index} className="education-item relative">
-                  <div className="education-header">
-                    <div className="education-title-wrapper">
-                      <div className="flex items-center gap-1">
-                        <span className="education-degree">
-                          {`${degree.type} ${degree.field}`}
-                        </span>
-                        {isEditing && (
-                          <EditButton
-                            onClick={() => onEdit('education', index)}
-                            title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
-                            variant="dark"
-                          />
-                        )}
-                      </div>
-                      <span className="experience-separator">|</span>
-                      <span className="education-institution">{degree.institution}</span>
-                    </div>
-                    <div className="education-date">{degree.years}</div>
-                  </div>
-                  {degree.specialization && (
-                    <div className="education-specialization">
-                      התמחות: {degree.specialization}
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="header-contact">
+              {personalInfo.email && <span>{personalInfo.email}</span>}
+              {personalInfo.email && personalInfo.phone && <span className="contact-separator">|</span>}
+              {personalInfo.phone && <span>{personalInfo.phone}</span>}
+              {personalInfo.phone && personalInfo.address && <span className="contact-separator">|</span>}
+              {personalInfo.address && <span>{personalInfo.address}</span>}
             </div>
-          </section>
-        )}
+          </div>
+        </div>
 
-        {/* כירות צבאי/לאומי */}
-        {military && (
-          <section className="military-section">
-            <h2 className="section-title relative flex items-center gap-4">
-              {military.role?.toLowerCase().includes('לאומי') ? t.nationalService : t.militaryService}
-              {isEditing && (
-                <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleEdit('military', undefined, military)}>
-                  {military.role?.toLowerCase().includes('לאומי') ? 'ערוך שירות לאומי' : 'ערוך שירות צבאי'}
-                  <EditButton
-                    onClick={() => handleEdit('military', undefined, military)}
-                    title={lang === 'he' ? (military.role?.toLowerCase().includes('לאומי') ? 'ערוך שירות לאומי' : 'ערוך שירות צבאי') : 'Edit Service'}
-                    variant="dark"
-                  />
-                </span>
-              )}
-            </h2>
-            <div className="military-content">
-              <div className="military-header">
-                <div className="military-title-wrapper">
-                  <div className="flex items-center gap-1">
-                    <h3 className="military-title">{military.role}</h3>
-                    <span className="military-separator">|</span>
-                    <span className="military-unit">{military.unit}</span>
-                  </div>
-                </div>
-                <div className="military-date">
-                  {formatDate(military.startDate, military.endDate, lang)}
-                </div>
+        <main className="classic-content">
+          {/* תקציר */}
+          {data.personalInfo.summary && (
+            <section className="summary-section">
+              <div className="summary-content">
+                {data.personalInfo.summary}
               </div>
-              {military.description && military.description.length > 0 && (
-                <ul className="military-description" style={{ listStyle: 'none', paddingRight: 0 }}>
-                  {formatDescription(military.description, 3).map((desc, i) => (
-                    <li key={i}>{desc}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </section>
-        )}
+            </section>
+          )}
 
-        {/* כישורים */}
-        {skills && (
-          <section className="skills-section">
-            <h2 className="section-title relative flex items-center gap-4">
-              {t.skills}
-              {isEditing && (
-                <div className="flex gap-4 text-base font-normal">
-                  <span className="flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('technicalSkill')}>
-                    הוסף כישור טכני
+          {/* ניסיון תעסוקתי */}
+          {experience && experience.length > 0 && (
+            <section className="experience-section">
+              <h2 className="section-title relative flex items-center gap-4">
+                {t.workExperience}
+                {isEditing && (
+                  <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('experience')}>
+                    הוסף ניסיון תעסוקתי
                     <EditButton
-                      onClick={() => handleAdd('technicalSkill')}
-                      title={lang === 'he' ? 'הוסף כישור טכני' : 'Add Technical Skill'}
+                      onClick={() => handleAdd('experience')}
+                      title={lang === 'he' ? 'הוסף ניסיון תעסוקתי' : 'Add Work Experience'}
                       variant="dark"
                     />
                   </span>
-                  <span className="flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('softSkill')}>
-                    הוסף כישור רך
+                )}
+              </h2>
+              <div className="experience-items">
+                {experience.map((exp, index) => (
+                  <div key={index} className="experience-item relative">
+                    <div className="experience-header">
+                      <div className="experience-title-wrapper">
+                        <div className="flex items-center gap-1">
+                          <span className="experience-title">{exp.position}</span>
+                          {isEditing && (
+                            <EditButton
+                              onClick={() => onEdit('experience', index)}
+                              title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
+                              variant="dark"
+                            />
+                          )}
+                        </div>
+                        {exp.company && (
+                          <>
+                            <span className="experience-separator">|</span>
+                            <span className="experience-company">{exp.company}</span>
+                          </>
+                        )}
+                      </div>
+                      <div className="experience-date">
+                        {formatDate(exp.startDate, exp.endDate, cvLang)}
+                      </div>
+                    </div>
+                    {exp.description && exp.description.length > 0 && (
+                      <ul className="experience-description" style={{ listStyle: 'none', paddingRight: 0 }}>
+                        {formatDescription(exp.description, data.experience.length).map((desc, i) => (
+                          <li key={i}>{desc}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* השכלה */}
+          {education?.degrees && education.degrees.length > 0 && (
+            <section className="education-section">
+              <h2 className="section-title relative flex items-center gap-4">
+                {t.education}
+                {isEditing && (
+                  <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('education')}>
+                    הוסף השכלה
                     <EditButton
-                      onClick={() => handleAdd('softSkill')}
-                      title={lang === 'he' ? 'הוסף כישור רך' : 'Add Soft Skill'}
+                      onClick={() => handleAdd('education')}
+                      title={lang === 'he' ? 'הוסף השכלה' : 'Add Education'}
                       variant="dark"
                     />
                   </span>
+                )}
+              </h2>
+              <div className="education-items">
+                {education.degrees.map((degree, index) => (
+                  <div key={index} className="education-item relative">
+                    <div className="education-header">
+                      <div className="education-title-wrapper">
+                        <div className="flex items-center gap-1">
+                          <span className="education-degree">
+                            {`${degree.type} ${degree.field}`}
+                          </span>
+                          {isEditing && (
+                            <EditButton
+                              onClick={() => onEdit('education', index)}
+                              title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
+                              variant="dark"
+                            />
+                          )}
+                        </div>
+                        <span className="experience-separator">|</span>
+                        <span className="education-institution">{degree.institution}</span>
+                      </div>
+                      <div className="education-date">{degree.years}</div>
+                    </div>
+                    {degree.specialization && (
+                      <div className="education-specialization">
+                        התמחות: {degree.specialization}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* כירות צבאי/לאומי */}
+          {military && (
+            <section className="military-section">
+              <h2 className="section-title relative flex items-center gap-4">
+                {military.role?.toLowerCase().includes('לאומי') ? t.nationalService : t.militaryService}
+                {isEditing && (
+                  <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleEdit('military', undefined, military)}>
+                    {military.role?.toLowerCase().includes('לאומי') ? 'ערוך שירות לאומי' : 'ערוך שירות צבאי'}
+                    <EditButton
+                      onClick={() => handleEdit('military', undefined, military)}
+                      title={lang === 'he' ? (military.role?.toLowerCase().includes('לאומי') ? 'ערוך שירות לאומי' : 'ערוך שירות צבאי') : 'Edit Service'}
+                      variant="dark"
+                    />
+                  </span>
+                )}
+              </h2>
+              <div className="military-content">
+                <div className="military-header">
+                  <div className="military-title-wrapper">
+                    <div className="flex items-center gap-1">
+                      <h3 className="military-title">{military.role}</h3>
+                      <span className="military-separator">|</span>
+                      <span className="military-unit">{military.unit}</span>
+                    </div>
+                  </div>
+                  <div className="military-date">
+                    {formatDate(military.startDate, military.endDate, lang)}
+                  </div>
                 </div>
-              )}
-            </h2>
-            <div className="skills-items">
-              {skills.technical?.map((skill, index) => (
-                <span key={`tech-${index}`} className="skill-item">
-                  <span className="skill-name">{skill.name}</span>
-                  {" - "}
-                  <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
-                  {index < skills.technical.length - 1 && <span className="skill-separator"> | </span>}
-                  {isEditing && (
+                {military.description && military.description.length > 0 && (
+                  <ul className="military-description" style={{ listStyle: 'none', paddingRight: 0 }}>
+                    {formatDescription(military.description, 3).map((desc, i) => (
+                      <li key={i}>{desc}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* כישורים */}
+          {skills && (
+            <section className="skills-section">
+              <h2 className="section-title relative flex items-center gap-4">
+                {t.skills}
+                {isEditing && (
+                  <div className="flex gap-4 text-base font-normal">
+                    <span className="flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('technicalSkill')}>
+                      הוסף כישור טכני
+                      <EditButton
+                        onClick={() => handleAdd('technicalSkill')}
+                        title={lang === 'he' ? 'הוסף כישור טכני' : 'Add Technical Skill'}
+                        variant="dark"
+                      />
+                    </span>
+                    <span className="flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('softSkill')}>
+                      הוסף כישור רך
+                      <EditButton
+                        onClick={() => handleAdd('softSkill')}
+                        title={lang === 'he' ? 'הוסף כישור רך' : 'Add Soft Skill'}
+                        variant="dark"
+                      />
+                    </span>
+                  </div>
+                )}
+              </h2>
+              <div className="skills-items">
+                {skills.technical?.map((skill, index) => (
+                  <span key={`tech-${index}`} className="skill-item">
+                    <span className="skill-name">{skill.name}</span>
+                    {" - "}
+                    <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
+                    {index < skills.technical.length - 1 && <span className="skill-separator"> | </span>}
+                    {isEditing && (
+                      <EditButton
+                        onClick={() => onEdit('technicalSkill', index)}
+                        title={lang === 'he' ? 'ערוך כישור טכני' : 'Edit Technical Skill'}
+                        variant="dark"
+                      />
+                    )}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* שפות */}
+          {data.skills?.languages && data.skills.languages.length > 0 && (
+            <section className="languages-section">
+              <h2 className="section-title">
+                {t.languages}
+                {isEditing && (
+                  <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAddLanguage()}>
+                    הוסף שפה
                     <EditButton
-                      onClick={() => onEdit('technicalSkill', index)}
-                      title={lang === 'he' ? 'ערוך כישור טכני' : 'Edit Technical Skill'}
+                      onClick={() => handleAddLanguage()}
+                      title={lang === 'he' ? 'הוסף שפה' : 'Add Language'}
                       variant="dark"
                     />
-                  )}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
+                  </span>
+                )}
+              </h2>
+              <div className="languages-items">
+                {data.skills.languages.map((langSkill, index) => (
+                  <div key={index} className="language-item">
+                    <span className="language-tag">
+                      {langSkill.language} - {langSkill.level}
+                    </span>
+                    {isEditing && (
+                      <EditButton
+                        onClick={() => onEdit('language', index)}
+                        title={cvLang === 'he' ? 'ערוך שפה' : 'Edit Language'}
+                        variant="dark"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+        </main>
 
-        {/* שפות */}
-        {skills.languages && skills.languages.length > 0 && (
-          <section className="languages-section">
-            <h2 className="section-title relative flex items-center gap-4">
-              {t.languages}
-              {isEditing && (
-                <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('language')}>
-                  הוסף שפה
-                  <EditButton
-                    onClick={() => handleAdd('language')}
-                    title={lang === 'he' ? 'הוסף שפה' : 'Add Language'}
-                    variant="dark"
-                  />
-                </span>
-              )}
-            </h2>
-            <div className="languages-items">
-              {skills.languages.map((langSkill, index) => (
-                <span key={index} className="skill-item">
-                  <span className="skill-name">{langSkill.language}</span>
-                  <span className="skill-separator"> - </span>
-                  <span className="skill-level">{langSkill.level}</span>
-                  {isEditing && (
-                    <EditButton
-                      onClick={() => onEdit('language', index)}
-                      title={cvLang === 'he' ? 'ערוך שפה' : 'Edit Language'}
-                      variant="dark"
-                    />
-                  )}
-                </span>
-              ))}
-            </div>
-          </section>
+        <div className="classic-footer">
+        </div>
+        {editingSection && (
+          <EditPopup
+            isOpen={true}
+            onClose={() => setEditingSection(null)}
+            data={editingSection.data}
+            onSave={handleSave}
+            section={editingSection.type}
+          />
         )}
-      </main>
-
-      <div className="classic-footer">
+        {isAddingItem && (
+          <AddItemPopup
+            isOpen={true}
+            onClose={() => setIsAddingItem(null)}
+            onAdd={handleAddItem}
+            section={isAddingItem.type}
+          />
+        )}
       </div>
-      {editingSection && (
-        <EditPopup
-          isOpen={true}
-          onClose={() => setEditingSection(null)}
-          data={editingSection.data}
-          onSave={handleSave}
-          section={editingSection.type}
-        />
-      )}
-      {isAddingItem && (
-        <AddItemPopup
-          isOpen={true}
-          onClose={() => setIsAddingItem(null)}
-          onAdd={handleAddItem}
-          section={isAddingItem.type}
-        />
-      )}
     </div>
   );
 };

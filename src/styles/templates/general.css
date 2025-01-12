@@ -740,18 +740,19 @@
 .skills-items {
   display: block;
   padding-right: 1.5rem;
-  padding-left: 3rem;
   line-height: 1.4;
   margin-top: 0.5rem;
   text-align: right;
   max-width: 100%;
+  white-space: normal;
+  word-break: keep-all;
 }
 
 .skill-item {
-  display: inline;
+  display: inline-block;
   font-size: 0.9rem;
   color: #333;
-  margin-left: 0;
+  margin-bottom: 0.2rem;
 }
 
 .skill-name {
@@ -764,12 +765,25 @@
   color: #666;
 }
 
-.skill-item:not(:last-child)::after {
-  content: " | ";
+.skill-separator {
   margin: 0 0.8rem;
   color: #666;
   opacity: 0.4;
   font-weight: 200;
+  display: inline-block;
+}
+
+.skills-type-separator {
+  margin: 0 0.8rem;
+  color: #666;
+  opacity: 0.4;
+  font-weight: 200;
+  display: inline-block;
+}
+
+.skills-section {
+  margin-bottom: 2rem;
+  margin-left: 10rem;
 }
 
 /* שפות */
@@ -843,4 +857,9 @@
   color: #666;
   opacity: 0.4;
   font-weight: 200;
+}
+
+.skills-section {
+  margin-bottom: 2rem;
+  margin-left: 10rem;
 } 

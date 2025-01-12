@@ -1115,122 +1115,29 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   };
 
   const renderEditButton = () => {
-    if (isMobile) return null;
+    // אם זו התבנית הקלאסית, לא נציג את כפתור העריכה
+    if (selectedTemplate === 'classic') {
+      return null;
+    }
 
     return (
       <div className="flex items-center gap-2">
-        <Dialog open={isUpgradeDialogOpen} onOpenChange={setIsUpgradeDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              onClick={() => {
-                if (isEditable) {
-                  setIsEditing(!isEditing);
-                  return;
-                }
-              }}
-              className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
-            >
-              {isEditing ? <X className="h-6 w-6" /> : <Edit2 className="h-6 w-6" />}
-            </Button>
-          </DialogTrigger>
-          {!isEditable && (
-            <DialogContent className="sm:max-w-[600px]">
-              <DialogHeader>
-                <DialogTitle className={`text-center text-xl ${lang === 'he' ? 'font-heebo' : ''}`}>
-                  {lang === 'he' 
-                    ? 'שדרג את החבילה שלך'
-                    : 'Upgrade Your Package'}
-                </DialogTitle>
-              </DialogHeader>
-              <div className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  {/* Advanced Package */}
-                  <div className="border border-[#4856CD]/20 rounded-xl p-4 space-y-4">
-                    <div className="text-center">
-                      <h3 className="text-xl font-medium text-[#4856CD]">Advanced</h3>
-                      <div className="text-3xl font-bold text-gray-900 mt-2">
-                        +{formatPriceDifference(selectedPackage || 'basic', 'advanced')}₪
-                      </div>
-                      {selectedPackage && (
-                        <div className="text-sm text-gray-500 mt-1">
-                          {lang === 'he' 
-                            ? 'תוספת לחבילה הנוכחית'
-                            : 'Additional to current package'}
-                        </div>
-                      )}
-                    </div>
-                    <ul className="space-y-2">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-[#4856CD]" />
-                        <span>{lang === 'he' ? 'קורות חיים באנגלית' : 'English CV'}</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-[#4856CD]" />
-                        <span>{lang === 'he' ? 'עריכת קורות חיים' : 'CV Editing'}</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-[#4856CD]" />
-                        <span>{lang === 'he' ? 'פרופיל לינקדאין אוטומטי' : 'Automatic LinkedIn Profile'}</span>
-                      </li>
-                    </ul>
-                    <Button
-                      onClick={() => handleUpgradeClick('advanced')}
-                      className="w-full bg-[#4856CD] text-white hover:bg-[#4856CD]/90 rounded-full py-2"
-                    >
-                      {lang === 'he' ? 'שדרג ל-Advanced' : 'Upgrade to Advanced'}
-                    </Button>
-                  </div>
-
-                  {/* Pro Package */}
-                  <div className="border-2 border-[#4856CD] rounded-xl p-4 space-y-4 relative">
-                    <div className="absolute -top-3 right-4 bg-[#4856CD] text-white px-3 py-1 rounded-full text-sm">
-                      {lang === 'he' ? 'הכי פופולרי' : 'Most Popular'}
-                    </div>
-                    <div className="text-center">
-                      <h3 className="text-xl font-medium text-[#4856CD]">Pro</h3>
-                      <div className="text-3xl font-bold text-gray-900 mt-2">
-                        +{formatPriceDifference(selectedPackage || 'basic', 'pro')}₪
-                      </div>
-                      {selectedPackage && (
-                        <div className="text-sm text-gray-500 mt-1">
-                          {lang === 'he' 
-                            ? 'תוספת לחבילה הנוכחית'
-                            : 'Additional to current package'}
-                        </div>
-                      )}
-                    </div>
-                    <ul className="space-y-2">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-[#4856CD]" />
-                        <span>{lang === 'he' ? 'כל התכונות של Advanced' : 'All Advanced features'}</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-[#4856CD]" />
-                        <span>{lang === 'he' ? 'הכנה אישית לראיון' : 'Personal Interview Prep'}</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-[#4856CD]" />
-                        <span>{lang === 'he' ? 'ליווי אישי מול מעסיקים' : 'Personal Employer Guidance'}</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle2 className="h-5 w-5 text-[#4856CD]" />
-                        <span>{lang === 'he' ? 'שובר נסיעה לראיון' : 'Interview Travel Voucher'}</span>
-                      </li>
-                    </ul>
-                    <Button
-                      onClick={() => handleUpgradeClick('pro')}
-                      className="w-full bg-[#4856CD] text-white hover:bg-[#4856CD]/90 rounded-full py-2"
-                    >
-                      {lang === 'he' ? 'שדרג ל-Pro' : 'Upgrade to Pro'}
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </DialogContent>
+        <Button
+          onClick={() => setIsEditing(!isEditing)}
+          disabled={isDownloadingPdf}
+          className={cn(
+            "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
+            isDownloadingPdf && "opacity-50 cursor-not-allowed"
           )}
-        </Dialog>
+          aria-label={lang === 'he' ? 'עריכת קורות חיים' : 'Edit CV'}
+        >
+          {isEditing ? <X className="h-6 w-6" /> : <Edit2 className="h-6 w-6" />}
+        </Button>
         <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-          {isEditing ? (lang === 'he' ? 'סיום עריכה' : 'Finish Editing') : (lang === 'he' ? 'עריכה' : 'Edit')}
+          {isEditing 
+            ? (lang === 'he' ? 'סיום עריכה' : 'Finish Editing')
+            : (lang === 'he' ? 'עריכת קורות החיים' : 'Edit CV')
+          }
         </span>
       </div>
     );
@@ -1498,10 +1405,10 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           <div className="flex items-center gap-2">
             <Button
               onClick={handleDownloadAndContinue}
-              disabled={isDownloadingPdf || isEditing}
+              disabled={isDownloadingPdf || isEditing || selectedTemplate === 'classic'}
               className={cn(
                 "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
-                isEditing && "opacity-50 cursor-not-allowed"
+                (isEditing || selectedTemplate === 'classic') && "opacity-50 cursor-not-allowed"
               )}
               aria-label={lang === 'he' ? 'הורדת קובץ PDF והמשך' : 'Download PDF and Continue'}
             >
@@ -1512,7 +1419,10 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
               )}
             </Button>
             <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-              {lang === 'he' ? 'הורדת הקורות חיים והמשך למסך ההטבות' : 'Download CV and Continue to Benefits Screen'}
+              {selectedTemplate === 'classic' 
+                ? (lang === 'he' ? 'התבנית בבנייה' : 'Template Under Construction')
+                : (lang === 'he' ? 'הורדת הקורות חיים והמשך למסך ההטבות' : 'Download CV and Continue to Benefits Screen')
+              }
             </span>
           </div>
         ) : (

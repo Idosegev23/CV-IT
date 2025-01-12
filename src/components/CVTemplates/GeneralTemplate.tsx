@@ -35,6 +35,7 @@ interface GeneralTemplateProps {
   isEditing?: boolean;
   onUpdate?: (field: string, value: any) => void;
   onDelete?: (section: string, index: number) => void;
+  onEdit?: (type: string, index: number, data?: any) => void;
 }
 
 const assistant = Assistant({ 
@@ -85,7 +86,8 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
   lang = 'he',
   isEditing = false,
   onUpdate = () => {},
-  onDelete = () => {}
+  onDelete = () => {},
+  onEdit = () => {}
 }) => {
   const [editingSection, setEditingSection] = useState<{
     type: string;
@@ -579,36 +581,45 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
           <div className="skills-items">
             {/* Technical Skills */}
             {Array.isArray(data.skills.technical) && data.skills.technical.map((skill, index) => (
-              <span key={`tech-${index}`} className="skill-item">
-                <span className="skill-name">{skill.name}</span>
-                {skill.level && (
-                  <>
-                    <span> - </span>
-                    <span className="skill-level">{getSkillLevel(skill.level)}</span>
-                  </>
-                )}
-                {isEditing && (
-                  <EditButton
-                    onClick={() => handleEdit('technicalSkill', index)}
-                    title={lang === 'he' ? 'ערוך כישור טכני' : 'Edit Technical Skill'}
-                    variant="dark"
-                  />
-                )}
-              </span>
+              <React.Fragment key={`tech-${index}`}>
+                <span className="skill-item">
+                  <span className="skill-name">{skill.name}</span>
+                  {skill.level && (
+                    <span className="skill-level"> - {getSkillLevel(skill.level)}</span>
+                  )}
+                  {isEditing && (
+                    <EditButton
+                      onClick={() => handleEdit('technicalSkill', index)}
+                      title={lang === 'he' ? 'ערוך כישור טכני' : 'Edit Technical Skill'}
+                      variant="dark"
+                    />
+                  )}
+                </span>
+                {index < data.skills.technical.length - 1 && <span className="skill-separator">|</span>}
+              </React.Fragment>
             ))}
+            
+            {/* Separator between technical and soft skills */}
+            {Array.isArray(data.skills.technical) && data.skills.technical.length > 0 && 
+             Array.isArray(data.skills.soft) && data.skills.soft.length > 0 && (
+              <span className="skills-type-separator">|</span>
+            )}
             
             {/* Soft Skills */}
             {Array.isArray(data.skills.soft) && data.skills.soft.map((skill, index) => (
-              <span key={`soft-${index}`} className="skill-item">
-                <span className="skill-name">{skill.name}</span>
-                {isEditing && (
-                  <EditButton
-                    onClick={() => handleEdit('softSkill', index)}
-                    title={lang === 'he' ? 'ערוך כישור רך' : 'Edit Soft Skill'}
-                    variant="dark"
-                  />
-                )}
-              </span>
+              <React.Fragment key={`soft-${index}`}>
+                <span className="skill-item">
+                  <span className="skill-name">{skill.name}</span>
+                  {isEditing && (
+                    <EditButton
+                      onClick={() => handleEdit('softSkill', index)}
+                      title={lang === 'he' ? 'ערוך כישור רך' : 'Edit Soft Skill'}
+                      variant="dark"
+                    />
+                  )}
+                </span>
+                {index < data.skills.soft.length - 1 && <span className="skill-separator">|</span>}
+              </React.Fragment>
             ))}
           </div>
         </section>

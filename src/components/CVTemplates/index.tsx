@@ -46,8 +46,8 @@ export const CVTemplate: React.FC<CVTemplateProps> = ({
         return <GeneralTemplateEn data={data} lang={lang} />;
       default:
         console.warn('No matching English template for:', templateId);
-        console.log('Using ClassicTemplateEn as default');
-        return <ClassicTemplateEn data={data} lang={lang} />;
+        console.log('Using ProfessionalTemplateEn as default');
+        return <ProfessionalTemplateEn data={data} lang={lang} />;
     }
   }
 
@@ -67,8 +67,8 @@ export const CVTemplate: React.FC<CVTemplateProps> = ({
       return <CreativeTemplate data={data} lang={lang} />;
     default:
       console.warn('No matching Hebrew template for:', templateId);
-      console.log('Using ClassicTemplate as default');
-      return <ClassicTemplate data={data} lang={lang} />;
+      console.log('Using ProfessionalTemplate as default');
+      return <ProfessionalTemplate data={data} lang={lang} />;
   }
 };
 
