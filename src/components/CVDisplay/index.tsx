@@ -665,21 +665,17 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
 
-      } catch (error) {
-        console.warn('Failed to process PDF:', error);
-        toast.error(dictionary.messages.downloadError);
-        return;
-      }
+        toast.success(dictionary.messages.downloadSuccess);
 
-      toast.success(dictionary.messages.downloadSuccess);
-
-      // ניתוט אוטומטי למסך הסיום לאחר ההורדה וצלחת
-      setTimeout(() => {
+        // ניווט למסך הסיום
         router.push(`/${lang}/finish/${sessionId}`);
-      }, 1500);
 
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        toast.error(dictionary.messages.downloadError);
+      }
     } catch (error) {
-      console.error('Error generating PDF:', error);
+      console.error('Error preparing PDF:', error);
       toast.error(dictionary.messages.downloadError);
     } finally {
       setIsDownloadingPdf(false);
@@ -1476,13 +1472,16 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         {/* כפתור הורדה */}
         <div className="flex items-center gap-2">
           <Button
-            onClick={handlePdfDownload}
+            onClick={async () => {
+              await handlePdfDownload();
+              router.push(`/${lang}/finish/${sessionId}`);
+            }}
             disabled={isDownloadingPdf || isEditing}
             className={cn(
               "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
               isEditing && "opacity-50 cursor-not-allowed"
             )}
-            aria-label={lang === 'he' ? 'הורדת קובץ PDF' : 'Download PDF'}
+            aria-label={lang === 'he' ? 'הורדת קובץ PDF והמשך' : 'Download PDF and Continue'}
           >
             {isDownloadingPdf ? (
               <Loader2 className="h-6 w-6 animate-spin" />
@@ -1491,21 +1490,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
             )}
           </Button>
           <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-            {lang === 'he' ? 'שמירה' : 'Save'}
-          </span>
-        </div>
-
-        {/* כפתור המשך לדף סיום */}
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => router.push(`/${lang}/finish/${sessionId}`)}
-            className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
-            aria-label={lang === 'he' ? 'המשך לדף סיום' : 'Continue to finish page'}
-          >
-            <FileText className="h-6 w-6" />
-          </Button>
-          <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-            {lang === 'he' ? 'המשך' : 'Continue'}
+            {lang === 'he' ? 'הורדת הקורות חיים והמשך למסך ההטבות' : 'Download CV and Continue to Benefits Screen'}
           </span>
         </div>
       </div>
