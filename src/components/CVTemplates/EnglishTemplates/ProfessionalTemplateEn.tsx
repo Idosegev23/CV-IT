@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { ResumeData } from '../../../types/resume';
 import '../../../styles/templates/professional-en.css';
 import { Assistant } from 'next/font/google';
+import { formatDate } from '../utils';
 
 interface ProfessionalTemplateProps {
   data: ResumeData;
@@ -36,15 +37,6 @@ const translations = {
     softSkills: 'Soft Skills',
     skillLevel: 'Skill Level'
   }
-};
-
-// Date formatting function
-const formatDate = (startDate: string, endDate: string) => {
-  const formattedEnd = endDate === 'Present' || endDate === 'present' ? 
-    translations.en.present : 
-    endDate;
-  
-  return `${startDate} ${translations.en.to} ${formattedEnd}`;
 };
 
 const shouldPreventWordWrap = (text: string = '') => {

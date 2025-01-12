@@ -16,7 +16,7 @@ import Cloud from '../../../public/design/general/cloud.svg';
 import Image from 'next/image';
 import '../../styles/templates/general.css';
 import { Assistant } from 'next/font/google';
-import { formatDescription } from './utils';
+import { formatDescription, formatDate } from './utils';
 import { EditButton } from '../EditableFields/EditButton';
 import { EditPopup } from '../EditableFields/EditPopup';
 import { AddItemPopup } from '../EditableFields/AddItemPopup';
@@ -416,27 +416,24 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               <div key={index} className="timeline-item">
                 <div className="timeline-header">
                   <div className="timeline-title-wrapper">
-                    <h4>
-                      <span className="timeline-position">{exp.position}</span>
-                      {isEditing && (
-                        <EditButton
-                          onClick={() => handleEdit('experience', index, experience[index])}
-                          title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
-                          variant="dark"
-                        />
-                      )}
-                      {exp.company && (
-                        <>
-                          <span className="timeline-separator">|</span>
-                          <span className="timeline-company">{exp.company}</span>
-                        </>
-                      )}
-                      <span className="timeline-separator">|</span>
-                      <span className="timeline-date">
-                        {`${exp.startDate} - ${exp.endDate}`}
-                      </span>
-                    </h4>
+                    <span className="timeline-position">{exp.position}</span>
+                    {isEditing && (
+                      <EditButton
+                        onClick={() => handleEdit('experience', index, experience[index])}
+                        title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
+                        variant="dark"
+                      />
+                    )}
+                    {exp.company && (
+                      <>
+                        <span className="timeline-separator">|</span>
+                        <span className="timeline-company">{exp.company}</span>
+                      </>
+                    )}
                   </div>
+                  <span className="timeline-date">
+                    {formatDate(exp.startDate, exp.endDate, lang)}
+                  </span>
                 </div>
                 {exp.description && exp.description.length > 0 && (
                   <ul className="timeline-description">
@@ -474,7 +471,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
             {data.education.degrees.map((degree, index) => (
               <div key={index} className="timeline-item">
                 <div className="timeline-header">
-                  <h4>
+                  <div className="timeline-title-wrapper">
                     <span className="timeline-position">{degree.type} {degree.field}</span>
                     {isEditing && (
                       <EditButton
@@ -489,8 +486,8 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                         <span className="timeline-company">{degree.institution}</span>
                       </>
                     )}
-                    <span className="timeline-date">{degree.years}</span>
-                  </h4>
+                  </div>
+                  <span className="timeline-date">{degree.years}</span>
                 </div>
                 {degree.specialization && (
                   <div className="timeline-description">
@@ -515,7 +512,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
           <div className="timeline-container">
             <div className="timeline-item">
               <div className="timeline-header">
-                <h4>
+                <div className="timeline-title-wrapper">
                   <span className="timeline-position">{data.military.role}</span>
                   {isEditing && (
                     <EditButton
@@ -530,10 +527,10 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                       <span className="timeline-company">{data.military.unit}</span>
                     </>
                   )}
-                  <span className="timeline-date">
-                    {`${data.military.startDate} - ${data.military.endDate}`}
-                  </span>
-                </h4>
+                </div>
+                <span className="timeline-date">
+                  {formatDate(data.military.startDate, data.military.endDate, lang)}
+                </span>
               </div>
               {data.military.description && data.military.description.length > 0 && (
                 <ul className="timeline-description">
@@ -552,7 +549,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
         (Array.isArray(data.skills.technical) && data.skills.technical.length > 0) || 
         (Array.isArray(data.skills.soft) && data.skills.soft.length > 0)
       ) && (
-        <section className="section">
+        <section className="skills-section">
           <h3 className="section-title">
             <div className="section-icon">
               <Image src={SkillIcon} alt="skills" width={48} height={48} />
@@ -579,11 +576,17 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               </div>
             )}
           </h3>
-          <div className="skills-grid">
+          <div className="skills-items">
             {/* Technical Skills */}
             {Array.isArray(data.skills.technical) && data.skills.technical.map((skill, index) => (
-              <div key={`tech-${index}`} className="skill-item">
-                <span>{skill.name && `${skill.name}${skill.level ? ` - ${getSkillLevel(skill.level)}` : ''}`}</span>
+              <span key={`tech-${index}`} className="skill-item">
+                <span className="skill-name">{skill.name}</span>
+                {skill.level && (
+                  <>
+                    <span> - </span>
+                    <span className="skill-level">{getSkillLevel(skill.level)}</span>
+                  </>
+                )}
                 {isEditing && (
                   <EditButton
                     onClick={() => handleEdit('technicalSkill', index)}
@@ -591,13 +594,13 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                     variant="dark"
                   />
                 )}
-              </div>
+              </span>
             ))}
             
             {/* Soft Skills */}
             {Array.isArray(data.skills.soft) && data.skills.soft.map((skill, index) => (
-              <div key={`soft-${index}`} className="skill-item">
-                <span>{skill.name}</span>
+              <span key={`soft-${index}`} className="skill-item">
+                <span className="skill-name">{skill.name}</span>
                 {isEditing && (
                   <EditButton
                     onClick={() => handleEdit('softSkill', index)}
@@ -605,7 +608,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                     variant="dark"
                   />
                 )}
-              </div>
+              </span>
             ))}
           </div>
         </section>
@@ -613,7 +616,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
 
       {/* Languages */}
       {data.skills?.languages && data.skills.languages.length > 0 && (
-        <section className="section">
+        <section className="languages-section">
           <h3 className="section-title">
             <div className="section-icon">
               <Image src={LangIcon} alt="languages" width={48} height={48} />
@@ -630,10 +633,12 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               </span>
             )}
           </h3>
-          <div className="languages-grid">
+          <div className="languages-items">
             {data.skills.languages.map((lang, index) => (
-              <div key={index} className="language-item">
-                <span className="language-name">{lang.language}</span>
+              <span key={index}>
+                <span>{lang.language}</span>
+                <span> - </span>
+                <span>{lang.level}</span>
                 {isEditing && (
                   <EditButton
                     onClick={() => handleEdit('language', index, skills.languages[index])}
@@ -641,8 +646,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                     variant="dark"
                   />
                 )}
-                <span className="language-level">{lang.level}</span>
-              </div>
+              </span>
             ))}
           </div>
         </section>

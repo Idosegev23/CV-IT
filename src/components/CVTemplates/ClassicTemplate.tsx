@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { Assistant } from 'next/font/google';
 import { EditableText } from '../EditableFields/EditableText';
 import { EditableList } from '../EditableFields/EditableList';
-import { adjustTemplateSize, formatDescription } from './utils';
+import { adjustTemplateSize, formatDescription, formatDate, getSkillLevel } from './utils';
 import { EditPopup } from '../EditableFields/EditPopup';
 import { EditButton } from '../EditableFields/EditButton';
 import { AddItemPopup } from '../EditableFields/AddItemPopup';
@@ -77,6 +77,7 @@ const translations = {
     workExperience: 'ניסיון תעסוקתי',
     education: 'השכלה',
     militaryService: 'שירות צבאי',
+    nationalService: 'שירות לאומי',
     professionalSummary: 'תקציר מקצועי',
     email: 'דוא"ל',
     phone: 'טלפון',
@@ -94,6 +95,7 @@ const translations = {
     workExperience: 'Work Experience',
     education: 'Education',
     militaryService: 'Military Service',
+    nationalService: 'National Service',
     professionalSummary: 'Professional Summary',
     email: 'Email',
     phone: 'Phone',
@@ -105,30 +107,6 @@ const translations = {
     softSkills: 'Soft Skills',
     skillLevel: 'Skill Level'
   }
-};
-
-// פונקציה לפורמוט תאריכים
-const formatDate = (startDate: string, endDate: string, lang: string) => {
-  const formattedEnd = endDate === 'כיום' || endDate === 'היום' ? 
-    translations[lang as keyof typeof translations].present : 
-    endDate;
-  
-  return lang === 'he' ? 
-    `${startDate} - ${formattedEnd}` : 
-    `${startDate} ${translations[lang as keyof typeof translations].to} ${formattedEnd}`;
-};
-
-const getSkillLevel = (level: number, lang: string = 'he') => {
-  const levels: { [key: number]: { he: string; en: string } } = {
-    5: { he: 'רמה גבוהה מאוד', en: 'Expert Level' },
-    4: { he: 'רמה גבוהה', en: 'Advanced Level' },
-    3: { he: 'רמה טובה', en: 'Intermediate Level' },
-    2: { he: 'רמה בינונית', en: 'Basic Level' },
-    1: { he: 'רמה בסיסית', en: 'Beginner Level' }
-  };
-
-  return levels[level]?.[lang as 'he' | 'en'] || 
-    (lang === 'he' ? 'רמה טובה' : 'Good Level');
 };
 
 const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ 
@@ -440,7 +418,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                     </div>
                   </div>
                   {exp.description && exp.description.length > 0 && (
-                    <ul className="experience-description">
+                    <ul className="experience-description" style={{ listStyle: 'none', paddingRight: 0 }}>
                       {formatDescription(exp.description, data.experience.length).map((desc, i) => (
                         <li key={i}>{desc}</li>
                       ))}
@@ -501,36 +479,37 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
           </section>
         )}
 
-        {/* כירות צבאי */}
+        {/* כירות צבאי/לאומי */}
         {military && (
           <section className="military-section">
             <h2 className="section-title relative flex items-center gap-4">
-              {t.militaryService}
+              {military.role?.toLowerCase().includes('לאומי') ? t.nationalService : t.militaryService}
               {isEditing && (
                 <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleEdit('military', undefined, military)}>
-                  ערוך שירות צבאי
+                  {military.role?.toLowerCase().includes('לאומי') ? 'ערוך שירות לאומי' : 'ערוך שירות צבאי'}
                   <EditButton
                     onClick={() => handleEdit('military', undefined, military)}
-                    title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
+                    title={lang === 'he' ? (military.role?.toLowerCase().includes('לאומי') ? 'ערוך שירות לאומי' : 'ערוך שירות צבאי') : 'Edit Service'}
                     variant="dark"
                   />
                 </span>
               )}
             </h2>
-            <div className="experience-item">
-              <div className="experience-header">
-                <div className="experience-title-wrapper">
+            <div className="military-content">
+              <div className="military-header">
+                <div className="military-title-wrapper">
                   <div className="flex items-center gap-1">
-                    <h3 className="experience-title">{military.role}</h3>
-                    <span className="experience-company">{military.unit}</span>
+                    <h3 className="military-title">{military.role}</h3>
+                    <span className="military-separator">|</span>
+                    <span className="military-unit">{military.unit}</span>
                   </div>
                 </div>
-                <div className="experience-date">
+                <div className="military-date">
                   {formatDate(military.startDate, military.endDate, lang)}
                 </div>
               </div>
               {military.description && military.description.length > 0 && (
-                <ul className="experience-description">
+                <ul className="military-description" style={{ listStyle: 'none', paddingRight: 0 }}>
                   {formatDescription(military.description, 3).map((desc, i) => (
                     <li key={i}>{desc}</li>
                   ))}
@@ -568,10 +547,11 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
             </h2>
             <div className="skills-items">
               {skills.technical?.map((skill, index) => (
-                <div key={`tech-${index}`} className="flex items-center gap-1">
-                  <span className="skill-item">
-                    {`${skill.name} - ${getSkillLevel(skill.level, cvLang)}`}
-                  </span>
+                <span key={`tech-${index}`} className="skill-item">
+                  <span className="skill-name">{skill.name}</span>
+                  {" - "}
+                  <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
+                  {index < skills.technical.length - 1 && <span className="skill-separator"> | </span>}
                   {isEditing && (
                     <EditButton
                       onClick={() => onEdit('technicalSkill', index)}
@@ -579,7 +559,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                       variant="dark"
                     />
                   )}
-                </div>
+                </span>
               ))}
             </div>
           </section>
@@ -603,10 +583,10 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
             </h2>
             <div className="languages-items">
               {skills.languages.map((langSkill, index) => (
-                <div key={index} className="flex items-center gap-1">
-                  <span className="skill-item">
-                    {`${langSkill.language} - ${langSkill.level}`}
-                  </span>
+                <span key={index} className="skill-item">
+                  <span className="skill-name">{langSkill.language}</span>
+                  <span className="skill-separator"> - </span>
+                  <span className="skill-level">{langSkill.level}</span>
                   {isEditing && (
                     <EditButton
                       onClick={() => onEdit('language', index)}
@@ -614,7 +594,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                       variant="dark"
                     />
                   )}
-                </div>
+                </span>
               ))}
             </div>
           </section>

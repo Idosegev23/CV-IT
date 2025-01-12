@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { BackButton } from '@/components/BackButton';
 
 const templates = {
   pro: {
@@ -62,35 +63,10 @@ export default function GalleryPage() {
   const lang = (params?.lang ?? 'he') as 'he' | 'en';
   const isRTL = lang === 'he';
   const [currentTemplate, setCurrentTemplate] = useState('pro');
-  const [isAutoPlay, setIsAutoPlay] = useState(true);
-
+  
   const handleStart = () => {
     router.push(`/${lang}/packages`);
   };
-
-  // עצירת האוטופליי כשהמשתמש לא רואה את הדף
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      setIsAutoPlay(!document.hidden);
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
-
-  useEffect(() => {
-    if (!isAutoPlay) return;
-    
-    const interval = setInterval(() => {
-      setCurrentTemplate(current => {
-        const templates = ['pro', 'classic', 'general', 'creative'];
-        const currentIndex = templates.indexOf(current);
-        return templates[(currentIndex + 1) % templates.length];
-      });
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [isAutoPlay]);
 
   const handlePrevTemplate = () => {
     setCurrentTemplate(current => {
@@ -116,21 +92,25 @@ export default function GalleryPage() {
       )}
     >
       <div className="container mx-auto">
+        <div className="mb-8">
+          <BackButton isRTL={isRTL} />
+        </div>
+
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-12 md:mb-16 font-rubik text-[#4856CD]">
           {isRTL ? 'הטמפלייטים שלנו' : 'Our Templates'}
         </h1>
 
         <div className="relative max-w-[350px] sm:max-w-2xl md:max-w-4xl mx-auto">
           <button
-            onClick={handlePrevTemplate}
+            onClick={isRTL ? handleNextTemplate : handlePrevTemplate}
             className="absolute left-[-40px] top-1/2 transform -translate-y-1/2 z-10
                      w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center
                      hover:bg-gray-50 transition-colors duration-300
                      focus:outline-none focus:ring-2 focus:ring-[#4856CD]"
-            aria-label={isRTL ? 'תבנית קודמת' : 'Previous template'}
+            aria-label={isRTL ? 'תבנית הבאה' : 'Previous template'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isRTL ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
 
@@ -157,15 +137,15 @@ export default function GalleryPage() {
           </AnimatePresence>
 
           <button
-            onClick={handleNextTemplate}
+            onClick={isRTL ? handlePrevTemplate : handleNextTemplate}
             className="absolute right-[-40px] top-1/2 transform -translate-y-1/2 z-10
                      w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center
                      hover:bg-gray-50 transition-colors duration-300
                      focus:outline-none focus:ring-2 focus:ring-[#4856CD]"
-            aria-label={isRTL ? 'תבנית הבאה' : 'Next template'}
+            aria-label={isRTL ? 'תבנית קודמת' : 'Next template'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isRTL ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7"} />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
 

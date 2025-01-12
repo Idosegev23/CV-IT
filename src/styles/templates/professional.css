@@ -92,14 +92,14 @@
 }
 
 .professional-name-first {
-  font-weight: 700;
+  font-weight: 700 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .professional-name-last {
-  font-weight: 200;
+  font-weight: 200 !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -119,7 +119,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
-  font-weight: 200;
+  font-weight: 300 !important;
   font-size: clamp(0.7rem, 1.5vw, 0.95rem);
   color: #F3F4F1;
   opacity: 0.9;
@@ -129,7 +129,7 @@
 
 /* כותרות משניות */
 .professional-section-title {
-  font-weight: 700;
+  font-weight: 600 !important;
   font-size: clamp(1rem, 2vw, 1.2rem);
   color: #F3F4F1;
   margin-bottom: 0.8rem;
@@ -150,7 +150,7 @@
 }
 
 .professional-language-name {
-  font-weight: 400;
+  font-weight: 400 !important;
   font-size: 0.8rem;
   white-space: nowrap;
   overflow: hidden;
@@ -163,7 +163,7 @@
 }
 
 .professional-language-level {
-  font-weight: 200;
+  font-weight: 200 !important;
   color: #F3F4F1;
   opacity: 0.85;
   white-space: nowrap;
@@ -181,7 +181,7 @@
 .professional-skill-item {
   display: flex;
   align-items: flex-start;
-  font-weight: 200;
+  font-weight: 200 !important;
   font-size: 0.8rem;
   color: white;
   opacity: 0.9;
@@ -282,14 +282,14 @@
 .professional-experience-title,
 .professional-education-title,
 .professional-military-title {
-  font-weight: 500;
+  font-weight: 600 !important;
   font-size: clamp(0.9rem, 2vw, 1.1rem);
 }
 
 .professional-experience-company,
 .professional-education-institution,
 .professional-military-unit {
-  font-weight: 300;
+  font-weight: 300 !important;
   font-size: clamp(0.85rem, 1.8vw, 1rem);
 }
 
@@ -302,12 +302,22 @@
 .professional-experience-date,
 .professional-education-date,
 .professional-military-date {
-  font-weight: 200;
   font-size: 0.85rem;
   color: #666;
-  text-align: left;
-  margin-right: auto;
-  padding-right: 1rem;
+  white-space: nowrap;
+  min-width: fit-content;
+  margin-right: 0;
+  margin-left: 5rem;
+  direction: ltr;
+  text-align: right;
+  font-weight: 400;
+}
+
+[dir="rtl"] .professional-experience-date,
+[dir="rtl"] .professional-education-date,
+[dir="rtl"] .professional-military-date {
+  margin-left: 0;
+  margin-right: 5rem;
 }
 
 .professional-experience-description,
@@ -323,7 +333,7 @@
   margin-bottom: 0.4rem;
   position: relative;
   padding-right: 1rem;
-  font-weight: 200;
+  font-weight: 200 !important;
 }
 
 .professional-experience-description li::before {
@@ -357,13 +367,13 @@
 }
 
 .professional-education-degree {
-  font-weight: 400;
+  font-weight: 600 !important;
   font-size: clamp(0.85rem, 1.5vw, 0.95rem);
   margin-bottom: 0.3rem;
 }
 
 .professional-education-institution {
-  font-weight: 300;
+  font-weight: 300 !important;
   font-size: clamp(0.85rem, 1.5vw, 0.95rem);
   color: #333;
 }
@@ -380,8 +390,8 @@
 }
 
 .professional-military-description {
-  font-weight: 300;
-  font-size: clamp(0.85rem, 1.5vw, 0.95rem);
+  font-weight: 200 !important;
+  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
   color: #333;
   line-height: 1.4;
 }
@@ -404,7 +414,7 @@
 
 /* עדכון שירות צבאי */
 .professional-military-description {
-  font-weight: 200;
+  font-weight: 200 !important;
   font-size: clamp(0.7rem, 1.5vw, 0.9rem);
   white-space: normal;
   word-wrap: break-word;
@@ -413,7 +423,7 @@
 
 /* דכון השכלה */
 .professional-education-institution {
-  font-weight: 200;
+  font-weight: 200 !important;
   font-size: clamp(0.7rem, 1.5vw, 0.9rem);
   white-space: normal;
   word-wrap: break-word;
@@ -495,7 +505,7 @@
 .professional-skill-item {
   display: flex;
   align-items: center;
-  font-weight: 200;
+  font-weight: 200 !important;
   font-size: 0.8rem;
   color: white;
   opacity: 0.9;
@@ -634,11 +644,59 @@
 }
 
 .professional-experience-title {
-  font-weight: 500 !important;
+  font-weight: 600 !important;
 }
 
 .professional-experience-company {
   font-weight: 300 !important;
+}
+
+.professional-experience-date {
+  font-weight: 400 !important;
+}
+
+.professional-experience-description li {
+  font-weight: 200 !important;
+}
+
+.professional-education-degree {
+  font-weight: 600 !important;
+}
+
+.professional-education-institution {
+  font-weight: 300 !important;
+}
+
+.professional-education-date {
+  font-weight: 400 !important;
+}
+
+.professional-military-title {
+  font-weight: 600 !important;
+}
+
+.professional-military-unit {
+  font-weight: 300 !important;
+}
+
+.professional-military-date {
+  font-weight: 400 !important;
+}
+
+.professional-military-description {
+  font-weight: 200 !important;
+}
+
+.professional-language-name {
+  font-weight: 400 !important;
+}
+
+.professional-language-level {
+  font-weight: 200 !important;
+}
+
+.professional-skill-item {
+  font-weight: 200 !important;
 }
 
 /* התאמות להדפסה */

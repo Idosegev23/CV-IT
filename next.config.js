@@ -4,13 +4,14 @@ const nextConfig = {
   images: {
     domains: ['yjxbiyfnedsehjbaqbey.supabase.co'],
   },
-  swcMinify: true,
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   experimental: {
     optimizeCss: false,
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ['*']
+    }
   },
   poweredByHeader: false,
   compress: true,

@@ -7,6 +7,7 @@ import { useAppStore } from '@/lib/store';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { toast } from 'sonner';
 import { useSessionStore } from '@/store/sessionStore';
+import { BackButton } from '@/components/BackButton';
 
 // הוספת טיפוס Package
 import type { Package } from '@/lib/store';
@@ -251,27 +252,21 @@ export default function PackagesPage() {
   };
 
   return (
-    <div 
-      dir={isRTL ? 'rtl' : 'ltr'}
-      className="min-h-screen bg-[#EAEAE7] py-8"
-    >
-      <div className="container mx-auto px-4">
-        {/* כותרת ראשית */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center max-w-[800px] mx-auto mb-8"
-        >
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-600 mb-3">
+    <div className="min-h-screen bg-[#EAEAE7]">
+      <div className="container mx-auto px-4 py-8 relative">
+        {/* Back Button */}
+        <div className="mb-8">
+          <BackButton isRTL={isRTL} />
+        </div>
+
+        <div className="text-center mb-8">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-[#4856CD] mb-4">
             {currentContent.title}
           </h1>
-          <h2 className="text-lg md:text-xl text-[#4754D6] font-medium mb-2">
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto whitespace-pre-line">
             {currentContent.subtitle}
-          </h2>
-          <p className="text-base md:text-lg text-gray-600 leading-relaxed whitespace-pre-line">
-            {currentContent.description}
           </p>
-        </motion.div>
+        </div>
 
         {/* קורטיינר החבילות עם סדר מותאם למובייל */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1200px] mx-auto mb-6">

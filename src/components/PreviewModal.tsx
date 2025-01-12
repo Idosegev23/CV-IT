@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { X } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 interface PreviewModalProps {
   isOpen: boolean;
@@ -32,12 +33,24 @@ const templateContent = {
     description: 'תבנית גמישה שתתאים את עצמה לכל סוג של ניסיון ורקע. אידיאלית למי שנמצא/ת בתחילת הדרך או במעבר קריירה.'
   },
   'creative': {
-    title: 'תבנית קריאייטיבית',
+    title: 'תבנית קריאטיבית',
     description: 'עיצוב ייחודי שיעזור לך לבלוט מעל כולם. מושלמת למי שרוצה להביע את הצד היצירתי והחדשני שלו/ה.'
   }
 };
 
 export function PreviewModal({ isOpen, onClose, templateId, isRTL }: PreviewModalProps) {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsAnimating(true);
+    }
+  }, [isOpen]);
+
+  const handleAnimationComplete = () => {
+    setIsAnimating(false);
+  };
+
   if (!isOpen) return null;
 
   const imageSrc = templateImages[templateId as keyof typeof templateImages] || '';
@@ -50,6 +63,7 @@ export function PreviewModal({ isOpen, onClose, templateId, isRTL }: PreviewModa
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-8"
+        dir={isRTL ? 'rtl' : 'ltr'}
       >
         {/* Backdrop with blur */}
         <div 
@@ -62,12 +76,13 @@ export function PreviewModal({ isOpen, onClose, templateId, isRTL }: PreviewModa
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.95, opacity: 0 }}
+          onAnimationComplete={handleAnimationComplete}
           className="relative w-full max-w-4xl bg-white rounded-[32px] overflow-hidden shadow-xl"
         >
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-2 rounded-full bg-[#B78BE6] text-white hover:bg-[#B78BE6]/90 transition-colors"
+            className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} z-10 p-2 rounded-full bg-[#B78BE6] text-white hover:bg-[#B78BE6]/90 transition-colors`}
             aria-label={isRTL ? 'סגור' : 'Close'}
           >
             <X size={20} />

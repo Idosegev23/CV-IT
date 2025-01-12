@@ -3,9 +3,12 @@ import React, { useEffect, useState } from 'react';
 import { ResumeData } from '../../types/resume';
 import '../../styles/templates/professional.css';
 import { Assistant } from 'next/font/google';
+import { EditableText } from '../EditableFields/EditableText';
+import { EditableList } from '../EditableFields/EditableList';
 import { EditButton } from '../EditableFields/EditButton';
 import { EditPopup } from '../EditableFields/EditPopup';
 import { AddItemPopup } from '../EditableFields/AddItemPopup';
+import { formatDescription, formatDate } from './utils';
 
 interface ProfessionalTemplateProps {
   data: ResumeData;
@@ -67,17 +70,6 @@ const translations = {
     softSkills: 'Soft Skills',
     skillLevel: 'Skill Level'
   }
-};
-
-// פונקציה פרמוט תאריכים
-const formatDate = (startDate: string, endDate: string, lang: string) => {
-  const formattedEnd = endDate === 'כיום' || endDate === 'היום' ? 
-    translations[lang as keyof typeof translations].present : 
-    endDate;
-  
-  return lang === 'he' ? 
-    `${startDate} - ${formattedEnd}` : 
-    `${startDate} ${translations[lang as keyof typeof translations].to} ${formattedEnd}`;
 };
 
 const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({ 

@@ -176,17 +176,17 @@
 /* Content Layout */
 .content {
   position: relative;
-  margin-top: 1rem;
+  margin-top: 4rem;
 }
 
 /* הקו האנכי הראשי */
 .content::before {
   content: '';
   position: absolute;
-  top: 170px;
+  top: 120px;
   right: 0;
   width: 1px;
-  height: calc(100% - 190px);
+  height: calc(100% - 120px);
   background: var(--line-color);
 }
 
@@ -207,6 +207,8 @@
   order: 4;
   margin-bottom: 1.3rem;
   max-width: 60%;
+  position: relative;
+  z-index: 2;
 }
 
 /* Languages Section */
@@ -230,7 +232,7 @@
   position: absolute;
   right: -24px;
   top: 24px;
-  width: 30%;
+  width: 6rem;
   height: 1px;
   background-color: #000000 !important;
   z-index: 1;
@@ -238,10 +240,10 @@
 }
 
 /* נקודת הסיום של הקו */
-.section-title::before {
+.section:not(.summary-section) .section-title::before {
   content: '';
   position: absolute;
-  right: calc(30% - 24px);
+  right: calc(10.2rem - 24px);
   top: 22px;
   width: 4px;
   height: 4px;
@@ -269,68 +271,66 @@
 /* Timeline Content */
 .timeline-container {
   padding-top: 0.3rem;
+  padding-right: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .timeline-item {
   position: relative;
-  padding-right: 3rem;
-  margin-bottom: 0.5rem;
+  padding-right: 1.5rem;
+  margin-bottom: 1rem;
   direction: rtl;
   text-align: right;
 }
 
 .timeline-header {
-  margin-bottom: 0.3rem;
-}
-
-.timeline-header h4 {
   display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 2px;
-  font-size: 14px;
-  margin: 0;
-  direction: rtl;
-  text-align: right;
-  flex-wrap: wrap;
-}
-
-.timeline-position,
-.timeline-company,
-.timeline-date {
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.timeline-position {
-  font-weight: 600;
-  color: var(--primary-color);
-}
-
-.timeline-company {
-  color: var(--primary-color);
-  font-weight: normal;
-}
-
-.timeline-date {
-  color: var(--primary-color);
-  font-size: 14px;
-  font-weight: normal;
-  white-space: nowrap;
-  margin-right: auto;
-  padding-right: 0.5rem;
-}
-
-.timeline-separator {
-  color: var(--primary-color);
-  margin: 0 0.5rem;
-  opacity: 0.6;
+  margin-bottom: 0.3rem;
+  width: 100%;
 }
 
 .timeline-title-wrapper {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  width: 100%;
+  flex: 1;
+}
+
+.timeline-position {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.timeline-separator {
+  margin: 0 0.5rem;
+  opacity: 0.4;
+  font-weight: 200;
+}
+
+.timeline-company {
+  font-weight: 300;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.timeline-date {
+  font-size: 0.9rem;
+  color: #666;
+  white-space: nowrap;
+  min-width: fit-content;
+  margin-right: 0;
+  margin-left: 5rem;
+  direction: ltr;
+  text-align: right;
+  font-weight: 300;
+}
+
+[dir="rtl"] .timeline-date {
+  margin-left: 0;
+  margin-right: 5rem;
 }
 
 .timeline-content {
@@ -372,14 +372,10 @@
 
 .skill-item {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 300;
   color: var(--primary-color);
   white-space: normal;
   display: inline;
-}
-
-.skill-item .skill-level {
-  font-weight: 300;
 }
 
 .skill-item:last-child {
@@ -415,7 +411,7 @@
 }
 
 .language-name::after {
-  content: "";
+  content: " - ";
   margin: 0;
 }
 
@@ -528,8 +524,8 @@
 
 /* Add new summary section styles */
 .summary-section {
-  margin-bottom: 2rem;
-  padding-right: 3rem;
+  margin-bottom: 1rem;
+  padding: 0 1rem;
   position: relative;
   z-index: 2;
 }
@@ -537,8 +533,8 @@
 .summary-title {
   font-size: 18px;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  position: relative;
+  margin-bottom: 0.1rem;
+  color: var(--primary-color);
 }
 
 /* Update existing styles for LTR support */
@@ -565,11 +561,12 @@
 .general-template.ltr .section-title::after {
   right: auto;
   left: -24px;
+  width: 6rem;
 }
 
 .general-template.ltr .section-title::before {
   right: auto;
-  left: calc(30% - 24px);
+  left: calc(10.2rem - 24px);
 }
 
 .general-template.ltr .timeline-item {
@@ -637,7 +634,7 @@
   position: absolute;
   right: -24px;
   top: 24px;
-  width: 30%;
+  width: 6rem;
   height: 1px;
   background-color: #000000 !important;
   z-index: 1;
@@ -647,7 +644,7 @@
 .section:not(.summary-section) .section-title::before {
   content: '';
   position: absolute;
-  right: calc(30% - 24px);
+  right: calc(10.2rem - 24px);
   top: 22px;
   width: 4px;
   height: 4px;
@@ -657,115 +654,193 @@
   display: block !important;
 }
 
-.summary-content {
-  font-size: 16px;
-  line-height: 1.5;
-  color: var(--primary-color);
-  white-space: pre-line;
-}
-
-/* Image handling for general template */
-.general-template img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
-  -webkit-print-color-adjust: exact !important;
-  print-color-adjust: exact !important;
-}
-
-.header-decoration img,
-.footer-decorations img {
-  position: absolute;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  z-index: 1;
-}
-
-.contact-item-icon img {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
-}
-
-@media screen and (max-width: 768px) {
-  .general-template img,
-  .header-decoration img,
-  .footer-decorations img,
-  .contact-item-icon img {
-    display: block !important;
-    max-width: 100% !important;
-    width: auto !important;
-    height: auto !important;
-    object-fit: contain !important;
-    margin: 0 auto !important;
-  }
-}
-
+/* עדכון תיאור */
 .timeline-description {
-  list-style-type: none;
   padding-right: 1.5rem;
-  margin: 0.2rem 0;
-  max-width: 95%;
-  font-size: 13px;
-  line-height: 1.3;
-  color: #666;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.2rem 0.6rem;
+  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  font-weight: 300;
 }
 
 .timeline-description li {
-  position: relative;
-  display: inline-block;
-  padding-right: 0.5rem;
-  white-space: normal;
-  overflow: hidden;
-  max-width: 100%;
+  display: inline;
 }
 
 .timeline-description li:not(:last-child)::after {
-  content: "•";
-  position: absolute;
-  left: -0.3rem;
-  color: #999;
-  font-size: 8px;
-  top: 50%;
-  transform: translateY(-50%);
+  content: " | ";
+  margin: 0 0.5rem;
+  opacity: 0.7;
+  font-weight: 200;
 }
 
-/* עדכון תצוגת LTR */
-.general-template[dir="ltr"] .timeline-description {
+/* עדכון התאריכים בכל המקומות */
+.timeline-header h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  margin: 0;
+}
+
+.timeline-header h4 .timeline-date {
+  margin-right: 0;
+  margin-left: 5rem;
+}
+
+[dir="rtl"] .timeline-header h4 .timeline-date {
+  margin-left: 0;
+  margin-right: 5rem;
+}
+
+/* עדכון גרסת LTR */
+.general-template.ltr .timeline-container {
   padding-right: 0;
   padding-left: 1.5rem;
-  text-align: left;
 }
 
-.general-template[dir="ltr"] .timeline-description li:not(:last-child)::after {
-  left: auto;
-  right: -0.3rem;
-}
-
-/* התאמה למובייל */
-@media screen and (max-width: 768px) {
-  .timeline-description {
-    grid-template-columns: 1fr;
-    gap: 0.2rem;
-  }
-}
-
-/* עדכון תצוגת LTR */
-.general-template[dir="ltr"] .timeline-header h4 {
-  direction: ltr;
-  text-align: left;
-}
-
-.general-template[dir="ltr"] .timeline-date {
-  margin-right: 0;
-  margin-left: auto;
+.general-template.ltr .timeline-item {
   padding-right: 0;
-  padding-left: 0.5rem;
+  padding-left: 1.5rem;
+}
+
+.general-template.ltr .timeline-description {
+  padding-right: 0;
+  padding-left: 1.5rem;
+}
+
+/* כוחק את כל ההגדרות הישנות */
+.skills-grid,
+.languages-grid,
+.skill-item:last-child,
+.language-item,
+.language-name,
+.language-level,
+.language-name::after,
+.skill-dot,
+.skill-dot.filled,
+.skill-item::after,
+.skill-item:not(:last-child)::after,
+.languages-items > span:not(:last-child)::after {
+  display: none !important;
+  content: none !important;
+}
+
+/* משאיר רק את העיצוב החדש */
+.skills-section,
+.languages-section {
+  margin: 0.4rem 0;
+}
+
+.skills-section .section-title,
+.languages-section .section-title {
+  padding-right: 1.5rem !important;
+}
+
+.skills-items {
+  display: block;
+  padding-right: 1.5rem;
+  padding-left: 3rem;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+  text-align: right;
+  max-width: 100%;
+}
+
+.skill-item {
+  display: inline;
+  font-size: 0.9rem;
+  color: #333;
+  margin-left: 0;
+}
+
+.skill-name {
+  font-weight: 600;
+  color: #1F1B2F;
+}
+
+.skill-level {
+  font-weight: 300;
+  color: #666;
+}
+
+.skill-item:not(:last-child)::after {
+  content: " | ";
+  margin: 0 0.8rem;
+  color: #666;
+  opacity: 0.4;
+  font-weight: 200;
+}
+
+/* שפות */
+.languages-section {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  max-width: 65%;
+  position: relative;
+  z-index: 2;
+}
+
+.languages-items {
+  display: block;
+  padding: 0 1.5rem;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+  text-align: right;
+  max-width: 100%;
+}
+
+.languages-items > span {
+  display: inline;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.languages-items > span:not(:last-child)::after {
+  content: " | ";
+  margin: 0 0.8rem;
+  color: #666;
+  opacity: 0.4;
+  font-weight: 200;
+}
+
+/* מחיקת ההגדרות החוסמות */
+.skills-grid,
+.skill-item:last-child,
+.skill-dot,
+.skill-dot.filled {
+  all: unset;
+}
+
+.skills-items {
+  display: block;
+  padding-right: 1.5rem;
+  line-height: 1.4;
+  margin-top: 0.5rem;
+  text-align: right;
+  max-width: 100%;
+}
+
+.skill-item {
+  display: inline;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.skill-name {
+  font-weight: 600;
+  color: #1F1B2F;
+}
+
+.skill-level {
+  font-weight: 300;
+  color: #666;
+}
+
+.skill-item:not(:last-child)::after {
+  content: " | ";
+  margin: 0 0.8rem;
+  color: #666;
+  opacity: 0.4;
+  font-weight: 200;
 } 

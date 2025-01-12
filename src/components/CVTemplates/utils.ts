@@ -70,7 +70,11 @@ export const formatDate = (startDate: string | undefined, endDate?: string, lang
   if (!startDate) return '';
   if (!endDate) return startDate;
   
-  const formattedEnd = endDate === 'כיום' || endDate === 'היום' ? 
+  const formattedEnd = endDate === 'כיום' || 
+    endDate === 'היום' || 
+    endDate === 'today' || 
+    endDate === 'present' || 
+    endDate === 'Present' ? 
     translations[lang as keyof typeof translations].present : 
     endDate;
   
@@ -178,23 +182,16 @@ export const getTranslation = (key: string, lang: string, contentLang: string) =
   return translations[languageToUse as keyof typeof translations]?.[key as keyof (typeof translations)['he']] || key;
 };
 
-export const formatDescription = (descriptions: string[], totalJobs: number) => {
-  // אם יש יותר מ-3 משרות או שזה שירות צבאי, מציג רק 2 תיאורים
-  const maxDescriptions = totalJobs > 3 ? 2 : descriptions.length;
+export const formatDescription = (description: string | string[], maxItems?: number): string[] => {
+  if (!description) return [];
   
-  // מקצר את התיאורים לפי המקסימום שקבענו
-  const shortenedDescriptions = descriptions
-    .slice(0, maxDescriptions)
-    .map(desc => {
-      if (desc.length > 100) {
-        return desc.substring(0, 97) + '...';
-      }
-      return desc;
-    });
-
-  // מחזיר את התיאורים כמערך נפרד עם מפריד
-  return shortenedDescriptions.map((desc, index, arr) => {
-    if (index === arr.length - 1) return desc;
-    return desc + ' | ';
-  });
+  if (typeof description === 'string') {
+    return [description];
+  }
+  
+  if (maxItems && description.length > maxItems) {
+    return description.slice(0, maxItems);
+  }
+  
+  return description;
 }; 

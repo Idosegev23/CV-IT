@@ -4,7 +4,7 @@ import { ResumeData } from '../../types/resume';
 import '../../styles/templates/creative.css';
 import Image from 'next/image';
 import { Assistant } from 'next/font/google';
-import { formatDescription } from './utils';
+import { formatDescription, formatDate } from './utils';
 import { EditableText } from '../EditableFields/EditableText';
 import { EditableList } from '../EditableFields/EditableList';
 import { EditButton } from '../EditableFields/EditButton';
@@ -610,7 +610,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                       )}
                     </h3>
                     <span className="creative-experience-date">
-                      {`${exp.startDate} - ${exp.endDate}`}
+                      {formatDate(exp.startDate, exp.endDate, lang)}
                     </span>
                   </div>
                   {exp.description && exp.description.length > 0 && (
@@ -684,7 +684,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     )}
                   </div>
                   <div className="creative-experience-date">
-                    {formatDate(data.military.startDate, data.military.endDate)}
+                    {formatDate(data.military.startDate, data.military.endDate, lang)}
                   </div>
                 </div>
                 {data.military.description && data.military.description.length > 0 && (

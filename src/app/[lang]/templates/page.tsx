@@ -10,34 +10,35 @@ import { toast } from 'sonner';
 import { useAppStore } from '@/lib/store';
 import type { Package } from '@/lib/store';
 import { PreviewModal } from '@/components/PreviewModal';
+import { BackButton } from '@/components/BackButton';
 
 const templates = {
   he: [
     {
       id: 'classic',
       title: 'תבנית קלאסית',
-      description: 'תציג קובץ בעל ארומה נקיה.\nומדויקת.',
+      description: 'כמו ג׳ינס וחולצה לבנה - אי אפשר לפספס.',
       suitable: ['משרות אדמיניסטרטיביות', 'סוכנים וסוכנות', 'תפקידי ניהול', 'משרות מסורתיות'],
       image: '/design/classic/clasics.png'
     },
     {
       id: 'professional',
       title: 'תבנית Pro',
-      description: 'חריפה לתפקידים בכירים.',
+      description: 'עיצוב נקי ומדויק שאומר ״אני פה כדי לעבוד״.',
       suitable: ['הייטק', 'פיננסים', 'ניהול בכיר', 'תפקידים מקצועיים'],
       image: '/design/classic/pros.png'
     },
     {
       id: 'general',
       title: 'תבנית כללית',
-      description: 'אם קשה לך להחליט, זו התבנית עבורך.\nכמו פיצה מרגריטה היא תתאים לכולם.',
+      description: 'מושלמת למשרה ראשונה או לשינוי כיוון.',
       suitable: ['שירות לקוחות', 'מכירות', 'סטודנטים וסטודנטיות', 'משרות התחלתיות'],
       image: '/design/general/generals.png'
     },
     {
       id: 'creative',
       title: 'תבנית קריאטיבית',
-      description: 'להיות שונה.\nלבלוט.',
+      description: 'בשביל מי שרוצה לבלוט בים של קורות חיים.',
       suitable: ['עיצוב', 'שיווק', 'מדיה', 'אמנות'],
       image: '/design/creative/creatives.png'
     }
@@ -46,28 +47,28 @@ const templates = {
     {
       id: 'professional',
       title: 'Professional',
-      description: 'Perfect for managers, finance and high-tech professionals - emphasizes seriousness and expertise',
+      description: 'Clean and precise design that says "I mean business".',
       suitable: ['High-Tech', 'Finance', 'Senior Management', 'Professional Roles'],
       image: '/design/classic/pros.png'
     },
     {
       id: 'classic',
       title: 'Classic',
-      description: 'Simple and clean, suitable for a wide range of positions and fields',
+      description: 'Like jeans and a white shirt - you can\'t go wrong.',
       suitable: ['All Fields', 'Senior Positions', 'Academia', 'Administration'],
       image: '/design/classic/clasics.png'
     },
     {
       id: 'general',
       title: 'Flexible',
-      description: 'A design that easily adapts to different needs, suitable for any role and person',
+      description: 'Perfect for your first job or changing directions.',
       suitable: ['First Job', 'Career Change', 'Students', 'Internship'],
       image: '/design/general/generals.png'
     },
     {
       id: 'creative',
       title: 'Creative',
-      description: 'Perfect for designers and marketers, with a unique look that radiates creativity',
+      description: 'For those who want to stand out from the crowd.',
       suitable: ['Design', 'Marketing', 'Digital', 'Media'],
       image: '/design/creative/creatives.png'
     }
@@ -89,6 +90,7 @@ export default function TemplatesPage() {
   const selectedTemplate = useAppStore(state => state.selectedTemplate);
   const setSelectedTemplate = useAppStore(state => state.setSelectedTemplate);
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     // אם הגיע מדף הבית ויש לו כבר חבילה נבחרת, נאפס אותה
@@ -98,7 +100,11 @@ export default function TemplatesPage() {
   }, [fromHome, selectedPackage, setSelectedPackage]);
 
   const handleTemplateSelect = async (templateId: string) => {
+    if (isAnimating) return; // מונע מעבר בזמן אנימציה
+
     try {
+      setIsAnimating(true);
+
       // אם אין חבילה נבחרת, מומרים את התבנית ומעבירים לדף חבילות
       if (!selectedPackage) {
         setSelectedTemplate(templateId);
@@ -156,15 +162,22 @@ export default function TemplatesPage() {
     } catch (error) {
       console.error('Detailed error:', error);
       toast.error(isRTL ? 'אירעה שגיאה ביצירת התבנית' : 'Error creating template');
+    } finally {
+      setIsAnimating(false);
     }
   };
 
   const handlePreviewClick = (templateId: string) => {
+    if (isAnimating) return; // מונע פתיחת תצוגה מקדימה בזמן אנימציה
     setPreviewTemplate(templateId);
   };
 
+  const handleAnimationComplete = () => {
+    setIsAnimating(false);
+  };
+
   return (
-    <main className="min-h-screen bg-[#EAEAE7] relative">
+    <main className="min-h-screen bg-[#EAEAE7] relative" dir={isRTL ? 'rtl' : 'ltr'}>
       <div 
         className="fixed bottom-0 right-0 w-full h-[75vh] pointer-events-none z-0"
         style={{
@@ -181,8 +194,13 @@ export default function TemplatesPage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+              onAnimationComplete={handleAnimationComplete}
               className="text-center relative"
             >
+              <div className={`absolute ${isRTL ? 'right-0' : 'left-0'} top-0`}>
+                <BackButton isRTL={isRTL} />
+              </div>
+
               <div className="absolute left-1/2 -translate-x-1/2 -top-20">
                 <Image
                   src="/design/templates.svg"
@@ -194,19 +212,13 @@ export default function TemplatesPage() {
               </div>
 
               <h1 className="text-3xl md:text-4xl font-bold mb-2 font-rubik text-[#1A1A1A]">
-                {isRTL ? 'בחירת תבנית מושלמת' : 'Choose Your Perfect Template'}
+                {isRTL ? 'בואו נבנה קו״ח מנצחים' : 'Let\'s Build a Winning CV'}
               </h1>
-              
-              <p className="text-lg text-[#4B4553] font-rubik mb-4 block">
-                {isRTL ? 
-                  'תבניות זה לא רק עיצוב של עמוד – זו אומנות.\nכל תבנית שלנו בנויה כמו לוק בהתאמה אישית.' : 
-                  'Templates are not just page design - it\'s art.\nEach of our templates is built like a personalized look.'}
-              </p>
               
               <p className="text-lg text-[#4B4553] font-rubik mb-8 whitespace-pre-line">
                 {isRTL ? 
-                  'רק לבחור את זו שתתאים לך.\nואל דאגה – תמיד אפשר להחליף.' : 
-                  'Just choose the one that suits you.\nAnd don\'t worry - you can always change it.'}
+                  'מותאם למובייל, להורדה כ-PDF, כולל גרסה באנגלית.' : 
+                  'Mobile friendly, PDF download, English version included.'}
               </p>
             </motion.div>
           </div>
@@ -219,7 +231,8 @@ export default function TemplatesPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="group relative bg-[#EAEAE7] rounded-[32px] overflow-visible border border-white"
+              onAnimationComplete={handleAnimationComplete}
+              className="group relative bg-[#EAEAE7] rounded-[32px] overflow-visible border border-white flex flex-col"
             >
               <div className="bg-white/38 pt-[10px] px-[10px]">
                 <div className="bg-white border border-white rounded-[32px] overflow-hidden relative">
@@ -236,7 +249,7 @@ export default function TemplatesPage() {
                 </div>
               </div>
 
-              <div className="relative p-4 pb-10">
+              <div className="relative p-4 pb-10 flex-grow">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-xl font-bold font-rubik text-[#4856CD]">
                     {template.title}
@@ -244,48 +257,50 @@ export default function TemplatesPage() {
                   <button
                     onClick={() => handlePreviewClick(template.id)}
                     className="px-3 py-0.5 bg-[#B78BE6] text-white rounded-full text-sm hover:bg-[#B78BE6]/90 transition-colors"
+                    disabled={isAnimating}
                   >
                     {isRTL ? 'לצפייה' : 'Preview'}
                   </button>
                 </div>
 
-                <p className="text-sm text-[#4B4553] mb-3 font-rubik">
+                <p className="text-[#4B4553] text-sm mb-4 whitespace-pre-line">
                   {template.description}
                 </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {template.suitable.map((role) => (
+
+                <div className="flex flex-wrap gap-2">
+                  {template.suitable.map((tag, tagIndex) => (
                     <span
-                      key={role}
-                      className="px-2 py-0.5 rounded-full border border-[#4754D6] text-xs text-[#4856CD] font-rubik"
+                      key={tagIndex}
+                      className="inline-block px-2 py-1 bg-[#4856CD]/5 text-[#4856CD] text-xs rounded-full"
                     >
-                      {role}
+                      {tag}
                     </span>
                   ))}
                 </div>
               </div>
 
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/3">
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Button
-                    onClick={() => handleTemplateSelect(template.id)}
-                    className="px-8 bg-[#4856CD] hover:bg-[#4856CD]/90 text-white font-rubik py-4 text-base rounded-full"
-                    aria-label={isRTL ? `בחר תבנית ${template.title}` : `Select ${template.title} template`}
-                  >
-                    {isRTL ? 'בואו נתחיל' : 'Let\'s Start'}
-                  </Button>
-                </motion.div>
+              <div className="absolute bottom-0 left-0 right-0 flex justify-center translate-y-1/2">
+                <button
+                  onClick={() => handleTemplateSelect(template.id)}
+                  className="px-6 py-2 bg-[#4856CD] text-white rounded-full text-sm hover:bg-[#4856CD]/90 transition-colors shadow-lg"
+                  disabled={isAnimating}
+                >
+                  {isRTL ? 'בחירה' : 'Select'}
+                </button>
               </div>
             </motion.div>
           ))}
         </div>
       </div>
 
-      <PreviewModal
-        isOpen={!!previewTemplate}
-        onClose={() => setPreviewTemplate(null)}
-        templateId={previewTemplate || ''}
-        isRTL={isRTL}
-      />
+      {previewTemplate && (
+        <PreviewModal
+          isOpen={!!previewTemplate}
+          onClose={() => setPreviewTemplate(null)}
+          templateId={previewTemplate}
+          isRTL={isRTL}
+        />
+      )}
     </main>
   );
 }

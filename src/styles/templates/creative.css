@@ -81,12 +81,10 @@
 /* הגדרות משקל ספציפיות */
 .creative-firstname {
   font-weight: 700 !important;
-  display: block;
 }
 
 .creative-lastname {
   font-weight: 400 !important;
-  display: block;
 }
 
 .creative-contact-info {
@@ -94,15 +92,15 @@
 }
 
 .creative-section-title {
-  font-weight: 500 !important;
+  font-weight: 600 !important;
 }
 
 .creative-language {
-  font-weight: 700 !important;
+  font-weight: 400 !important;
 }
 
 .creative-level {
-  font-weight: 300 !important;
+  font-weight: 200 !important;
 }
 
 /* עמודה ימנית */
@@ -176,7 +174,7 @@
 
 .creative-section-title {
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 700;
   margin-bottom: 0.5rem;
   color: white;
 }
@@ -204,7 +202,7 @@
 }
 
 .creative-level {
-  font-weight: 300;
+  font-weight: 200;
   text-align: right;
 }
 
@@ -309,6 +307,7 @@
   font-size: 1.1rem;
   color: #4B4553;
   margin: 0;
+  font-weight: 600 !important;
 }
 
 .creative-experience-company {
@@ -318,7 +317,7 @@
 }
 
 .creative-experience-date {
-  font-weight: 300;
+  font-weight: 200;
   font-size: 0.9rem;
   color: #666;
   white-space: nowrap;
@@ -337,7 +336,7 @@
   font-size: 0.9rem;
   line-height: 1.4;
   color: #4B4553;
-  font-weight: normal;
+  font-weight: 200;
 }
 
 .creative-experience-description li:not(:last-child)::after {
@@ -374,7 +373,7 @@
 }
 
 .creative-experience-position {
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1.1rem;
   color: #4B4553; /* שינוי צבע התפקיד */
   margin: 0;
@@ -557,4 +556,77 @@
 
 .creative-template[dir="ltr"] .creative-skill-level {
   justify-content: flex-start;
+} 
+
+/* הוספת משקל לפונטים בתבנית היצירתית */
+.creative-firstname {
+  font-weight: 700 !important;
+}
+
+.creative-lastname {
+  font-weight: 400 !important;
+}
+
+.creative-contact-info {
+  font-weight: 300 !important;
+}
+
+.creative-section-title {
+  font-weight: 600 !important;
+}
+
+.creative-experience-title {
+  font-weight: 600 !important;
+}
+
+.creative-experience-company {
+  font-weight: 300 !important;
+}
+
+.creative-experience-date {
+  font-weight: 200 !important;
+}
+
+.creative-experience-description li {
+  font-weight: 200 !important;
+}
+
+.creative-education-degree {
+  font-weight: 600 !important;
+}
+
+.creative-education-institution {
+  font-weight: 300 !important;
+}
+
+.creative-education-date {
+  font-weight: 200 !important;
+}
+
+.creative-military-title {
+  font-weight: 600 !important;
+}
+
+.creative-military-unit {
+  font-weight: 300 !important;
+}
+
+.creative-military-date {
+  font-weight: 200 !important;
+}
+
+.creative-military-description {
+  font-weight: 200 !important;
+}
+
+.creative-language {
+  font-weight: 400 !important;
+}
+
+.creative-level {
+  font-weight: 200 !important;
+}
+
+.creative-skill-name {
+  font-weight: 400 !important;
 } 

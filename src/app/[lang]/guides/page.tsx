@@ -4,51 +4,52 @@ import { PiggyBank, ChevronLeft, Linkedin, Receipt } from 'lucide-react';
 import Link from 'next/link';
 import { Metadata } from 'next';
 import Image from 'next/image';
+import { BackButton } from '@/components/BackButton';
 
 const content = {
   he: {
-    title: 'דברים שכדאי לדעת על החיים האמיתיים',
-    description: 'מדריכים קצרים וברורים שיעזרו לכם להבין את כל מה שלא לימדו בבית ספר',
+    title: "דברים שכדאי לדעת על החיים האמיתיים",
+    description: "מדריכים קצרים וברורים שיעזרו לכם להבין את כל מה שלא לימדו בבית ספר",
     guides: [
       {
-        title: 'פנסיה? זה לא כזה מסובך',
-        description: 'מדריך פשוט שיעשה לכם סדר בראש. בלי מילים מפוצצות, בלי בלבול מוח',
+        title: "פנסיה? זה לא כזה מסובך",
+        description: "מדריך פשוט שיעשה לכם סדר בראש. בלי מילים מפוצצות, בלי בלבול מוח",
         icon: PiggyBank,
         href: '/guides/pension'
       },
       {
-        title: 'איך להפוך את הלינקדאין למגנט',
-        description: 'טיפים פרקטיים שיגרמו למגייסים לרצות אתכם. בלי קשקושים, רק מה שעובד',
+        title: "איך להפוך את הלינקדאין למגנט",
+        description: "טיפים פרקטיים שיגרמו למגייסים לרצות אתכם. בלי קשקושים, רק מה שעובד",
         icon: Linkedin,
         href: '/guides/linkedin'
       },
       {
-        title: 'תלוש משכורת? יאללה נפצח את זה',
-        description: 'סוף סוף תבינו מה המספרים אומרים. פשוט, ברור, ובלי להתבלבל',
+        title: "תלוש משכורת? יאללה נפצח את זה",
+        description: "סוף סוף תבינו מה המספרים אומרים. פשוט, ברור, ובלי להתבלבל",
         icon: Receipt,
         href: '/guides/salary'
       }
     ]
   },
   en: {
-    title: 'Real Life Skills They Forgot to Teach You',
-    description: 'Simple guides that make adulting a bit easier',
+    title: "Real Life Skills They Forgot to Teach You",
+    description: "Simple guides that make adulting a bit easier",
     guides: [
       {
-        title: 'Pension Made Simple',
-        description: 'A no-nonsense guide to understanding pension. Just the stuff you actually need to know',
+        title: "Pension Made Simple",
+        description: "A no-nonsense guide to understanding pension. Just the stuff you actually need to know",
         icon: PiggyBank,
         href: '/guides/pension'
       },
       {
-        title: 'LinkedIn That Actually Works',
-        description: 'Practical tips to make recruiters want you. No fluff, just what works',
+        title: "LinkedIn That Actually Works",
+        description: "Practical tips to make recruiters want you. No fluff, just what works",
         icon: Linkedin,
         href: '/guides/linkedin'
       },
       {
-        title: 'Payslip Decoded',
-        description: 'Finally understand what all those numbers mean. Simple, clear, and no confusion',
+        title: "Payslip Decoded",
+        description: "Finally understand what all those numbers mean. Simple, clear, and no confusion",
         icon: Receipt,
         href: '/guides/salary'
       }
@@ -59,7 +60,7 @@ const content = {
 type Lang = keyof typeof content;
 
 type PageProps = {
-  params: Promise<{ lang: Lang }>;
+  params: { lang: Lang };
 };
 
 export function generateStaticParams() {
@@ -70,8 +71,7 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const resolvedParams = await params;
-  const currentContent = content[resolvedParams.lang];
+  const currentContent = content[params.lang];
   return {
     title: currentContent.title,
     description: currentContent.description,
@@ -79,14 +79,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function Page({ params }: PageProps) {
-  const resolvedParams = await params;
-  const currentContent = content[resolvedParams.lang];
-  const isRTL = resolvedParams.lang === 'he';
+  const currentContent = content[params.lang];
+  const isRTL = params.lang === 'he';
 
   return (
     <div className="bg-[#EAEAE7] min-h-screen">
       <div className="container mx-auto py-6 md:py-8 px-4" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="max-w-[1400px] mx-auto space-y-8">
+          <div className="mb-8">
+            <BackButton isRTL={isRTL} />
+          </div>
+
           <div className="text-center space-y-4">
             <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold">
               <span className="text-gray-800">דברים שכדאי לדעת</span>
@@ -104,7 +107,7 @@ export default async function Page({ params }: PageProps) {
             {currentContent.guides.map((guide, index) => (
               <Link 
                 key={index} 
-                href={`/${resolvedParams.lang}${guide.href}`}
+                href={`/${params.lang}${guide.href}`}
               >
                 <Card className="group relative transition-all duration-500 hover:shadow-2xl border-0 overflow-hidden h-full bg-white">
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">

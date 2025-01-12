@@ -8,6 +8,7 @@ import { Assistant } from 'next/font/google';
 import MailIcon from '../../../../public/design/general/MailIcon.svg';
 import PhoneIcon from '../../../../public/design/general/PhoneIcon.svg';
 import LocIcon from '../../../../public/design/general/LocIcon.svg';
+import { formatDate } from '../utils';
 
 const assistant = Assistant({ 
   subsets: ['hebrew', 'latin'],
@@ -84,14 +85,6 @@ const CreativeTemplateEn: React.FC<CreativeTemplateEnProps> = ({ data, lang }) =
     const lastName = nameParts.pop() || '';
     const firstName = nameParts.join(' ');
     return { firstName, lastName };
-  };
-
-  const formatDate = (startDate: string, endDate: string) => {
-    const formattedEnd = endDate === 'Present' || endDate === 'present' ? 
-      t.present : 
-      endDate;
-    
-    return `${startDate} ${t.to} ${formattedEnd}`;
   };
 
   return (

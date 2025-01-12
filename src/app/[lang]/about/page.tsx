@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Lottie from 'lottie-react';
 import { useWindowSize } from '@/hooks/useWindowSize';
+import { BackButton } from '@/components/BackButton';
 
 // הגדרת טיפוס למאפיינ
 type Feature = {
@@ -204,6 +205,10 @@ export default function AboutPage() {
     <div dir={isRTL ? 'rtl' : 'ltr'} className="min-h-screen bg-[#EAEAE7]">
       {/* Hero Section */}
       <section className="container mx-auto px-6 sm:px-4 pt-6 pb-4">
+        <div className="mb-8">
+          <BackButton isRTL={isRTL} />
+        </div>
+
         <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-600">
             {currentContent.title}

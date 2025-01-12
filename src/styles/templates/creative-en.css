@@ -8,6 +8,13 @@
   --primary-blue: #4855CE;
   --primary-grey: #E8E8E5;
   --separator-color: #E8E8E5;
+  
+  /* Adding font-weight variables for consistency */
+  --font-weight-primary: 700;    /* Main headers, section names */
+  --font-weight-secondary: 600;  /* Secondary headers, titles */
+  --font-weight-regular: 400;    /* Regular text */
+  --font-weight-light: 300;      /* Companies, institutions */
+  --font-weight-thin: 200;       /* Dates and descriptions */
 }
 
 .creative-template-en {
@@ -20,6 +27,7 @@
   transform-origin: top center;
   transform: scale(var(--scale-factor));
   font-family: Assistant, sans-serif !important;
+  font-weight: var(--font-weight-regular);  /* Setting default font weight */
   background-color: var(--primary-grey);
   direction: ltr;
 }
@@ -114,7 +122,7 @@
 
 .creative-section-title-en {
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: 600 !important;
   margin-bottom: 0.5rem;
   color: white;
 }
@@ -131,7 +139,7 @@
 }
 
 .creative-language-en {
-  font-weight: 700;
+  font-weight: 400 !important;
   text-align: left;
 }
 
@@ -142,7 +150,7 @@
 }
 
 .creative-level-en {
-  font-weight: 300;
+  font-weight: 200 !important;
   text-align: left;
 }
 
@@ -171,6 +179,7 @@
   max-width: calc(100% - 70px);
   word-wrap: break-word;
   line-height: 1.2;
+  font-weight: 400 !important;
 }
 
 .creative-skill-level-en {
@@ -254,12 +263,12 @@
 }
 
 .creative-experience-company-en {
-  font-weight: 400;
+  font-weight: 300 !important;
   font-size: 1rem;
 }
 
 .creative-experience-date-en {
-  font-weight: 300;
+  font-weight: 200 !important;
   font-size: 0.9rem;
   color: #666;
 }
@@ -280,6 +289,7 @@
   font-size: 0.9rem;
   line-height: 1.4;
   display: inline;
+  font-weight: 200 !important;
 }
 
 .creative-experience-description-en li::before {
@@ -430,6 +440,7 @@
   line-height: 1.4;
   max-width: 100%;
   color: white;
+  font-weight: 300 !important;
 }
 
 .creative-contact-info-en .contact-item {

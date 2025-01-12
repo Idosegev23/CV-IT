@@ -12,6 +12,13 @@
   --text-base: 0.85rem;
   --text-lg: 0.9rem;
   --text-xl: 1rem;
+  
+  /* Adding standardized font weights */
+  --font-weight-primary: 700;    /* Main headers, section names */
+  --font-weight-secondary: 600;  /* Secondary headers, titles */
+  --font-weight-regular: 400;    /* Regular text */
+  --font-weight-light: 300;      /* Companies, educational institutions */
+  --font-weight-thin: 200;       /* Dates and descriptions */
 }
 
 .classic-template {
@@ -569,4 +576,76 @@
 
 .languages-skills .skill-item {
   white-space: nowrap;
+}
+
+.classic-name-first-en {
+  font-weight: 700 !important;
+}
+
+.classic-name-last-en {
+  font-weight: 400 !important;
+}
+
+.classic-contact-info-en {
+  font-weight: 300 !important;
+}
+
+.classic-section-title-en {
+  font-weight: 600 !important;
+}
+
+.classic-experience-title-en {
+  font-weight: 600 !important;
+}
+
+.classic-experience-company-en {
+  font-weight: 300 !important;
+}
+
+.classic-experience-date-en {
+  font-weight: 200 !important;
+}
+
+.experience-description-en li {
+  font-weight: 200 !important;
+}
+
+.education-degree-en {
+  font-weight: 600 !important;
+}
+
+.education-institution-en {
+  font-weight: 300 !important;
+}
+
+.education-date-en {
+  font-weight: 200 !important;
+}
+
+.military-title-en {
+  font-weight: 600 !important;
+}
+
+.military-unit-en {
+  font-weight: 300 !important;
+}
+
+.military-date-en {
+  font-weight: 200 !important;
+}
+
+.military-description-en li {
+  font-weight: 200 !important;
+}
+
+.language-name-en {
+  font-weight: 400 !important;
+}
+
+.language-level-en {
+  font-weight: 200 !important;
+}
+
+.skill-name-en {
+  font-weight: 400 !important;
 }

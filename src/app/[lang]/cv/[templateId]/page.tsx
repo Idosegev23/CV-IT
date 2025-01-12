@@ -26,6 +26,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/theme/ui/dialog';
 import { Input } from "@/components/theme/ui/input";
 import { Textarea } from "@/components/theme/ui/textarea";
+import { BackButton } from '@/components/BackButton';
 
 interface PageProps {
   params: Promise<{
@@ -563,104 +564,101 @@ export default function CVPage({ params }: PageProps) {
   }
 
   return (
-    <div id="desktop-container" className="min-h-screen flex flex-col items-center justify-start pt-8" style={{ background: '#EAEAE7' }} dir={interfaceLang === 'he' ? 'rtl' : 'ltr'}>
-      <div className="w-full flex justify-center mb-8">
-        <Image
-          src="/design/finish.svg"
-          alt={interfaceLang === 'he' ? 'סיום' : 'Finish'}
-          width={180}
-          height={190}
-          className="mx-auto"
-        />
+    <div className="min-h-screen bg-[#EAEAE7]">
+      {/* Back Button */}
+      <div className="container mx-auto px-4 pt-4">
+        <BackButton isRTL={interfaceLang === 'he'} />
       </div>
 
-      <div className="text-center space-y-2 mb-8">
-        <h2 className="text-2xl font-bold text-[#4856CD]">
-          {interfaceLang === 'he' ? 'וואו! איזה קורות חיים מדהימים!' : 'Wow! What an amazing CV!'}
-        </h2>
-        <p className="text-gray-600">
-          {interfaceLang === 'he' 
-            ? 'עכשיו נשאר רק להוריד ולהתחיל לשלוח'
-            : 'Now just download and start sending it'}
-        </p>
-      </div>
+      <div className="container px-4 py-8 flex flex-col items-center justify-center w-full max-w-[800px]">
+        <div className="text-center space-y-2 mb-8">
+          <h2 className="text-2xl font-bold text-[#4856CD]">
+            {interfaceLang === 'he' ? 'וואו! איזה קורות חיים מדהימים!' : 'Wow! What an amazing CV!'}
+          </h2>
+          <p className="text-gray-600">
+            {interfaceLang === 'he' 
+              ? 'עכשיו נשאר רק להוריד ולהתחיל לשלוח'
+              : 'Now just download and start sending it'}
+          </p>
+        </div>
 
-      {/* בחירת תבנית - דסקטופ */}
-      <div className="w-full max-w-[800px] mb-8 px-4">
-        <div className="flex h-[57px] w-full border-2 border-[#4856CD] rounded-full overflow-hidden shadow-lg">
-          {templates.map((template, index) => (
-            <motion.div
-              key={template.id}
-              className={`
-                flex-1 
-                relative 
-                ${index !== templates.length - 1 ? 'border-r-2 border-[#4856CD]' : ''}
-              `}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Button
-                onClick={() => router.push(`/${interfaceLang}/cv/${template.id}?sessionId=${sessionId}`)}
+        {/* בחירת תבנית - דסקטופ */}
+        <div className="w-full max-w-[800px] mb-8 px-4">
+          <div className="flex h-[57px] w-full border-2 border-[#4856CD] rounded-full overflow-hidden shadow-lg">
+            {templates.map((template, index) => (
+              <motion.div
+                key={template.id}
                 className={`
-                  w-full 
-                  h-full 
-                  text-base 
-                  font-rubik 
-                  rounded-none
-                  transition-all
-                  duration-300
-                  flex
-                  items-center
-                  justify-center
-                  ${templateId === template.id 
-                    ? 'bg-[#4856CD] text-white'
-                    : 'bg-transparent text-[#4856CD] hover:bg-[#4856CD]/5'
-                  }
+                  flex-1 
+                  relative 
+                  ${index !== templates.length - 1 ? 'border-r-2 border-[#4856CD]' : ''}
                 `}
+                whileTap={{ scale: 0.98 }}
               >
-                {template.name[interfaceLang as keyof typeof template.name]}
-              </Button>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      <div id="cv-content">
-        <CVTemplate
-          templateId={templateId}
-          data={cvData}
-          lang={interfaceLang}
-        />
-      </div>
-
-      <div className="fixed bottom-8 right-8 flex flex-col gap-4">
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handlePdfDownload}
-            disabled={isDownloadingPdf}
-            className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
-          >
-            {isDownloadingPdf ? (
-              <Loader2 className="h-6 w-6 animate-spin" />
-            ) : (
-              <Download className="h-6 w-6" />
-            )}
-          </Button>
-          <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-            {interfaceLang === 'he' ? 'הורדת קורות החיים' : 'Download your CV'}
-          </span>
+                <Button
+                  onClick={() => router.push(`/${interfaceLang}/cv/${template.id}?sessionId=${sessionId}`)}
+                  className={`
+                    w-full 
+                    h-full 
+                    text-base 
+                    font-rubik 
+                    rounded-none
+                    transition-all
+                    duration-300
+                    flex
+                    items-center
+                    justify-center
+                    ${templateId === template.id 
+                      ? 'bg-[#4856CD] text-white'
+                      : 'bg-transparent text-[#4856CD] hover:bg-[#4856CD]/5'
+                    }
+                  `}
+                >
+                  {template.name[interfaceLang as keyof typeof template.name]}
+                </Button>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Link href={`/${interfaceLang}/finish/${sessionId}`}>
-            <Button 
-              className="bg-[#C287EB] hover:opacity-90 p-4 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+        <div id="cv-content">
+          <CVTemplate
+            templateId={templateId}
+            data={cvData}
+            lang={interfaceLang}
+          />
+        </div>
+
+        <div className="fixed bottom-8 right-8 flex flex-col gap-4">
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handlePdfDownload}
+              disabled={isDownloadingPdf}
+              className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
             >
-              <LayoutTemplate className="h-6 w-6" />
+              {isDownloadingPdf ? (
+                <Loader2 className="h-6 w-6 animate-spin" />
+              ) : (
+                <Download className="h-6 w-6" />
+              )}
             </Button>
-          </Link>
-          <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-            {interfaceLang === 'he' ? 'למסך הסיום' : 'To finish screen'}
-          </span>
+            <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+              {interfaceLang === 'he' ? 'הורדת קורות החיים' : 'Download your CV'}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link href={`/${interfaceLang}/finish/${sessionId}`}>
+              <Button 
+                className="bg-[#C287EB] hover:opacity-90 p-4 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+              >
+                <LayoutTemplate className="h-6 w-6" />
+              </Button>
+            </Link>
+            <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+              {interfaceLang === 'he' ? 'למסך הסיום' : 'To finish screen'}
+            </span>
+          </div>
         </div>
       </div>
     </div>

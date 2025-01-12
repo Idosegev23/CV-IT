@@ -1,0 +1,425 @@
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+}
+
+.modalContent {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  background-color: white;
+  border-radius: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  margin: 0 1rem;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* Header Styles */
+.modalHeader {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #4754D7;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s;
+}
+
+.closeButton:hover {
+  color: #4754D7;
+}
+
+/* Body Styles */
+.modalBody {
+  padding: 1.5rem;
+}
+
+/* Price Section */
+.priceSection {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.priceAmount {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #4754D7;
+}
+
+.couponApplied {
+  color: #10B981;
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Payment Summary */
+.paymentSummary {
+  background-color: #F9FAFB;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.paymentSummary h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #4754D7;
+  margin-bottom: 1rem;
+}
+
+.summaryDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #6B7280;
+}
+
+.finalPrice {
+  padding-top: 0.75rem;
+  border-top: 1px solid #E5E7EB;
+  font-weight: 600;
+  color: #4754D7;
+}
+
+/* Coupon Section */
+.couponSection {
+  margin-bottom: 1.5rem;
+}
+
+.couponInput {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.couponInput input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.couponInput input:focus {
+  border-color: #4754D7;
+}
+
+.couponInput button {
+  padding: 0.75rem 1.5rem;
+  background-color: #4754D7;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.couponInput button:hover:not(:disabled) {
+  background-color: #4856CD;
+}
+
+.couponInput button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Form Styles */
+.paymentForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.formField label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4754D7;
+}
+
+.formField input {
+  padding: 0.75rem 1rem;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.formField input:focus {
+  border-color: #4754D7;
+}
+
+/* Terms Checkbox */
+.termsCheckbox {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.termsCheckbox input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.25rem;
+}
+
+.termsCheckbox label {
+  font-size: 0.875rem;
+  color: #6B7280;
+}
+
+.termsCheckbox a {
+  color: #4754D7;
+  text-decoration: none;
+}
+
+.termsCheckbox a:hover {
+  text-decoration: underline;
+}
+
+/* Submit Button */
+.submitButton {
+  padding: 0.875rem;
+  background-color: #4754D7;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
+
+.submitButton:hover:not(:disabled) {
+  background-color: #4856CD;
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Success State */
+.successContainer {
+  padding: 2rem;
+  text-align: center;
+}
+
+.successIcon {
+  width: 4rem;
+  height: 4rem;
+  color: #4754D7;
+  margin-bottom: 1rem;
+}
+
+/* Generating State */
+.generatingContainer {
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+}
+
+.generatingContainer h2 {
+  margin-top: 1rem;
+  color: #4754D7;
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.generatingContainer p {
+  margin-top: 0.5rem;
+  color: #6B7280;
+  font-size: 0.875rem;
+}
+
+.generatingContainer::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(71, 84, 215, 0.1) 0%, rgba(71, 84, 215, 0) 70%);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.5; }
+  50% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.5; }
+}
+
+.loadingAnimation {
+  margin-bottom: 1rem;
+  position: relative;
+  width: 32px;
+  height: 32px;
+  margin: 0 auto;
+}
+
+.loadingAnimation::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 4px solid #4754D7;
+  border-top-color: transparent;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* iframe Container */
+.iframeContainer {
+  position: relative;
+  height: 600px;
+}
+
+.backButton {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  padding: 0.5rem 1rem;
+  background-color: white;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.paymentIframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* רספונסיביות */
+@media (max-width: 640px) {
+  .modalContent {
+    margin: 0 0.5rem;
+    max-height: 85vh;
+  }
+
+  .modalHeader {
+    padding: 1rem;
+  }
+
+  .modalBody {
+    padding: 1rem;
+  }
+
+  .modalHeader h2 {
+    font-size: 1.25rem;
+  }
+
+  .priceAmount {
+    font-size: 1.75rem;
+  }
+
+  .paymentSummary {
+    padding: 1rem;
+  }
+
+  .couponInput {
+    flex-direction: column;
+  }
+
+  .couponInput button {
+    width: 100%;
+  }
+
+  .iframeContainer {
+    height: 500px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalOverlay {
+    padding: 0.5rem;
+  }
+
+  .modalContent {
+    margin: 0;
+    border-radius: 16px;
+  }
+
+  .iframeContainer {
+    height: 400px;
+  }
+}
+
+/* תמיכה במסכים גדולים */
+@media (min-width: 1024px) {
+  .modalContent {
+    max-width: 600px;
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .backButton {
+  right: auto;
+  left: 1rem;
+}
+
+/* אנימציות */
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modalContent {
+  animation: slideIn 0.3s ease-out;
+} 

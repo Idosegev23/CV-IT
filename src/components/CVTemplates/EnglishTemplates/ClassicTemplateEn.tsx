@@ -4,7 +4,7 @@ import { ResumeData } from '../../../types/resume';
 import '../../../styles/templates/classic-en.css';
 import Image from 'next/image';
 import { Assistant } from 'next/font/google';
-import { formatDescription } from '../utils';
+import { formatDescription, formatDate } from '../utils';
 
 interface Military {
   role: string;
@@ -71,18 +71,6 @@ const translations = {
     softSkills: 'Soft Skills',
     skillLevel: 'Skill Level'
   }
-};
-
-// Date formatting function
-const formatDate = (startDate: string, endDate: string) => {
-  const formattedEnd = endDate === 'היום' || 
-    endDate === 'today' || 
-    endDate === 'present' || 
-    endDate === 'Present' ? 
-    'Present' : 
-    endDate;
-  
-  return `${startDate} - ${formattedEnd}`;
 };
 
 const formatSummary = (summary: string) => {
