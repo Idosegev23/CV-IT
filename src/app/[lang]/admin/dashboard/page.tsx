@@ -542,246 +542,258 @@ export default function DashboardPage({
   }
 
   return (
-    <div className="p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold">דשבורד</h1>
-        <button
-          onClick={() => loadDashboardStats()}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-        >
-          רענן נתונים
-        </button>
-      </div>
-
-      {/* קופסאות סטטיסטיקה */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* קורות חיים */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">קורות חיים</p>
-              <h3 className="text-2xl font-bold">{stats.cvStats.total}</h3>
-              <p className="text-sm text-green-600 mt-1">
-                +{stats.cvStats.today} היום
-              </p>
-            </div>
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <DocumentTextIcon className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-blue-600 rounded-full h-2"
-                style={{ width: `${stats.cvStats.completionRate}%` }}
-              />
-            </div>
-            <p className="text-xs text-gray-600 mt-1">
-              {formatPercentage(stats.cvStats.completionRate)} שיעור השלמה
-            </p>
-          </div>
+    <div className="p-6 space-y-6">
+      {loading ? (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
+      ) : (
+        <>
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-2xl font-bold">דשבורד</h1>
+            <button
+              onClick={() => loadDashboardStats()}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              רענן נתונים
+            </button>
+          </div>
 
-        {/* הכנסות */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">הכנסות</p>
-              <h3 className="text-2xl font-bold">
-                {formatCurrency(stats.financialStats.totalRevenue)}
-              </h3>
-              <p className="text-sm text-green-600 mt-1">
-                {formatCurrency(stats.financialStats.todayRevenue)} היום
-              </p>
-            </div>
-            <div className="p-3 bg-green-100 rounded-lg">
-              <CurrencyDollarIcon className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <p className="text-xs text-gray-600">
-              ממוצע להזמנה: {formatCurrency(stats.financialStats.averageOrderValue)}
-            </p>
-          </div>
-        </div>
-
-        {/* קופונים */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">קופונים פעילים</p>
-              <h3 className="text-2xl font-bold">{stats.couponsStats.totalActive}</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                נוצלו: {stats.couponsStats.totalUsed}
-              </p>
-            </div>
-            <div className="p-3 bg-purple-100 rounded-lg">
-              <TagIcon className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <p className="text-xs text-gray-600">
-              פגי תוקף: {stats.couponsStats.totalExpired}
-            </p>
-          </div>
-        </div>
-
-        {/* קמפיינים */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 mb-1">קמפיינים פעילים</p>
-              <h3 className="text-2xl font-bold">{stats.campaignStats.active}</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                ROI: {formatPercentage(stats.campaignStats.totalROI)}
-              </p>
-            </div>
-            <div className="p-3 bg-orange-100 rounded-lg">
-              <ChartBarIcon className="h-6 w-6 text-orange-600" />
-            </div>
-          </div>
-          <div className="mt-4">
-            <p className="text-xs text-gray-600">
-              תקציב: {formatCurrency(stats.campaignStats.totalBudget)}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* גלויות AI */}
-      <div className="grid grid-cols-1 gap-6 mb-8">
-        <CostAnalysis />
-      </div>
-
-      {/* גרפים */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        {/* גרף קורות חיים לאורך זמן */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold mb-6">קורות חיים שנוצרו</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={stats.timeSeriesData.cvCreation}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#8884d8"
-                  fill="#8884d8"
-                  fillOpacity={0.3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* גרף הכנסות */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold mb-6">הכנסות לאורך זמן</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats.timeSeriesData.revenue}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-                <Line
-                  type="monotone"
-                  dataKey="amount"
-                  stroke="#10b981"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* התפלגות שפות */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold mb-6">התפלגות שפות</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={stats.cvStats.byLanguage}
-                  dataKey="count"
-                  nameKey="language"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  label
-                >
-                  {stats.cvStats.byLanguage.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* התפלגות חבילות */}
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold mb-6">התפלגות חבילות</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.cvStats.byPackage}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="package" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#8884d8">
-                  {stats.cvStats.byPackage.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-
-      {/* נתוני המרה ונטישה */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold mb-6">נקודות נטישה</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.conversionStats.dropoffPoints}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="step" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#ef4444" />
-              </BarChart>
-            </ResponsiveContainer>
+          {/* קופסאות סטטיסטיקה */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* קורות חיים */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">קורות חיים</p>
+                  <h3 className="text-2xl font-bold">{stats.cvStats.total}</h3>
+                  <p className="text-sm text-green-600 mt-1">
+                    +{stats.cvStats.today} היום
+                  </p>
+                </div>
+                <div className="p-3 bg-blue-100 rounded-lg">
+                  <DocumentTextIcon className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
+              <div className="mt-4">
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-blue-600 rounded-full h-2"
+                    style={{ width: `${stats.cvStats.completionRate}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-600 mt-1">
+                  {formatPercentage(stats.cvStats.completionRate)} שיעור השלמה
+                </p>
+              </div>
+            </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
-          <h3 className="text-lg font-semibold mb-6">ביצועי קופונים</h3>
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={stats.couponsStats.usageStats}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="used"
-                  stroke="#8884d8"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {/* הכנסות */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">הכנסות</p>
+                  <h3 className="text-2xl font-bold">
+                    {formatCurrency(stats.financialStats.totalRevenue)}
+                  </h3>
+                  <p className="text-sm text-green-600 mt-1">
+                    {formatCurrency(stats.financialStats.todayRevenue)} היום
+                  </p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-lg">
+                  <CurrencyDollarIcon className="h-6 w-6 text-green-600" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-xs text-gray-600">
+                  ממוצע להזמנה: {formatCurrency(stats.financialStats.averageOrderValue)}
+                </p>
+              </div>
+            </div>
+
+            {/* קופונים */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">קופונים פעילים</p>
+                  <h3 className="text-2xl font-bold">{stats.couponsStats.totalActive}</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    נוצלו: {stats.couponsStats.totalUsed}
+                  </p>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-lg">
+                  <TagIcon className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-xs text-gray-600">
+                  פגי תוקף: {stats.couponsStats.totalExpired}
+                </p>
+              </div>
+            </div>
+
+            {/* קמפיינים */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">קמפיינים פעילים</p>
+                  <h3 className="text-2xl font-bold">{stats.campaignStats.active}</h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    ROI: {formatPercentage(stats.campaignStats.totalROI)}
+                  </p>
+                </div>
+                <div className="p-3 bg-orange-100 rounded-lg">
+                  <ChartBarIcon className="h-6 w-6 text-orange-600" />
+                </div>
+              </div>
+              <div className="mt-4">
+                <p className="text-xs text-gray-600">
+                  תקציב: {formatCurrency(stats.campaignStats.totalBudget)}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+
+          {/* גלויות AI */}
+          <div className="grid grid-cols-1 gap-6 mb-8">
+            <CostAnalysis />
+          </div>
+
+          {/* גרפים */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            {/* גרף קורות חיים לאורך זמן */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold mb-6">קורות חיים שנוצרו</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={stats.timeSeriesData.cvCreation}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Area
+                      type="monotone"
+                      dataKey="count"
+                      stroke="#8884d8"
+                      fill="#8884d8"
+                      fillOpacity={0.3}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* גרף הכנסות */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold mb-6">הכנסות לאורך זמן</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={stats.timeSeriesData.revenue}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => formatCurrency(Number(value))} />
+                    <Line
+                      type="monotone"
+                      dataKey="amount"
+                      stroke="#10b981"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* התפלגות שפות */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold mb-6">התפלגות שפות</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={stats.cvStats.byLanguage}
+                      dataKey="count"
+                      nameKey="language"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      label
+                    >
+                      {stats.cvStats.byLanguage.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* התפלגות חבילות */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold mb-6">התפלגות חבילות</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.cvStats.byPackage}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="package" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#8884d8">
+                      {stats.cvStats.byPackage.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* נתוני המרה ונטישה */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold mb-6">נקודות נטישה</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats.conversionStats.dropoffPoints}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="step" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#ef4444" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+              <h3 className="text-lg font-semibold mb-6">ביצועי קופונים</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={stats.couponsStats.usageStats}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis />
+                    <Tooltip />
+                    <Line
+                      type="monotone"
+                      dataKey="used"
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center mt-8 text-2xl font-bold text-gray-600">
+            שלום
+          </div>
+        </>
+      )}
     </div>
   );
 } 
