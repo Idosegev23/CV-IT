@@ -206,9 +206,7 @@
 .section:has(.section-title:contains("כישורים")) {
   order: 4;
   margin-bottom: 1.3rem;
-  max-width: 60%;
-  position: relative;
-  z-index: 2;
+  max-width: 65%;
 }
 
 /* Languages Section */
@@ -709,7 +707,7 @@
   padding-left: 1.5rem;
 }
 
-/* כוחק את כל ההגדרות הישנות */
+/* כוחק את ההגדרות הישנות */
 .skills-grid,
 .languages-grid,
 .skill-item:last-child,
@@ -717,13 +715,10 @@
 .language-name,
 .language-level,
 .language-name::after,
+.skill-level,
 .skill-dot,
-.skill-dot.filled,
-.skill-item::after,
-.skill-item:not(:last-child)::after,
-.languages-items > span:not(:last-child)::after {
-  display: none !important;
-  content: none !important;
+.skill-dot.filled {
+  all: unset;
 }
 
 /* משאיר רק את העיצוב החדש */
@@ -777,8 +772,6 @@
   margin-top: 0;
   margin-bottom: 1rem;
   max-width: 65%;
-  position: relative;
-  z-index: 2;
 }
 
 .languages-items {
@@ -797,47 +790,6 @@
 }
 
 .languages-items > span:not(:last-child)::after {
-  content: " | ";
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.4;
-  font-weight: 200;
-}
-
-/* מחיקת ההגדרות החוסמות */
-.skills-grid,
-.skill-item:last-child,
-.skill-dot,
-.skill-dot.filled {
-  all: unset;
-}
-
-.skills-items {
-  display: block;
-  padding-right: 1.5rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  text-align: right;
-  max-width: 100%;
-}
-
-.skill-item {
-  display: inline;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.skill-name {
-  font-weight: 600;
-  color: #1F1B2F;
-}
-
-.skill-level {
-  font-weight: 300;
-  color: #666;
-}
-
-.skill-item:not(:last-child)::after {
   content: " | ";
   margin: 0 0.8rem;
   color: #666;
