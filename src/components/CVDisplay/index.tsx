@@ -1566,36 +1566,45 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
       {/* פופאפ שמירת שינויים */}
       <Dialog open={showSavePrompt} onOpenChange={setShowSavePrompt}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle className={lang === 'he' ? 'text-right' : 'text-left'}>
-              {lang === 'he' ? 'שמירת שינויים' : 'Save Changes'}
-            </DialogTitle>
-          </DialogHeader>
-          <div className={`mt-4 ${lang === 'he' ? 'text-right' : 'text-left'}`}>
-            <p className="text-gray-700">
-              {lang === 'he' 
-                ? 'היי, ערכת את קורות החיים. אולי כדאי לשמור את השינויים?'
-                : 'Hey, you\'ve made changes to your CV. Would you like to save them?'}
-            </p>
+        <DialogContent className="sm:max-w-[600px] p-0 gap-0 bg-white rounded-2xl">
+          <div className="p-6 border-b border-[#4856CD]/10">
+            <DialogHeader>
+              <DialogTitle className={`text-center text-xl ${lang === 'he' ? 'font-heebo' : ''}`}>
+                {lang === 'he' ? 'שמירת שינויים' : 'Save Changes'}
+              </DialogTitle>
+            </DialogHeader>
           </div>
-          <div className={`mt-6 flex gap-4 ${lang === 'he' ? 'flex-row-reverse' : ''}`}>
-            <Button
-              onClick={handleDownloadAndContinue}
-              className="flex-1 bg-[#4856CD] text-white hover:opacity-90"
-            >
-              {lang === 'he' ? 'הורד והמשך' : 'Download & Continue'}
-            </Button>
-            <Button
-              onClick={() => {
-                setShowSavePrompt(false);
-                router.push(`/${lang}/finish/${sessionId}`);
-              }}
-              variant="outline"
-              className="flex-1"
-            >
-              {lang === 'he' ? 'המשך בלי להוריד' : 'Continue without Download'}
-            </Button>
+          <div className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-center">
+                <div className="w-16 h-16 rounded-full bg-[#4856CD]/10 flex items-center justify-center">
+                  <Download className="w-8 h-8 text-[#4856CD]" />
+                </div>
+              </div>
+              <p className={`text-center text-gray-600 ${lang === 'he' ? 'font-heebo' : ''}`}>
+                {lang === 'he' 
+                  ? 'היי, ערכת את קורות החיים. אולי כדאי לשמור את השינויים?'
+                  : 'Hey, you\'ve made changes to your CV. Would you like to save them?'}
+              </p>
+              <div className={`flex gap-3 ${lang === 'he' ? 'flex-row-reverse' : ''}`}>
+                <Button
+                  onClick={handleDownloadAndContinue}
+                  className="flex-1 bg-[#4856CD] text-white hover:bg-[#4856CD]/90 rounded-full py-2"
+                >
+                  {lang === 'he' ? 'הורד והמשך' : 'Download & Continue'}
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowSavePrompt(false);
+                    router.push(`/${lang}/finish/${sessionId}`);
+                  }}
+                  variant="outline"
+                  className="flex-1 border-[#4856CD] text-[#4856CD] hover:bg-[#4856CD]/5 rounded-full py-2"
+                >
+                  {lang === 'he' ? 'המשך בלי להוריד' : 'Continue without Download'}
+                </Button>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
