@@ -252,18 +252,15 @@
 }
 
 .experience-description {
-  list-style-type: none;
-  padding-right: 1.5rem;
-  margin-top: 0.3rem;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: #333;
+  margin-top: 0.5rem;
 }
 
 .experience-description li {
-  display: inline;
-  font-weight: 300;
-  color: #333;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  position: relative;
+  margin-bottom: 0.8rem;
+  line-height: 1.5;
 }
 
 .experience-description li::before {
@@ -456,19 +453,20 @@ display: none;
 }
 
 .skills-items {
-  display: block;
-  padding-right: 1.5rem;
-  padding-left: 8rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  text-align: right;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0 1.5rem;
 }
 
 .skill-item {
   display: inline;
-  font-size: 0.9rem;
-  color: #333;
-  margin-left: 0;
+}
+
+.skill-item:not(:last-child)::after {
+  content: '|';
+  margin: 0 0.5rem;
+  color: #666;
 }
 
 .skill-name {
@@ -479,6 +477,7 @@ display: none;
 .skill-level {
   font-weight: 300;
   color: #666;
+  margin-right: 0.2rem;
 }
 
 .skill-separator {
