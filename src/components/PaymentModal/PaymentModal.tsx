@@ -369,6 +369,43 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
   const validateCoupon = async (code: string) => {
     setIsValidatingCoupon(true);
     try {
+      // בדיקת קופון מילואים
+      const { data: reservistCoupon, error: reservistError } = await supabase
+        .from('reservist_coupons')
+        .select('*')
+        .eq('coupon_code', code)
+        .eq('is_verified', true)
+        .single();
+
+      if (reservistCoupon && !reservistError) {
+        // בדיקה האם הקופון כבר נוצל
+        if (reservistCoupon.is_used) {
+          toast.error(isRTL ? 'קופון זה כבר נוצל' : 'This coupon has already been used');
+          return;
+        }
+
+        setAppliedCoupon({ type: 'reservist', data: reservistCoupon });
+        setFinalPrice(0); // קופון מילואים מעניק חבילה חינם
+        
+        // עדכון סטטוס הקופון לאחר שימוש
+        const { error: updateError } = await supabase
+          .from('reservist_coupons')
+          .update({ is_used: true })
+          .eq('id', reservistCoupon.id);
+          
+        if (updateError) {
+          console.error('Error updating reservist coupon:', updateError);
+          toast.error(isRTL ? 'אירעה שגיאה בעדכון הקופון' : 'Error updating coupon');
+          return;
+        }
+        
+        toast.success(isRTL 
+          ? 'קופון מילואים הופעל בהצלחה! חבילה חינם!' 
+          : 'Reservist coupon activated! Free package!');
+        return;
+      }
+
+      // אם לא נמצא קופון מילואים, בדוק קופון רגיל
       const { data: regularCoupon, error: regularError } = await supabase
         .from('coupons')
         .select('*')
@@ -377,6 +414,12 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         .single();
 
       if (regularCoupon && !regularError) {
+        // בדיקה שהקופון לא חרג ממספר השימושים המקסימלי
+        if (regularCoupon.current_uses >= regularCoupon.max_uses) {
+          toast.error(isRTL ? 'הקופון מוצה ולא ניתן להשתמש בו יותר' : 'This coupon has reached its maximum usage limit');
+          return;
+        }
+
         // בדיקות תקינות הקופון...
         setAppliedCoupon({ type: 'regular', data: regularCoupon });
         
@@ -407,6 +450,19 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         }
         
         setFinalPrice(newPrice);
+        
+        // עדכון מספר השימושים בקופון
+        const { error: updateError } = await supabase
+          .from('coupons')
+          .update({ current_uses: regularCoupon.current_uses + 1 })
+          .eq('id', regularCoupon.id);
+          
+        if (updateError) {
+          console.error('Error updating coupon uses:', updateError);
+          toast.error(isRTL ? 'אירעה שגיאה בעדכון הקופון' : 'Error updating coupon');
+          return;
+        }
+        
         toast.success(isRTL 
           ? `קופון הופעל בהצלחה! ${discountText}` 
           : `Coupon activated! ${discountText}`);
