@@ -387,6 +387,14 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         setAppliedCoupon({ type: 'reservist', data: reservistCoupon });
         setFinalPrice(0); // קופון מילואים מעניק חבילה חינם
         
+        // מילוי אוטומטי של פרטי הטופס
+        setFormData({
+          name: `${reservistCoupon.FirstName} ${reservistCoupon.LastName}`,
+          email: reservistCoupon.Email || '',
+          phone: reservistCoupon.Phone || '',
+          id: '' // תעודת זהות לא נשמרת בטבלת המילואים מטעמי פרטיות
+        });
+        
         // עדכון סטטוס הקופון לאחר שימוש
         const { error: updateError } = await supabase
           .from('reservist_coupons')
