@@ -353,4 +353,19 @@ CREATE TRIGGER set_updated_at
 
 -- אינדקסים
 CREATE INDEX IF NOT EXISTS social_connections_platform_idx ON public.social_connections (platform);
-CREATE INDEX IF NOT EXISTS social_connections_account_name_idx ON public.social_connections (account_name); 
+CREATE INDEX IF NOT EXISTS social_connections_account_name_idx ON public.social_connections (account_name);
+
+CREATE TABLE sessions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  expires_at TIMESTAMP WITH TIME ZONE,
+  template_id TEXT,
+  language TEXT,
+  status TEXT,
+  current_step TEXT,
+  is_paid BOOLEAN DEFAULT FALSE,
+  payment_details JSONB,
+  client_details JSONB,
+  metadata JSONB
+); 

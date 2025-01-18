@@ -189,6 +189,24 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         console.log('Free package detected, skipping payment process...');
         setPaymentStatus('success');
         
+        // שליחת הודעת וואטסאפ
+        try {
+          await fetch('/api/whatsapp/send', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              name: formData.name,
+              email: formData.email,
+              phone: formData.phone
+            })
+          });
+        } catch (error) {
+          console.error('Failed to send WhatsApp message:', error);
+          // לא נזרוק שגיאה כדי לא לעצור את התהליך
+        }
+        
         // התחלת תהליך יצירת קורות החיים
         setTimeout(async () => {
           setPaymentStatus('generating');
@@ -302,6 +320,51 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
             setPaymentIframe(null);
             setPaymentStatus('success');
             
+            // שליפת פרטי הלקוח מהדאטהבייס ושליחת הודעת וואטסאפ
+            const sendWhatsAppNotification = async () => {
+              try {
+                // שליפת הפרטים מ-cv_data
+                const { data: cvData, error: cvError } = await supabase
+                  .from('cv_data')
+                  .select('content')
+                  .eq('session_id', currentSessionId)
+                  .single();
+
+                if (cvError) {
+                  console.error('Failed to fetch CV data:', cvError);
+                  return;
+                }
+
+                if (cvData?.content?.personal_details) {
+                  // חילוץ הפרטים מה-personal_details
+                  const personalDetails = cvData.content.personal_details;
+                  const emailMatch = personalDetails.match(/מייל שלי זה\s*([^\n]+)/);
+                  const phoneMatch = personalDetails.match(/נייד שלי זה\s*([^\n]+)/);
+                  const nameMatch = personalDetails.match(/^([^\n]+)/);
+
+                  const clientData = {
+                    name: nameMatch ? nameMatch[1].trim() : formData.name,
+                    email: emailMatch ? emailMatch[1].trim() : formData.email,
+                    phone: phoneMatch ? phoneMatch[1].trim() : formData.phone
+                  };
+
+                  // שליחת הודעת וואטסאפ
+                  await fetch('/api/whatsapp/send', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(clientData)
+                  });
+                }
+              } catch (error) {
+                console.error('Failed to send WhatsApp message:', error);
+              }
+            };
+
+            // הפעלת הפונקציה
+            sendWhatsAppNotification();
+            
             toast.success(
               isRTL 
                 ? 'התשלום התקבל בהצלחה!' 
@@ -310,7 +373,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                 duration: 3000,
               }
             );
-            
+
             setTimeout(async () => {
               setPaymentStatus('generating');
               

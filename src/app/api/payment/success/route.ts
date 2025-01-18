@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { sendWhatsAppMessage } from '@/lib/whatsapp';
 
 // פונקציה משותפת לטיפול בתשלום מוצלח
 async function handlePaymentSuccess(data: any) {
@@ -27,6 +28,18 @@ async function handlePaymentSuccess(data: any) {
     date: new Date().toISOString()
   };
 
+  // קבלת פרטי הלקוח מהדאטהבייס
+  const { data: sessionData, error: fetchError } = await supabase
+    .from('sessions')
+    .select('client_details')
+    .eq('id', sessionId)
+    .single();
+
+  if (fetchError) {
+    console.error('Failed to fetch session data:', fetchError);
+    throw fetchError;
+  }
+
   // עדכון סטטוס התשלום
   const { error: updateError } = await supabase
     .from('sessions')
@@ -41,6 +54,16 @@ async function handlePaymentSuccess(data: any) {
   if (updateError) {
     console.error('Failed to update session:', updateError);
     throw updateError;
+  }
+
+  // שליחת הודעת וואטסאפ
+  if (sessionData?.client_details) {
+    try {
+      await sendWhatsAppMessage(sessionData.client_details);
+    } catch (error) {
+      console.error('Failed to send WhatsApp message:', error);
+      // לא נזרוק שגיאה כדי לא לעצור את התהליך
+    }
   }
 
   // התחלת תהליך יצירת קורות החיים
