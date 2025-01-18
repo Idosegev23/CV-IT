@@ -35,6 +35,7 @@ const emptyResumeData: ResumeData = {
 export default function AdminCreateCV() {
   const [sessionId, setSessionId] = useState('');
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [formattedData, setFormattedData] = useState<ResumeData>(emptyResumeData);
   const [showLinks, setShowLinks] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -66,11 +67,25 @@ export default function AdminCreateCV() {
       } catch (error) {
         console.error('Auth check error:', error);
         router.push('/he/admin/login');
+      } finally {
+        setInitialLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [router, supabase.auth]);
+
+  if (initialLoading) {
+    return (
+      <div className="min-h-screen bg-[#EAEAE7] p-8 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return null;
+  }
 
   const handleCopyLink = (link: string) => {
     navigator.clipboard.writeText(link);
@@ -228,14 +243,6 @@ export default function AdminCreateCV() {
   };
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://www.cvit.co.il';
-
-  if (!isAuthorized) {
-    return (
-      <div className="min-h-screen bg-[#EAEAE7] p-8 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#EAEAE7] p-8">

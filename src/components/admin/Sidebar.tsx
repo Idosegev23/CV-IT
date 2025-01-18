@@ -11,6 +11,7 @@ import {
   Cog6ToothIcon,
   ArrowLeftOnRectangleIcon,
   BellIcon,
+  DocumentPlusIcon,
 } from '@heroicons/react/24/outline';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
@@ -37,6 +38,13 @@ export default function Sidebar({ lang }: SidebarProps) {
       name: 'קורות חיים',
       href: `/${lang}/admin/cv-management`,
       icon: DocumentTextIcon,
+      subItems: [
+        {
+          name: 'השלמת תהליך',
+          href: `/${lang}/admin/create-cv`,
+          icon: DocumentPlusIcon,
+        }
+      ]
     },
     {
       name: 'קופונים',
@@ -77,25 +85,55 @@ export default function Sidebar({ lang }: SidebarProps) {
         </div>
         <nav className="mt-5 flex-1 px-2 space-y-1">
           {menuItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || 
+              (item.subItems?.some(sub => pathname === sub.href));
+            
             return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  isActive
-                    ? 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                <item.icon
-                  className={`ml-3 flex-shrink-0 h-6 w-6 ${
-                    isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'
+              <div key={item.name}>
+                <Link
+                  href={item.href}
+                  className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                    isActive
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
-                  aria-hidden="true"
-                />
-                {item.name}
-              </Link>
+                >
+                  <item.icon
+                    className={`ml-3 flex-shrink-0 h-6 w-6 ${
+                      isActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'
+                    }`}
+                    aria-hidden="true"
+                  />
+                  {item.name}
+                </Link>
+                
+                {item.subItems && (
+                  <div className="mr-8 mt-1 space-y-1">
+                    {item.subItems.map((subItem) => {
+                      const isSubActive = pathname === subItem.href;
+                      return (
+                        <Link
+                          key={subItem.name}
+                          href={subItem.href}
+                          className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                            isSubActive
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          }`}
+                        >
+                          <subItem.icon
+                            className={`ml-3 flex-shrink-0 h-5 w-5 ${
+                              isSubActive ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'
+                            }`}
+                            aria-hidden="true"
+                          />
+                          {subItem.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </nav>
