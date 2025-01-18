@@ -1,12 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/theme/ui/button';
 import { useWindowSize } from '@/hooks/useWindowSize';
-import ReservistButton from '@/components/ReservistButton';
+import { cn } from '@/lib/utils';
+import { ReservistCouponPopup } from '@/components/PaymentModal/ReservistCouponPopup';
+import { useAppStore } from '@/lib/store';
+import { Medal } from 'lucide-react';
 
 const content = {
   he: {
@@ -34,6 +37,7 @@ export default function HeroSection() {
   const isRTL = lang === 'he';
   const currentContent = content[lang as keyof typeof content];
   const { width } = useWindowSize();
+  const setSelectedPackage = useAppStore(state => state.setSelectedPackage);
 
   // פונקציה שמחזירה גדלים דינמיים בהתאם לרוחב המסך
   const getDynamicSizes = () => {
@@ -101,6 +105,43 @@ export default function HeroSection() {
 
   const handleStart = () => {
     router.push(`/${lang}/templates?from=home`);
+  };
+
+  const ReservistButton = () => {
+    const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+    return (
+      <>
+        <button
+          onClick={() => setIsPopupOpen(true)}
+          className={cn(
+            "flex items-center justify-center gap-2",
+            "px-6 py-3",
+            "bg-[#4B5320]", // צבע צבאי ירוק
+            "hover:bg-[#4B5320]/90",
+            "text-white",
+            "rounded-full",
+            "font-medium",
+            "transition-all",
+            "shadow-lg",
+            "border-2 border-[#4B5320]",
+            "w-full sm:w-auto",
+            "group" // הוספת קבוצה לאנימציה
+          )}
+        >
+          <div className="w-8 h-8 bg-[#4B5320] rounded-full flex items-center justify-center border-2 border-white/20 group-hover:scale-110 transition-transform">
+            <Medal className="w-5 h-5 text-white" />
+          </div>
+          <span>{isRTL ? 'משרת/ת מילואים? לחץ/י כאן' : 'Reserve Soldier? Click Here'}</span>
+        </button>
+        
+        <ReservistCouponPopup
+          isOpen={isPopupOpen}
+          onClose={() => setIsPopupOpen(false)}
+          isRTL={isRTL}
+        />
+      </>
+    );
   };
 
   return (
@@ -180,7 +221,7 @@ export default function HeroSection() {
               </div>
 
               <div className="flex justify-center mt-2">
-                <ReservistButton lang={lang} />
+                <ReservistButton />
               </div>
             </div>
           </motion.div>

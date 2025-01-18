@@ -15,26 +15,26 @@ export default function CVManagement() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      
         if (authError || !user) {
           router.push('/he/admin/login');
-          return;
-        }
+        return;
+      }
 
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
 
         if (profileError || !profile || profile.role !== 'admin') {
           router.push('/he/admin');
-          return;
-        }
+        return;
+      }
 
         setLoading(false);
-      } catch (error) {
+    } catch (error) {
         console.error('Auth check error:', error);
         router.push('/he/admin/login');
       }
@@ -55,13 +55,13 @@ export default function CVManagement() {
     <div className="p-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">ניהול קורות חיים</h1>
-        <button
-          onClick={() => router.push('/he/admin/cv-management/create')}
+          <button
+          onClick={() => router.push('/he/admin/create-cv')}
           className="flex items-center gap-2 px-4 py-2 bg-[#4856CD] text-white rounded-lg hover:bg-[#3A45C0] transition-colors"
-        >
+          >
           <DocumentPlusIcon className="h-5 w-5" />
           השלמת תהליך
-        </button>
+          </button>
       </div>
 
       {/* שאר התוכן של הדף */}

@@ -386,6 +386,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
 
         setAppliedCoupon({ type: 'reservist', data: reservistCoupon });
         setFinalPrice(0); // קופון מילואים מעניק חבילה חינם
+        setSelectedPackage('advanced'); // קביעת החבילה המתקדמת
         
         // מילוי אוטומטי של פרטי הטופס
         setFormData({
@@ -409,11 +410,11 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         
         toast.success(isRTL 
           ? 'קופון מילואים הופעל בהצלחה! חבילה חינם!' 
-          : 'Reservist coupon activated! Free package!');
+          : 'Military coupon activated! Free package!');
         return;
       }
 
-      // אם לא נמצא קופון מילואים, בדוק קופון רגיל
+      // המשך לבדיקת קופונים רגילים...
       const { data: regularCoupon, error: regularError } = await supabase
         .from('coupons')
         .select('*')
