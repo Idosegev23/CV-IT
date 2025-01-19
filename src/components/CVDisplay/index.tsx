@@ -10,7 +10,7 @@ import { TextEditor } from '@/components/TextEditor/page';
 import { ResumeData } from '@/types/resume';
 import { getDictionary } from '@/dictionaries';
 import { Button } from '@/components/theme/ui/button';
-import { Edit2, Eye, Download, FileText, Loader2, Menu, X, Globe, LayoutTemplate, Plus, Briefcase, GraduationCap, Languages, Wrench, Star, CheckCircle2 } from 'lucide-react';
+import { Edit2, Eye, Download, FileText, Loader2, Menu, X, Globe, LayoutTemplate, Plus, Briefcase, GraduationCap, Languages, Wrench, Star, CheckCircle2, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dictionary } from '@/dictionaries/dictionary';
 import { useAppStore } from '@/lib/store';
@@ -38,6 +38,7 @@ import { AddItemPopup } from '../EditableFields/AddItemPopup';
 import { UpgradePaymentModal } from '@/components/PaymentModal/UpgradePaymentModal';
 import { PACKAGE_PRICES } from '@/lib/constants';
 import type { Package } from '@/lib/store';
+import { CVTutorialSteps } from '../cv/CVTutorialSteps';
 
 // סגנונות חדשים למובייל
 const mobileStyles = `
@@ -241,6 +242,16 @@ interface ResumeDataWithIndex extends ResumeData {
   [key: string]: any;
 }
 
+// הוספת סגנונות חדשים לאנימציות
+const pulseAnimation = {
+  scale: [1, 1.2, 1],
+  transition: {
+    duration: 1.5,
+    repeat: Infinity,
+    ease: "easeInOut"
+  }
+};
+
 export const CVDisplay: React.FC<CVDisplayProps> = ({ 
   sessionId, 
   lang,
@@ -298,6 +309,9 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
   const [packageType, setPackageType] = useState<Package>('basic');
   const [isEditable, setIsEditable] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(true);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [highlightedElement, setHighlightedElement] = useState<'edit' | 'preview' | 'download' | null>(null);
 
   useEffect(() => {
     mounted.current = true;
@@ -1115,24 +1129,28 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   };
 
   const renderEditButton = () => {
-    // אם זו התבנית הקלאסית, לא נציג את כפתור העריכה
     if (selectedTemplate === 'classic') {
       return null;
     }
 
     return (
       <div className="flex items-center gap-2">
-        <Button
-          onClick={() => setIsEditing(!isEditing)}
-          disabled={isDownloadingPdf}
-          className={cn(
-            "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
-            isDownloadingPdf && "opacity-50 cursor-not-allowed"
-          )}
-          aria-label={lang === 'he' ? 'עריכת קורות חיים' : 'Edit CV'}
+        <motion.div
+          animate={highlightedElement === 'edit' ? pulseAnimation : {}}
         >
-          {isEditing ? <X className="h-6 w-6" /> : <Edit2 className="h-6 w-6" />}
-        </Button>
+          <Button
+            onClick={() => setIsEditing(!isEditing)}
+            disabled={isDownloadingPdf}
+            className={cn(
+              "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
+              isDownloadingPdf && "opacity-50 cursor-not-allowed",
+              highlightedElement === 'edit' && "ring-4 ring-[#4856CD]/30"
+            )}
+            aria-label={lang === 'he' ? 'עריכת קורות חיים' : 'Edit CV'}
+          >
+            {isEditing ? <X className="h-6 w-6" /> : <Edit2 className="h-6 w-6" />}
+          </Button>
+        </motion.div>
         <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
           {isEditing 
             ? (lang === 'he' ? 'סיום עריכה' : 'Finish Editing')
@@ -1189,255 +1207,260 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-start pt-4 md:pt-8">
-      {/* תמונת סיום - מותאמת למובייל */}
-      <div className="w-full flex justify-center mb-4 md:mb-8">
-        <Image
-          src="/design/finish.svg"
-          alt={lang === 'he' ? 'סיום' : 'Finish'}
-          width={120}
-          height={120}
-          className="mx-auto md:w-[180px] md:h-[180px]"
-          style={{ width: 'auto', height: 'auto' }}
-        />
-      </div>
+    <div className="relative">
+      {/* כפתור עזרה צף */}
+      <button
+        onClick={() => setShowTutorial(true)}
+        className="fixed bottom-8 left-8 bg-gradient-to-r from-[#4856CD] to-[#4856CD]/90 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 z-50"
+      >
+        <HelpCircle className="w-5 h-5" />
+        <span>{lang === 'he' ? 'נתקעת? נעזור לך!' : 'Need help?'}</span>
+      </button>
 
-      <div className="container px-4 py-4 md:py-8 flex flex-col items-center justify-center w-full max-w-[800px]">
-        {/* בחירת תבנית - מותאם למובייל ודסקטופ */}
-        <div className="mb-4 md:mb-8 flex flex-col items-center gap-4 w-full">
-          <div className="w-full max-w-[606px] mx-auto">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-0">
-              {Object.entries(templateComponents).map(([key, _], index) => (
-                <motion.div
-                  key={key}
-                  className={cn(
-                    "relative",
-                    index !== 0 && "md:border-l md:border-[#4856CD]/30",
-                    "first:rounded-r-full last:rounded-l-full overflow-hidden"
-                  )}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Button
-                    onClick={() => setSelectedTemplate(key as keyof typeof templateComponents)}
-                    className={cn(
-                      "w-full h-full",
-                      "text-sm md:text-base",
-                      "font-rubik",
-                      "transition-all duration-300",
-                      "flex items-center justify-center",
-                      "px-4 py-2",
-                      selectedTemplate === key
-                        ? "bg-[#4856CD] text-white"
-                        : "bg-transparent text-gray-900 hover:bg-[#4856CD]/5",
-                      "border border-[#4856CD]/30",
-                      "md:rounded-none",
-                      index === 0 && "rounded-r-full",
-                      index === Object.entries(templateComponents).length - 1 && "rounded-l-full"
-                    )}
-                    aria-label={dictionary.templates[key as keyof typeof templateComponents].name}
-                  >
-                    {dictionary.templates[key as keyof typeof templateComponents].name}
-                  </Button>
-                </motion.div>
-              ))}
-            </div>
-          </div>
+      {/* קומפוננטת ההדרכה */}
+      <CVTutorialSteps
+        isOpen={showTutorial}
+        onClose={() => setShowTutorial(false)}
+        canEdit={canEdit}
+        language={lang}
+        isPreviewMode={isPreviewMode}
+        onStepChange={setHighlightedElement}
+        isMobile={isMobile}
+      />
+
+      <div className="min-h-screen flex flex-col items-center justify-start pt-4 md:pt-8">
+        {/* תמונת סיום - מותאמת למובייל */}
+        <div className="w-full flex justify-center mb-4 md:mb-8">
+          <Image
+            src="/design/finish.svg"
+            alt={lang === 'he' ? 'סיום' : 'Finish'}
+            width={120}
+            height={120}
+            className="mx-auto md:w-[180px] md:h-[180px]"
+            style={{ width: 'auto', height: 'auto' }}
+          />
         </div>
 
-        {/* קו מפריד */}
-        <div className="w-full max-w-4xl mx-auto mb-4 md:mb-8 border-t border-[#4856CD]/20" />
-
-        {/* כצוגת CV עם ממשק עריכה */}
-        <div className="w-full">
-          {isMobile ? (
-            <MobilePreview 
-              data={cvData!}
-              lang={lang}
-              template={selectedTemplate}
-              dictionary={dictionary}
-            />
-          ) : (
-            <div className="relative mx-auto flex justify-center">
-              <div 
-                id="cv-content" 
-                className={`shadow-2xl rounded-2xl mx-auto relative ${isEditing ? 'overflow-y-visible min-h-full' : 'overflow-hidden'}`}
-                style={{
-                  width: '210mm',
-                  height: isEditing ? 'fit-content' : '297mm',
-                  minHeight: isEditing ? 'fit-content' : '297mm',
-                  maxHeight: isEditing ? 'none' : '297mm',
-                  transform: isEditing ? 'none' : 'scale(0.99)',
-                  transformOrigin: 'top center',
-                  margin: 0,
-                  padding: 0,
-                  position: 'relative',
-                  background: 'white',
-                  border: isEditing ? '1px solid rgba(72, 86, 205, 0.1)' : 'none'
-                }}
-              >
-                {isEditing && (
-                  <div className="absolute -right-16 top-0 flex flex-col gap-2 h-full py-4">
-                    <div className="sticky top-4 flex flex-col gap-2">
-                      <Button
-                        onClick={() => {
-                          const newData = { ...cvData! };
-                          newData.experience = [...(newData.experience || []), {
-                            position: '',
-                            company: '',
-                            startDate: '',
-                            endDate: '',
-                            description: []
-                          }];
-                          handleSave(newData);
-                        }}
-                        className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
-                        title={lang === 'he' ? 'הוסף ניסיון תעסוקתי' : 'Add Work Experience'}
-                      >
-                        <Plus className="h-4 w-4 text-gray-900" />
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          const newData = { ...cvData! };
-                          if (!newData.education) newData.education = { degrees: [] };
-                          newData.education.degrees = [...(newData.education.degrees || []), {
-                            type: '',
-                            field: '',
-                            institution: '',
-                            years: '',
-                            specialization: ''
-                          }];
-                          handleSave(newData);
-                        }}
-                        className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
-                        title={lang === 'he' ? 'הוסף השכלה' : 'Add Education'}
-                      >
-                        <Plus className="h-4 w-4 text-gray-900" />
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          const newData = { ...cvData! };
-                          if (!newData.skills) newData.skills = { technical: [], soft: [], languages: [] };
-                          newData.skills.languages = [...(newData.skills.languages || []), {
-                            language: '',
-                            level: ''
-                          }];
-                          handleSave(newData);
-                        }}
-                        className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
-                        title={lang === 'he' ? 'הוסף שפה' : 'Add Language'}
-                      >
-                        <Plus className="h-4 w-4 text-gray-900" />
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          const newData = { ...cvData! };
-                          if (!newData.skills) newData.skills = { technical: [], soft: [], languages: [] };
-                          newData.skills.technical = [...(newData.skills.technical || []), {
-                            name: '',
-                            level: 3
-                          }];
-                          handleSave(newData);
-                        }}
-                        className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
-                        title={lang === 'he' ? 'הוסף כישור טכני' : 'Add Technical Skill'}
-                      >
-                        <Plus className="h-4 w-4 text-gray-900" />
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          const newData = { ...cvData! };
-                          if (!newData.skills) newData.skills = { technical: [], soft: [], languages: [] };
-                          newData.skills.soft = [...(newData.skills.soft || []), {
-                            name: '',
-                            level: 3
-                          }];
-                          handleSave(newData);
-                        }}
-                        className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
-                        title={lang === 'he' ? 'הוסף כישור רך' : 'Add Soft Skill'}
-                      >
-                        <Plus className="h-4 w-4 text-gray-900" />
-                      </Button>
-                    </div>
-                  </div>
-                )}
-                <TemplateComponent
-                  data={cvData!}
-                  lang={cvData?.lang || 'he'}
-                  isEditing={isEditing}
-                  onUpdate={onUpdate}
-                  onDelete={onDelete}
-                  onEdit={handleEdit}
-                />
+        <div className="container px-4 py-4 md:py-8 flex flex-col items-center justify-center w-full max-w-[800px]">
+          {/* בחירת תבנית - מותאם למובייל ודסקטופ */}
+          <div className="mb-4 md:mb-8 flex flex-col items-center gap-4 w-full">
+            <div className="w-full max-w-[606px] mx-auto">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-0">
+                {Object.entries(templateComponents).map(([key, _], index) => (
+                  <motion.div
+                    key={key}
+                    className={cn(
+                      "relative",
+                      index !== 0 && "md:border-l md:border-[#4856CD]/30",
+                      "first:rounded-r-full last:rounded-l-full overflow-hidden"
+                    )}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Button
+                      onClick={() => setSelectedTemplate(key as keyof typeof templateComponents)}
+                      className={cn(
+                        "w-full h-full",
+                        "text-sm md:text-base",
+                        "font-rubik",
+                        "transition-all duration-300",
+                        "flex items-center justify-center",
+                        "px-4 py-2",
+                        selectedTemplate === key
+                          ? "bg-[#4856CD] text-white"
+                          : "bg-transparent text-gray-900 hover:bg-[#4856CD]/5",
+                        "border border-[#4856CD]/30",
+                        "md:rounded-none",
+                        index === 0 && "rounded-r-full",
+                        index === Object.entries(templateComponents).length - 1 && "rounded-l-full"
+                      )}
+                      aria-label={dictionary.templates[key as keyof typeof templateComponents].name}
+                    >
+                      {dictionary.templates[key as keyof typeof templateComponents].name}
+                    </Button>
+                  </motion.div>
+                ))}
               </div>
             </div>
-          )}
+          </div>
+
+          {/* קו מפריד */}
+          <div className="w-full max-w-4xl mx-auto mb-4 md:mb-8 border-t border-[#4856CD]/20" />
+
+          {/* כצוגת CV עם ממשק עריכה */}
+          <div className="w-full">
+            {isMobile ? (
+              <MobilePreview 
+                data={cvData!}
+                lang={lang}
+                template={selectedTemplate}
+                dictionary={dictionary}
+              />
+            ) : (
+              <div className="relative mx-auto flex justify-center">
+                <div 
+                  id="cv-content" 
+                  className={`shadow-2xl rounded-2xl mx-auto relative ${isEditing ? 'overflow-y-visible min-h-full' : 'overflow-hidden'}`}
+                  style={{
+                    width: '210mm',
+                    height: isEditing ? 'fit-content' : '297mm',
+                    minHeight: isEditing ? 'fit-content' : '297mm',
+                    maxHeight: isEditing ? 'none' : '297mm',
+                    transform: isEditing ? 'none' : 'scale(0.99)',
+                    transformOrigin: 'top center',
+                    margin: 0,
+                    padding: 0,
+                    position: 'relative',
+                    background: 'white',
+                    border: isEditing ? '1px solid rgba(72, 86, 205, 0.1)' : 'none'
+                  }}
+                >
+                  {isEditing && (
+                    <div className="absolute -right-16 top-0 flex flex-col gap-2 h-full py-4">
+                      <div className="sticky top-4 flex flex-col gap-2">
+                        <Button
+                          onClick={() => {
+                            const newData = { ...cvData! };
+                            newData.experience = [...(newData.experience || []), {
+                              position: '',
+                              company: '',
+                              startDate: '',
+                              endDate: '',
+                              description: []
+                            }];
+                            handleSave(newData);
+                          }}
+                          className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
+                          title={lang === 'he' ? 'הוסף ניסיון תעסוקתי' : 'Add Work Experience'}
+                        >
+                          <Plus className="h-4 w-4 text-gray-900" />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            const newData = { ...cvData! };
+                            if (!newData.education) newData.education = { degrees: [] };
+                            newData.education.degrees = [...(newData.education.degrees || []), {
+                              type: '',
+                              field: '',
+                              institution: '',
+                              years: '',
+                              specialization: ''
+                            }];
+                            handleSave(newData);
+                          }}
+                          className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
+                          title={lang === 'he' ? 'הוסף השכלה' : 'Add Education'}
+                        >
+                          <Plus className="h-4 w-4 text-gray-900" />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            const newData = { ...cvData! };
+                            if (!newData.skills) newData.skills = { technical: [], soft: [], languages: [] };
+                            newData.skills.languages = [...(newData.skills.languages || []), {
+                              language: '',
+                              level: ''
+                            }];
+                            handleSave(newData);
+                          }}
+                          className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
+                          title={lang === 'he' ? 'הוסף שפה' : 'Add Language'}
+                        >
+                          <Plus className="h-4 w-4 text-gray-900" />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            const newData = { ...cvData! };
+                            if (!newData.skills) newData.skills = { technical: [], soft: [], languages: [] };
+                            newData.skills.technical = [...(newData.skills.technical || []), {
+                              name: '',
+                              level: 3
+                            }];
+                            handleSave(newData);
+                          }}
+                          className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
+                          title={lang === 'he' ? 'הוסף כישור טכני' : 'Add Technical Skill'}
+                        >
+                          <Plus className="h-4 w-4 text-gray-900" />
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            const newData = { ...cvData! };
+                            if (!newData.skills) newData.skills = { technical: [], soft: [], languages: [] };
+                            newData.skills.soft = [...(newData.skills.soft || []), {
+                              name: '',
+                              level: 3
+                            }];
+                            handleSave(newData);
+                          }}
+                          className="bg-white hover:bg-gray-50 p-2 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center border border-[#4856CD]/10"
+                          title={lang === 'he' ? 'הוסף כישור רך' : 'Add Soft Skill'}
+                        >
+                          <Plus className="h-4 w-4 text-gray-900" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  <TemplateComponent
+                    data={cvData!}
+                    lang={cvData?.lang || 'he'}
+                    isEditing={isEditing}
+                    onUpdate={onUpdate}
+                    onDelete={onDelete}
+                    onEdit={handleEdit}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* כפתורי פעולה - מותאמים למובייל ודסקטופ */}
-      <div className="fixed bottom-8 right-8 flex flex-col gap-4">
-        {renderEditButton()}
+        {/* כפתורי פעולה - מותאמים למובייל ודסקטופ */}
+        <div className="fixed bottom-8 right-8 flex flex-col gap-4">
+          {renderEditButton()}
 
-        {/* כפתור צפייה - רק במובייל */}
-        {isMobile && (
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handlePreviewPdf}
-              disabled={isGenerating}
-              className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
-              aria-label={lang === 'he' ? 'צפייה בקובץ' : 'View file'}
-            >
-              {isGenerating ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                <Eye className="h-6 w-6" />
-              )}
-            </Button>
-            <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-              {lang === 'he' ? 'צפייה' : 'View'}
-            </span>
-          </div>
-        )}
-
-        {/* כפתור הורדה והמשך */}
-        {!isFromFinishPage ? (
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={handleDownloadAndContinue}
-              disabled={isDownloadingPdf || isEditing || selectedTemplate === 'classic'}
-              className={cn(
-                "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
-                (isEditing || selectedTemplate === 'classic') && "opacity-50 cursor-not-allowed"
-              )}
-              aria-label={lang === 'he' ? 'הורדת קובץ PDF והמשך' : 'Download PDF and Continue'}
-            >
-              {isDownloadingPdf ? (
-                <Loader2 className="h-6 w-6 animate-spin" />
-              ) : (
-                <Download className="h-6 w-6" />
-              )}
-            </Button>
-            <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-              {selectedTemplate === 'classic' 
-                ? (lang === 'he' ? 'התבנית בבנייה' : 'Template Under Construction')
-                : (lang === 'he' ? 'הורדת הקורות חיים והמשך למסך ההטבות' : 'Download CV and Continue to Benefits Screen')
-              }
-            </span>
-          </div>
-        ) : (
-          <>
-            {/* כפתור הורדה - כשחוזרים מדף הסיום */}
-            {hasChanges && (
-              <div className="flex items-center gap-2">
+          {/* כפתור צפייה - רק במובייל */}
+          {isMobile && (
+            <div className="flex items-center gap-2">
+              <motion.div
+                animate={highlightedElement === 'preview' ? pulseAnimation : {}}
+              >
                 <Button
-                  onClick={handlePdfDownload}
-                  disabled={isDownloadingPdf || isEditing}
+                  onClick={handlePreviewPdf}
+                  disabled={isGenerating}
                   className={cn(
                     "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
-                    isEditing && "opacity-50 cursor-not-allowed"
+                    highlightedElement === 'preview' && "ring-4 ring-[#4856CD]/30"
                   )}
-                  aria-label={lang === 'he' ? 'הורדת קובץ PDF' : 'Download PDF'}
+                  aria-label={lang === 'he' ? 'צפייה בקובץ' : 'View file'}
+                >
+                  {isGenerating ? (
+                    <Loader2 className="h-6 w-6 animate-spin" />
+                  ) : (
+                    <Eye className="h-6 w-6" />
+                  )}
+                </Button>
+              </motion.div>
+              <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                {lang === 'he' ? 'צפייה' : 'View'}
+              </span>
+            </div>
+          )}
+
+          {/* כפתור הורדה והמשך */}
+          {!isFromFinishPage ? (
+            <div className="flex items-center gap-2">
+              <motion.div
+                animate={highlightedElement === 'download' ? pulseAnimation : {}}
+              >
+                <Button
+                  onClick={handleDownloadAndContinue}
+                  disabled={isDownloadingPdf || isEditing || selectedTemplate === 'classic'}
+                  className={cn(
+                    "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
+                    (isEditing || selectedTemplate === 'classic') && "opacity-50 cursor-not-allowed",
+                    highlightedElement === 'download' && "ring-4 ring-[#4856CD]/30"
+                  )}
+                  aria-label={lang === 'he' ? 'הורדת קובץ PDF והמשך' : 'Download PDF and Continue'}
                 >
                   {isDownloadingPdf ? (
                     <Loader2 className="h-6 w-6 animate-spin" />
@@ -1445,131 +1468,160 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                     <Download className="h-6 w-6" />
                   )}
                 </Button>
-                <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-                  {lang === 'he' ? 'הורדת הקורות חיים' : 'Download CV'}
-                </span>
-              </div>
-            )}
-            {/* כפתור המשך */}
-            <div className="flex items-center gap-2">
-              <Button
-                onClick={handleContinueWithoutDownload}
-                className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
-                aria-label={lang === 'he' ? 'המשך למסך ההטבות' : 'Continue to Benefits'}
-              >
-                <FileText className="h-6 w-6" />
-              </Button>
+              </motion.div>
               <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-                {lang === 'he' ? 'המשך למסך ההטבות' : 'Continue to Benefits'}
+                {selectedTemplate === 'classic' 
+                  ? (lang === 'he' ? 'התבנית בבנייה' : 'Template Under Construction')
+                  : (lang === 'he' ? 'הורדת הקורות חיים והמשך למסך ההטבות' : 'Download CV and Continue to Benefits Screen')
+                }
               </span>
             </div>
-          </>
-        )}
-      </div>
+          ) : (
+            <>
+              {/* כפתור הורדה - כשחוזרים מדף הסיום */}
+              {hasChanges && (
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handlePdfDownload}
+                    disabled={isDownloadingPdf || isEditing}
+                    className={cn(
+                      "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
+                      isEditing && "opacity-50 cursor-not-allowed"
+                    )}
+                    aria-label={lang === 'he' ? 'הורדת קובץ PDF' : 'Download PDF'}
+                  >
+                    {isDownloadingPdf ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <Download className="h-6 w-6" />
+                    )}
+                  </Button>
+                  <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                    {lang === 'he' ? 'הורדת הקורות חיים' : 'Download CV'}
+                  </span>
+                </div>
+              )}
+              {/* כפתור המשך */}
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={handleContinueWithoutDownload}
+                  className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center"
+                  aria-label={lang === 'he' ? 'המשך למסך ההטבות' : 'Continue to Benefits'}
+                >
+                  <FileText className="h-6 w-6" />
+                </Button>
+                <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                  {lang === 'he' ? 'המשך למסך ההטבות' : 'Continue to Benefits'}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
 
-      <LoadingModal 
-        isOpen={isDownloadingPdf} 
-        lang={lang} 
-        dictionary={dictionary} 
-        action="generate-pdf"
-      />
+        <LoadingModal 
+          isOpen={isDownloadingPdf} 
+          lang={lang} 
+          dictionary={dictionary} 
+          action="generate-pdf"
+        />
 
-      {/* פופאפ שמירת שינויים */}
-      <Dialog open={showSavePrompt} onOpenChange={setShowSavePrompt}>
-        <DialogContent className="sm:max-w-[600px] p-0 gap-0 bg-white rounded-2xl">
-          <div className="p-6 border-b border-[#4856CD]/10">
-            <DialogHeader>
-              <DialogTitle className={`text-center text-xl ${lang === 'he' ? 'font-heebo' : ''}`}>
-                {lang === 'he' ? 'שמירת שינויים' : 'Save Changes'}
-              </DialogTitle>
-            </DialogHeader>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-[#4856CD]/10 flex items-center justify-center">
-                  <Download className="w-8 h-8 text-[#4856CD]" />
+        {/* פופאפ שמירת שינויים */}
+        <Dialog open={showSavePrompt} onOpenChange={setShowSavePrompt}>
+          <DialogContent className="sm:max-w-[600px] p-0 gap-0 bg-white rounded-2xl">
+            <div className="p-6 border-b border-[#4856CD]/10">
+              <DialogHeader>
+                <DialogTitle className={`text-center text-xl ${lang === 'he' ? 'font-heebo' : ''}`}>
+                  {lang === 'he' ? 'שמירת שינויים' : 'Save Changes'}
+                </DialogTitle>
+              </DialogHeader>
+            </div>
+            <div className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-center">
+                  <div className="w-16 h-16 rounded-full bg-[#4856CD]/10 flex items-center justify-center">
+                    <Download className="w-8 h-8 text-[#4856CD]" />
+                  </div>
+                </div>
+                <p className={`text-center text-gray-600 ${lang === 'he' ? 'font-heebo' : ''}`}>
+                  {lang === 'he' 
+                    ? 'היי, ערכת את קורות החיים. אולי כדאי לשמור את השינויים?'
+                    : 'Hey, you\'ve made changes to your CV. Would you like to save them?'}
+                </p>
+                <div className={`flex gap-3 ${lang === 'he' ? 'flex-row-reverse' : ''}`}>
+                  <Button
+                    onClick={handleDownloadAndContinue}
+                    className="flex-1 bg-[#4856CD] text-white hover:bg-[#4856CD]/90 rounded-full py-2"
+                  >
+                    {lang === 'he' ? 'הורד והמשך' : 'Download & Continue'}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowSavePrompt(false);
+                      router.push(`/${lang}/finish/${sessionId}`);
+                    }}
+                    variant="outline"
+                    className="flex-1 border-[#4856CD] text-[#4856CD] hover:bg-[#4856CD]/5 rounded-full py-2"
+                  >
+                    {lang === 'he' ? 'המשך בלי להוריד' : 'Continue without Download'}
+                  </Button>
                 </div>
               </div>
-              <p className={`text-center text-gray-600 ${lang === 'he' ? 'font-heebo' : ''}`}>
-                {lang === 'he' 
-                  ? 'היי, ערכת את קורות החיים. אולי כדאי לשמור את השינויים?'
-                  : 'Hey, you\'ve made changes to your CV. Would you like to save them?'}
-              </p>
-              <div className={`flex gap-3 ${lang === 'he' ? 'flex-row-reverse' : ''}`}>
-                <Button
-                  onClick={handleDownloadAndContinue}
-                  className="flex-1 bg-[#4856CD] text-white hover:bg-[#4856CD]/90 rounded-full py-2"
-                >
-                  {lang === 'he' ? 'הורד והמשך' : 'Download & Continue'}
-                </Button>
-                <Button
-                  onClick={() => {
-                    setShowSavePrompt(false);
-                    router.push(`/${lang}/finish/${sessionId}`);
-                  }}
-                  variant="outline"
-                  className="flex-1 border-[#4856CD] text-[#4856CD] hover:bg-[#4856CD]/5 rounded-full py-2"
-                >
-                  {lang === 'he' ? 'המשך בלי להוריד' : 'Continue without Download'}
-                </Button>
-              </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
 
-      {/* פופאפים קיימים */}
-      {editingItem && (
-        <EditPopup
-          isOpen={true}
-          onClose={() => setEditingItem(null)}
-          data={editingItem.data}
-          onSave={(newData) => handleEditSave(editingItem.type, editingItem.index!, newData)}
-          section={editingItem.type}
-          className={cn(
-            "fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0",
-            isRTL ? "rtl" : "ltr"
-          )}
-          isRTL={isRTL}
-        />
-      )}
-      {isAddingItem && (
-        <AddItemPopup
-          isOpen={true}
-          onClose={() => setIsAddingItem(null)}
-          onAdd={handleAddItem}
-          section={isAddingItem.type}
-          className={cn(
-            "fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0",
-            isRTL ? "rtl" : "ltr"
-          )}
-          isRTL={isRTL}
-        />
-      )}
+        {/* פופאפים קיימים */}
+        {editingItem && (
+          <EditPopup
+            isOpen={true}
+            onClose={() => setEditingItem(null)}
+            data={editingItem.data}
+            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index!, newData)}
+            section={editingItem.type}
+            className={cn(
+              "fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0",
+              isRTL ? "rtl" : "ltr"
+            )}
+            isRTL={isRTL}
+          />
+        )}
+        {isAddingItem && (
+          <AddItemPopup
+            isOpen={true}
+            onClose={() => setIsAddingItem(null)}
+            onAdd={handleAddItem}
+            section={isAddingItem.type}
+            className={cn(
+              "fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0",
+              isRTL ? "rtl" : "ltr"
+            )}
+            isRTL={isRTL}
+          />
+        )}
 
-      {/* מודל התשלום */}
-      <UpgradePaymentModal
-        isOpen={upgradeModalData.isOpen}
-        onClose={() => setUpgradeModalData(prev => ({ ...prev, isOpen: false }))}
-        isRTL={lang === 'he'}
-        lang={lang as 'he' | 'en'}
-        fromPackage={upgradeModalData.fromPackage}
-        toPackage={upgradeModalData.toPackage}
-        feature="edit"
-        upgradedFeatures={[
-          {
-            key: 'edit',
-            title: lang === 'he' ? 'עריכת קורות חיים' : 'CV Editing',
-            description: lang === 'he' ? 'עריכה מלאה של קורות החיים' : 'Full CV editing',
-            icon: '/icons/edit.svg',
-            requiredPackage: 'advanced' as Package,
-            route: '/cv',
-            upgradePrice: upgradeModalData.upgradePrice
-          }
-        ]}
-        upgradePrice={upgradeModalData.upgradePrice}
-      />
+        {/* מודל התשלום */}
+        <UpgradePaymentModal
+          isOpen={upgradeModalData.isOpen}
+          onClose={() => setUpgradeModalData(prev => ({ ...prev, isOpen: false }))}
+          isRTL={lang === 'he'}
+          lang={lang as 'he' | 'en'}
+          fromPackage={upgradeModalData.fromPackage}
+          toPackage={upgradeModalData.toPackage}
+          feature="edit"
+          upgradedFeatures={[
+            {
+              key: 'edit',
+              title: lang === 'he' ? 'עריכת קורות חיים' : 'CV Editing',
+              description: lang === 'he' ? 'עריכה מלאה של קורות החיים' : 'Full CV editing',
+              icon: '/icons/edit.svg',
+              requiredPackage: 'advanced' as Package,
+              route: '/cv',
+              upgradePrice: upgradeModalData.upgradePrice
+            }
+          ]}
+          upgradePrice={upgradeModalData.upgradePrice}
+        />
+      </div>
     </div>
   );
 };

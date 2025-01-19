@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Loader2, Sparkles, X } from 'lucide-react';
+import { Loader2, Sparkles, X, HelpCircle } from 'lucide-react';
 import { WritingTips } from '@/components/WritingTips';
 import Image from 'next/image';
 import { ProgressIndicator } from '@/components/QuestionForm/ProgressIndicator';
@@ -15,6 +15,7 @@ import { PaymentModal } from '@/components/PaymentModal/PaymentModal';
 import { useSessionStore } from '@/store/sessionStore';
 import { ValidationPopup } from './ValidationPopup';
 import { validateContent, ValidationIssue } from '@/lib/validations';
+import { QuestionFormTutorial } from './QuestionFormTutorial';
 
 // Types remain the same as in the original code
 export interface Question {
@@ -336,6 +337,11 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showValidationPopup, setShowValidationPopup] = useState(false);
   const [validationIssues, setValidationIssues] = useState<ValidationIssue[]>([]);
+  const [showTutorial, setShowTutorial] = useState(() => {
+    // בדיקה אם זו הפעם הראשונה שהמשתמש רואה את השאלון
+    const hasSeenTutorial = localStorage.getItem('hasSeenQuestionFormTutorial');
+    return !hasSeenTutorial;
+  });
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -514,6 +520,13 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // שמירת מצב הצפייה במדריך
+  useEffect(() => {
+    if (!showTutorial) {
+      localStorage.setItem('hasSeenQuestionFormTutorial', 'true');
+    }
+  }, [showTutorial]);
+
   return (
     <div className="min-h-screen flex items-start">
       {/* קטור רקע */}
@@ -526,6 +539,22 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       />
 
       <div className="w-full py-2 relative z-10">
+        {/* מדריך השאלון */}
+        <QuestionFormTutorial
+          isOpen={showTutorial}
+          onClose={() => setShowTutorial(false)}
+          language={lang}
+        />
+
+        {/* כפתור עזרה צף */}
+        <button
+          onClick={() => setShowTutorial(true)}
+          className="fixed bottom-8 left-8 bg-gradient-to-r from-[#4856CD] to-[#4856CD]/90 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 z-50"
+        >
+          <HelpCircle className="w-5 h-5" />
+          <span>{lang === 'he' ? 'צריכים עזרה?' : 'Need help?'}</span>
+        </button>
+
         {/* בר התקדמות */}
         <div className="w-full mb-6">
           <ProgressIndicator

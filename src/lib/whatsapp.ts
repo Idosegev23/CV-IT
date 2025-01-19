@@ -35,6 +35,16 @@ function formatPhoneNumber(phone: string): string {
 
 export async function sendWhatsAppMessage(clientData: ClientData) {
   try {
+    // בדיקה אם אנחנו במצב פיתוח
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Development mode - skipping WhatsApp message');
+      console.log('Would have sent:', {
+        to: '972509365605@c.us',
+        message: createMessage(clientData, formatPhoneNumber(clientData.phone))
+      });
+      return;
+    }
+
     const receiverPhone = '972509365605'; // מספר הטלפון של מקבל ההודעה
     const clientPhone = formatPhoneNumber(clientData.phone);
     const message = createMessage(clientData, clientPhone);
