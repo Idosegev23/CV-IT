@@ -66,12 +66,12 @@ export const questions: Question[] = [
       en: 'Work Experience'
     },
     subtitle: {
-      he: 'פירוט הניסיון התעסוקתי והתפקידים הקודמים',
-      en: 'Details about your previous positions and roles'
+      he: 'פירוט הניסיון התעסוקתי והתפקידים הקודמים, כולל תאריכי התחלה וסיום בכל תפקיד',
+      en: 'Details about your previous positions and roles, including start and end dates for each role'
     },
     placeholder: {
-      he: 'תפקיד אחרון: ניהול פרויקטים בחברת ABC, הובלת צוות של 12 מפתחים והשקת 4 מוצרים חדשים. לפני כן: תפקיד ב-XYZ, שם הובלתי לשיפור של 40% בתפוקת הצוות.',
-      en: 'Latest role: Project Manager at ABC, led a team of 12 developers and launched 4 new products. Previously at XYZ, where I achieved 40% improvement in team productivity.'
+      he: 'תפקיד אחרון: ניהול פרויקטים בחברת ABC (2021-היום), הובלת צוות של 12 מפתחים והשקת 4 מוצרים חדשים. לפני כן: תפקיד ב-XYZ (2018-2021), שם הובלתי לשיפור של 40% בתפוקת הצוות.',
+      en: 'Latest role: Project Manager at ABC (2021-present), led a team of 12 developers and launched 4 new products. Previously at XYZ (2018-2021), where I achieved 40% improvement in team productivity.'
     },
     validationId: 'experience_main'
   },
@@ -83,12 +83,12 @@ export const questions: Question[] = [
       en: 'Education and Professional Training'
     },
     subtitle: {
-      he: 'פירוט ההשכלה, תארים והכשרות מקצועיות',
-      en: 'Details about your education and professional certifications'
+      he: 'פירוט ההשכלה, תארים והכשרות מקצועיות, כולל שנות הלימוד וקבלת ההסמכות',
+      en: 'Details about your education and professional certifications, including years of study and certification dates'
     },
     placeholder: {
-      he: 'תואר במדעי המחשב מאוניברסיטת תל אביב, ממוצע 88. הסמכות נוספות: PMP ו-Scrum Master.',
-      en: 'Computer Science degree from Tel Aviv University, GPA 88. Additional certifications: PMP and Scrum Master.'
+      he: 'תואר במדעי המחשב מאוניברסיטת תל אביב (2015-2018), ממוצע 88. הסמכות נוספות: PMP (2020) ו-Scrum Master (2021).',
+      en: 'Computer Science degree from Tel Aviv University (2015-2018), GPA 88. Additional certifications: PMP (2020) and Scrum Master (2021).'
     },
     validationId: 'education_main'
   },
@@ -134,12 +134,12 @@ export const questions: Question[] = [
       en: 'Military or National Service'
     },
     subtitle: {
-      he: 'פירוט השירות הצבאי או שירות לאומי',
-      en: 'Details about your military or national service'
+      he: 'פירוט השירות הצבאי או שירות לאומי, כולל תאריכי שירות',
+      en: 'Details about your military or national service, including service dates'
     },
     placeholder: {
-      he: 'דוגמה 1: קצין מחשוב ב-8200, ניהול צוות של 15 חיילים ופיתוח מערכות מבצעיות.\nדוגמה 2: שירות לאומי בבית חולים איכילוב, סיוע לצוות הרפואי במחלקת ילדים.\nדוגמה 3: לא רלוונטי.',
-      en: 'Example 1: IT Officer in Unit 8200, managed a team of 15 soldiers and developed operational systems.\nExample 2: National Service at Ichilov Hospital, assisted medical staff in pediatrics.\nExample 3: Not relevant.'
+      he: 'דוגמה 1: קצין מחשוב ב-8200 (2019-2022), ניהול צוות של 15 חיילים ופיתוח מערכות מבצעיות.\nדוגמה 2: שירות לאומי בבית חולים איכילוב (2020-2021), סיוע לצוות הרפואי במחלקת ילדים.\nדוגמה 3: לא רלוונטי.',
+      en: 'Example 1: IT Officer in Unit 8200 (2019-2022), managed a team of 15 soldiers and developed operational systems.\nExample 2: National Service at Ichilov Hospital (2020-2021), assisted medical staff in pediatrics.\nExample 3: Not relevant.'
     },
     validationId: 'military_service_main'
   },
