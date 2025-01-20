@@ -11,6 +11,8 @@ import { useAppStore } from '@/lib/store';
 import type { Package } from '@/lib/store';
 import { PreviewModal } from '@/components/PreviewModal';
 import { BackButton } from '@/components/BackButton';
+import { HelpCircle } from 'lucide-react';
+import { TemplateTutorial } from '@/components/TemplateTutorial';
 
 const templates = {
   he: [
@@ -91,6 +93,7 @@ export default function TemplatesPage() {
   const setSelectedTemplate = useAppStore(state => state.setSelectedTemplate);
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     // אם הגיע מדף הבית ויש לו כבר חבילה נבחרת, נאפס אותה
@@ -98,6 +101,15 @@ export default function TemplatesPage() {
       setSelectedPackage(null);
     }
   }, [fromHome, selectedPackage, setSelectedPackage]);
+
+  // בדיקה אם זו כניסה ראשונה
+  useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('hasSeenTemplatesTutorial');
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
+      localStorage.setItem('hasSeenTemplatesTutorial', 'true');
+    }
+  }, []);
 
   const handleTemplateSelect = async (templateId: string) => {
     if (isAnimating) return; // מונע מעבר בזמן אנימציה
@@ -178,6 +190,20 @@ export default function TemplatesPage() {
 
   return (
     <main className="min-h-screen bg-[#EAEAE7] relative" dir={isRTL ? 'rtl' : 'ltr'}>
+      <button
+        onClick={() => setShowTutorial(true)}
+        className="fixed bottom-8 left-8 bg-gradient-to-r from-[#4856CD] to-[#4856CD]/90 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 z-50"
+      >
+        <HelpCircle className="w-5 h-5" />
+        <span>{isRTL ? 'צריכים עזרה?' : 'Need help?'}</span>
+      </button>
+
+      <TemplateTutorial
+        isOpen={showTutorial}
+        onClose={() => setShowTutorial(false)}
+        language={lang}
+      />
+
       <div 
         className="fixed bottom-0 right-0 w-full h-[75vh] pointer-events-none z-0"
         style={{
