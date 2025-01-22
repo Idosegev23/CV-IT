@@ -240,176 +240,76 @@ export async function POST(request: Request) {
     const { content, lang } = await request.json();
     const issues = [];
 
-    // מאפס את התוכן הקיים אם יש תוכן חדש בפופאפ
-    const updatedContent = {
-      ...content,
-      education: content.education_popup || content.education,
-      military_service: content.military_service_popup || content.military_service,
-      experience: content.experience_popup || content.experience,
-      personal_details: content.personal_details_popup || content.personal_details,
-      skills: content.skills_popup || content.skills,
-      languages: content.languages_popup || content.languages,
-      desired_position: content.desired_position_popup || content.desired_position
-    };
-
-    // בדיקת פרטים אישיים
-    if (updatedContent.personal_details) {
+    // בדיקת פרטים אישיים - רק בדיקות בסיסיות
+    if (content.personal_details) {
       const missingData: string[] = [];
-      const missingBasics: string[] = [];
       
-      if (!containsEmail(updatedContent.personal_details)) {
-        missingBasics.push(lang === 'he' ? 'כתובת אימייל תקינה' : 'Valid email address');
+      if (!containsEmail(content.personal_details)) {
+        missingData.push(lang === 'he' ? 'כתובת אימייל תקינה' : 'Valid email address');
       }
-      if (!containsPhone(updatedContent.personal_details)) {
-        missingBasics.push(lang === 'he' ? 'מספר טלפון (לדוגמה: 0501234567)' : 'Phone number (e.g., 0501234567)');
+      if (!containsPhone(content.personal_details)) {
+        missingData.push(lang === 'he' ? 'מספר טלפון (לדוגמה: 0501234567)' : 'Phone number (e.g., 0501234567)');
       }
-      
-      // בדיקת עיר בלבד, לא כתובת מלאה
-      const hasCity = /[א-ת]{2,}|[a-zA-Z]{2,}/.test(updatedContent.personal_details);
-      if (!hasCity) {
-        missingBasics.push(lang === 'he' ? 'עיר מגורים' : 'City of residence');
-      }
-
-      const gptResults = await analyzeWithGPT(updatedContent.personal_details, 'personal_details', lang);
-      // מסנן החוצה הודעות שגיאה על כתובת מלאה ותאריך לידה אם יש גיל
-      const hasAge = /בן\s*\d+|בת\s*\d+|age\s*\d+|\d+\s*years old/i.test(updatedContent.personal_details);
-      const filteredResults = gptResults.filter(result => 
-        !result.toLowerCase().includes('address') && 
-        !result.toLowerCase().includes('location') &&
-        !result.includes('כתובת') &&
-        !(hasAge && (
-          result.toLowerCase().includes('birth') || 
-          result.toLowerCase().includes('date') ||
-          result.includes('תאריך לידה')
-        ))
-      );
-      
-      missingData.push(...missingBasics, ...filteredResults);
       
       if (missingData.length > 0) {
         issues.push({
           field: 'personal_details',
           message: lang === 'he' 
-            ? 'חסרים כמה פרטים חשובים בפרטים האישיים'
-            : 'Some important details are missing in personal information',
+            ? 'חסרים פרטי קשר בסיסיים'
+            : 'Basic contact details are missing',
           missingData
         });
       }
     }
 
-    // בדיקת ניסיון תעסוקתי
-    if (updatedContent.experience) {
-      const missingData: string[] = [];
-      
-      if (!containsYear(updatedContent.experience)) {
-        missingData.push(lang === 'he' 
-          ? 'חסרים תאריכי עבודה (לדוגמה: 2020-2023, 20-23, או 2020)'
-          : 'Employment dates (e.g., 2020-2023, 20-23, or 2020)');
-      }
-
-      const gptResults = await analyzeWithGPT(updatedContent.experience, 'experience', lang);
-      
-      // התאמת הודעות השגיאה לעברית
-      const translatedResults = gptResults.map(result => {
-        if (lang === 'he') {
-          return result
-            .replace(/job title/i, 'תפקיד')
-            .replace(/company name/i, 'שם חברה')
-            .replace(/key responsibilities/i, 'תחומי אחריות')
-            .replace(/for entry/i, 'עבור משרה')
-            .replace(/for all entries/i, 'עבור כל המשרות')
-            .replace(/missing/i, 'חסר');
-        }
-        return result;
+    // בדיקת ניסיון תעסוקתי - רק תאריכים
+    if (content.experience && !containsYear(content.experience)) {
+      issues.push({
+        field: 'experience',
+        message: lang === 'he'
+          ? 'חסרים תאריכי עבודה'
+          : 'Employment dates are missing',
+        missingData: [
+          lang === 'he' 
+            ? 'תאריכי עבודה (לדוגמה: 2020-2023, 20-23, או 2020)'
+            : 'Employment dates (e.g., 2020-2023, 20-23, or 2020)'
+        ]
       });
-      
-      missingData.push(...translatedResults);
-      
-      if (missingData.length > 0) {
-        issues.push({
-          field: 'experience',
-          message: lang === 'he'
-            ? 'נדרש להשלים פרטים בניסיון התעסוקתי'
-            : 'Please complete the employment experience details',
-          missingData
-        });
-      }
     }
 
-    // בדיקת השכלה
-    if (updatedContent.education) {
-      const missingData: string[] = [];
-      
-      const gptResults = await analyzeWithGPT(updatedContent.education, 'education', lang);
-      
-      // התאמת הודעות השגיאה לעברית
-      const translatedResults = gptResults.map(result => {
-        if (lang === 'he') {
-          return result
-            .replace(/institution name/i, 'שם המוסד')
-            .replace(/degree\/certificate/i, 'תואר/תעודה')
-            .replace(/years of study/i, 'שנות לימוד')
-            .replace(/field of study/i, 'תחום לימודים')
-            .replace(/missing/i, 'חסר')
-            .replace(/required/i, 'נדרש');
-        }
-        return result;
+    // בדיקת השכלה - רק תאריכים
+    if (content.education && !containsYear(content.education)) {
+      issues.push({
+        field: 'education',
+        message: lang === 'he'
+          ? 'חסרים תאריכי לימודים'
+          : 'Education dates are missing',
+        missingData: [
+          lang === 'he'
+            ? 'תאריכי לימודים (לדוגמה: 2020-2023, 20-23, או 2020)'
+            : 'Education dates (e.g., 2020-2023, 20-23, or 2020)'
+        ]
       });
-      
-      missingData.push(...translatedResults);
-      
-      if (missingData.length > 0) {
-        issues.push({
-          field: 'education',
-          message: lang === 'he'
-            ? 'נדרשים פרטים נוספים על השכלתך'
-            : 'Additional education details required',
-          missingData
-        });
-      }
     }
 
-    // בדיקת שירות צבאי
-    if (updatedContent.military_service) {
-      const missingData: string[] = [];
-      
-      // בודק אם יש ציון מפורש של חוסר שירות צבאי
+    // בדיקת שירות צבאי - רק אם יש שירות, נדרש תאריך
+    if (content.military_service) {
       const noServiceIndicators = ['לא עשיתי', 'לא רלוונטי', 'פטור', 'לא שירתתי'];
       const hasNoServiceIndicator = noServiceIndicators.some(indicator => 
-        updatedContent.military_service.includes(indicator)
+        content.military_service.includes(indicator)
       );
 
-      // רק אם אין ציון של חוסר שירות, בודק את שאר הפרטים
-      if (!hasNoServiceIndicator) {
-        if (!containsYear(updatedContent.military_service)) {
-          missingData.push(lang === 'he' ? 'מתי שירתת?' : 'When did you serve?');
-        }
-
-        const gptResults = await analyzeWithGPT(updatedContent.military_service, 'military_service', lang);
-        missingData.push(...gptResults);
-      }
-      
-      if (missingData.length > 0) {
+      if (!hasNoServiceIndicator && !containsYear(content.military_service)) {
         issues.push({
           field: 'military_service',
           message: lang === 'he'
-            ? 'מתי היית בצבא? זה מידע חשוב למעסיקים'
-            : 'When were you in the military? It\'s important info for employers',
-          missingData
-        });
-      }
-    }
-
-    // בדיקת כישורים
-    if (updatedContent.skills) {
-      const gptResults = await analyzeWithGPT(updatedContent.skills, 'skills', lang);
-      if (gptResults.length > 0) {
-        issues.push({
-          field: 'skills',
-          message: lang === 'he'
-            ? 'בוא נפרט קצת יותר על הכישורים שלך'
-            : 'Let\'s add more details about your skills',
-          missingData: gptResults
+            ? 'חסרים תאריכי שירות'
+            : 'Service dates are missing',
+          missingData: [
+            lang === 'he'
+              ? 'תאריכי שירות (לדוגמה: 2020-2023, 20-23, או 2020)'
+              : 'Service dates (e.g., 2020-2023, 20-23, or 2020)'
+          ]
         });
       }
     }
