@@ -42,6 +42,13 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
     id: ''
   });
 
+  const [formErrors, setFormErrors] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    id: ''
+  });
+
   const selectedPackage = useAppStore(state => state.selectedPackage);
   const setSelectedPackage = useAppStore(state => state.setSelectedPackage);
   
@@ -549,6 +556,41 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
     }
   };
 
+  const validateField = (name: string, value: string): string => {
+    switch (name) {
+      case 'name':
+        return value.trim().length < 2 ? (isRTL ? 'נא להזין שם מלא' : 'Please enter full name') : '';
+      case 'email':
+        return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 
+          (isRTL ? 'נא להזין כתובת אימייל תקינה' : 'Please enter a valid email') : '';
+      case 'phone':
+        return !/^0\d{8,9}$/.test(value.replace(/[-\s]/g, '')) ?
+          (isRTL ? 'נא להזין מספר טלפון תקין' : 'Please enter a valid phone number') : '';
+      case 'id':
+        return !/^\d{9}$/.test(value) ?
+          (isRTL ? 'נא להזין מספר תעודת זהות תקין (9 ספרות)' : 'Please enter a valid ID (9 digits)') : '';
+      default:
+        return '';
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
+  };
+
+  const isFormValid = () => {
+    const errors = {
+      name: validateField('name', formData.name),
+      email: validateField('email', formData.email),
+      phone: validateField('phone', formData.phone),
+      id: validateField('id', formData.id)
+    };
+    setFormErrors(errors);
+    return !Object.values(errors).some(error => error !== '');
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -808,12 +850,19 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                         </label>
                         <input
                           type="text"
-                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
+                          name="name"
+                          className={cn(
+                            "w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]",
+                            formErrors.name && "border-red-500"
+                          )}
                           placeholder={isRTL ? 'ישראל ישראלי' : 'John Doe'}
                           value={formData.name}
-                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          onChange={handleInputChange}
                           required
                         />
+                        {formErrors.name && (
+                          <p className="mt-1 text-sm text-red-500">{formErrors.name}</p>
+                        )}
                       </div>
 
                       <div>
@@ -822,12 +871,19 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                         </label>
                         <input
                           type="email"
-                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
+                          name="email"
+                          className={cn(
+                            "w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]",
+                            formErrors.email && "border-red-500"
+                          )}
                           placeholder="example@email.com"
                           value={formData.email}
-                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          onChange={handleInputChange}
                           required
                         />
+                        {formErrors.email && (
+                          <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
+                        )}
                       </div>
 
                       <div>
@@ -836,12 +892,19 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                         </label>
                         <input
                           type="tel"
-                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
+                          name="phone"
+                          className={cn(
+                            "w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]",
+                            formErrors.phone && "border-red-500"
+                          )}
                           placeholder="050-0000000"
                           value={formData.phone}
-                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                          onChange={handleInputChange}
                           required
                         />
+                        {formErrors.phone && (
+                          <p className="mt-1 text-sm text-red-500">{formErrors.phone}</p>
+                        )}
                       </div>
 
                       <div>
@@ -850,13 +913,20 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                         </label>
                         <input
                           type="text"
+                          name="id"
                           maxLength={9}
-                          className="w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]"
+                          className={cn(
+                            "w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]",
+                            formErrors.id && "border-red-500"
+                          )}
                           placeholder="123456789"
                           value={formData.id}
-                          onChange={(e) => setFormData({ ...formData, id: e.target.value })}
+                          onChange={handleInputChange}
                           required
                         />
+                        {formErrors.id && (
+                          <p className="mt-1 text-sm text-red-500">{formErrors.id}</p>
+                        )}
                       </div>
 
                       <div className="flex items-start mt-4">
@@ -878,7 +948,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                       {/* כפתור תשלום */}
                       <button
                         type="submit"
-                        disabled={isLoading || !formData.name || !formData.email || !formData.phone || !formData.id}
+                        disabled={isLoading || Object.values(formErrors).some(error => error !== '') || Object.values(formData).some(value => !value)}
                         className="w-full mt-6 px-6 py-3 bg-[#4754D7] text-white rounded-lg hover:bg-[#4856CD] disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isLoading ? (
