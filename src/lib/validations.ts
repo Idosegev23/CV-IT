@@ -92,7 +92,7 @@ export const getValidationGuide = (
     professional_summary: {
       main: {
         requirements: lang === 'he' ? [
-          'סכם את ניסיו��ך המקצועי',
+          'סכם את ניסיוך המקצועי',
           'ציין את תחומי ההתמחות העיקריים שלך',
           'הדגש את ההישגים המשמעותיים ביותר'
         ] : [

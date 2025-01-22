@@ -325,8 +325,25 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [currentAnswer, setCurrentAnswer] = useState('');
+  const [answers, setAnswers] = useState<Record<string, string>>(() => {
+    // טעינת התשובות מה-localStorage בעת האתחול
+    if (typeof window !== 'undefined') {
+      const savedAnswers = localStorage.getItem('cvit_form_answers');
+      return savedAnswers ? JSON.parse(savedAnswers) : {};
+    }
+    return {};
+  });
+  const [currentAnswer, setCurrentAnswer] = useState(() => {
+    // טעינת התשובה הנוכחית מהתשובות השמורות
+    if (typeof window !== 'undefined') {
+      const savedAnswers = localStorage.getItem('cvit_form_answers');
+      if (savedAnswers) {
+        const parsed = JSON.parse(savedAnswers);
+        return parsed[questions[currentQuestionIndex]?.type] || '';
+      }
+    }
+    return '';
+  });
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showGenie, setShowGenie] = useState(false);
@@ -411,12 +428,17 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       ...answers,
       [currentQuestion.type]: currentAnswer
     };
+    
+    // שמירת התשובות המעודכנות ב-localStorage
+    localStorage.setItem('cvit_form_answers', JSON.stringify(updatedAnswers));
 
     // אם זו לא השאלה האחרונה
     if (currentQuestionIndex < questions.length - 1) {
       setAnswers(updatedAnswers);
       setCurrentQuestionIndex(prev => prev + 1);
-      setCurrentAnswer('');
+      // טעינת התשובה הקודמת לשאלה הבאה אם קיימת
+      const nextQuestionType = questions[currentQuestionIndex + 1].type;
+      setCurrentAnswer(updatedAnswers[nextQuestionType] || '');
       setError(null);
       return;
     }
@@ -480,8 +502,17 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
 
   const handleBack = () => {
     if (currentQuestionIndex > 0) {
+      // שמירת התשובה הנוכחית לפני המעבר אחורה
+      const updatedAnswers = {
+        ...answers,
+        [currentQuestion.type]: currentAnswer
+      };
+      localStorage.setItem('cvit_form_answers', JSON.stringify(updatedAnswers));
+      setAnswers(updatedAnswers);
+      
       setCurrentQuestionIndex(prev => prev - 1);
-      setCurrentAnswer(answers[questions[currentQuestionIndex - 1].type] || '');
+      const previousQuestionType = questions[currentQuestionIndex - 1].type;
+      setCurrentAnswer(updatedAnswers[previousQuestionType] || '');
       setError(null);
     }
   };
@@ -489,9 +520,18 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
   const handleAnswerChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setCurrentAnswer(value);
+    // עדכון התשובות בזיכרון המקומי בכל שינוי
+    setAnswers(prev => {
+      const updated = {
+        ...prev,
+        [questions[currentQuestionIndex].type]: value
+      };
+      localStorage.setItem('cvit_form_answers', JSON.stringify(updated));
+      return updated;
+    });
     const words = value.trim().split(/\s+/).filter(Boolean).length;
     setWordCount(words);
-  }, []);
+  }, [currentQuestionIndex, questions]);
 
   const handleFocus = useCallback(() => {
     if (textareaRef.current) {
@@ -526,6 +566,13 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       localStorage.setItem('hasSeenQuestionFormTutorial', 'true');
     }
   }, [showTutorial]);
+
+  // שמירת התשובות ב-localStorage בכל פעם שהן מתעדכנות
+  useEffect(() => {
+    if (Object.keys(answers).length > 0) {
+      localStorage.setItem('cvit_form_answers', JSON.stringify(answers));
+    }
+  }, [answers]);
 
   return (
     <div className="min-h-screen flex items-start">

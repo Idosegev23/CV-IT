@@ -2,6 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/theme/ui/dialog';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertCircle } from 'lucide-react';
+import { validationRules } from '@/lib/validationRules';
 
 interface ValidationIssue {
   field: string;
@@ -28,6 +29,14 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
 }) => {
   const [currentIssueIndex, setCurrentIssueIndex] = React.useState(0);
   const [answer, setAnswer] = React.useState('');
+  const [validationError, setValidationError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (issues[currentIssueIndex]) {
+      const currentField = issues[currentIssueIndex].field;
+      setAnswer(answers[currentField] || '');
+    }
+  }, [currentIssueIndex, issues, answers]);
 
   if (!issues || issues.length === 0) {
     return null;
@@ -37,10 +46,25 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
   const isRTL = lang === 'he';
   const existingContent = answers[currentIssue.field] || '';
 
+  const validateAnswer = (text: string): boolean => {
+    const rules = validationRules[currentIssue.field as keyof typeof validationRules];
+    if (!rules) return true;
+
+    for (const rule of rules) {
+      if (!rule.validate(text)) {
+        setValidationError(rule[lang]);
+        return false;
+      }
+    }
+    setValidationError(null);
+    return true;
+  };
+
   const handleNext = () => {
-    if (answer.trim()) {
+    if (answer.trim() && validateAnswer(answer)) {
       onUpdateAnswer(currentIssue.field, answer);
       setAnswer('');
+      setValidationError(null);
       
       if (currentIssueIndex < issues.length - 1) {
         setCurrentIssueIndex(prev => prev + 1);
@@ -49,6 +73,15 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
         setCurrentIssueIndex(0);
       }
     }
+  };
+
+  const getFormatGuidance = (): string => {
+    if (currentIssue.field === 'experience' || currentIssue.field === 'education' || currentIssue.field === 'military_service') {
+      return lang === 'he' 
+        ? 'פורמט תאריכים מקובל: YYYY או YY (לדוגמה: 2020 או 20)'
+        : 'Accepted date format: YYYY or YY (example: 2020 or 20)';
+    }
+    return '';
   };
 
   const getFieldName = (field: string): string => {
@@ -95,6 +128,11 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
               <p className="text-lg text-gray-600">
                 {currentIssue.message}
               </p>
+              {getFormatGuidance() && (
+                <p className="text-sm text-gray-500 bg-yellow-50 p-2 rounded">
+                  {getFormatGuidance()}
+                </p>
+              )}
               {currentIssue.missingData.length > 0 && (
                 <div className="text-base text-gray-500">
                   {lang === 'he' ? 'חסר:' : 'Missing:'} 
@@ -120,18 +158,29 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
 
             <textarea
               value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              className="w-full min-h-[120px] p-4 rounded-xl border border-[#4856CD]/20 focus:border-[#4856CD] focus:ring-1 focus:ring-[#4856CD] outline-none resize-none"
+              onChange={(e) => {
+                setAnswer(e.target.value);
+                validateAnswer(e.target.value);
+              }}
+              className={`w-full min-h-[120px] p-4 rounded-xl border ${
+                validationError ? 'border-red-500' : 'border-[#4856CD]/20'
+              } focus:border-[#4856CD] focus:ring-1 focus:ring-[#4856CD] outline-none resize-none`}
               placeholder={lang === 'he' 
                 ? 'אפשר להשלים את זה כאן...'
                 : 'You can complete this here...'}
               dir={isRTL ? 'rtl' : 'ltr'}
             />
 
+            {validationError && (
+              <p className="text-red-500 text-sm">
+                {validationError}
+              </p>
+            )}
+
             <div className="flex justify-end pt-4">
               <button
                 onClick={handleNext}
-                disabled={!answer.trim()}
+                disabled={!answer.trim() || !!validationError}
                 className="px-8 py-3 bg-[#4856CD] text-white rounded-full disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#4856CD]/90 transition-colors text-base font-medium"
               >
                 {currentIssueIndex === issues.length - 1

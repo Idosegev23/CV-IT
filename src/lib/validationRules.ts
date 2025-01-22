@@ -5,20 +5,21 @@ export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
   personal_details: [
     {
       id: 'fullDetails',
-      he: 'פרטים אישיים מלאים (שם, טלפון, אימייל)',
-      en: 'Full personal details (name, phone, email)',
+      he: 'נדרשים פרטים אישיים מלאים (שם מלא, טלפון, אימייל)',
+      en: 'Full personal details required (full name, phone, email)',
       validate: (text: string) => {
         const hasName = /[א-ת]{2,}\s+[א-ת]{2,}|[a-zA-Z]{2,}\s+[a-zA-Z]{2,}/.test(text);
-        const hasPhone = /\b0\d{8,9}\b/.test(text);
+        const hasPhone = /\b0\d{8,9}\b|\+\d{10,}/.test(text);
         const hasEmail = /\b[\w.-]+@[\w.-]+\.\w{2,}\b/.test(text);
-        return hasName && hasPhone && hasEmail;
+        const hasAgeOrBirthDate = /בן\s*\d+|בת\s*\d+|age\s*\d+|\d+\s*years old|\d{1,2}\/\d{1,2}\/\d{2,4}/i.test(text);
+        return hasName && hasPhone && hasEmail && hasAgeOrBirthDate;
       },
       questionId: 'personal_details_main'
     },
     {
       id: 'city',
-      he: 'עיר מגורים',
-      en: 'City of residence',
+      he: 'נדרשת עיר מגורים',
+      en: 'City of residence required',
       validate: (text: string) => {
         return /[א-ת]{2,}|[a-zA-Z]{2,}/.test(text);
       },
@@ -29,31 +30,42 @@ export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
   experience: [
     {
       id: 'jobTitle',
-      he: 'תפקיד/ים',
-      en: 'Job title(s)',
+      he: 'נדרש תפקיד לכל משרה',
+      en: 'Job title required for each position',
       validate: (text: string) => {
-        return /(מנל|מפתח|מהנדס|עובד|אחראי|רכז|מדריך|יועץ|מתכנת|ראש צוות|מנכ"ל|סמנכ"ל|דירקטור)/i.test(text) ||
-               /(manager|developer|engineer|worker|coordinator|consultant|programmer|team leader|ceo|director)/i.test(text);
+        const companies = text.split(/(?:ב|ו)?(?:הראל|פסגות)/i).filter(Boolean);
+        return companies.every(company => {
+          return /(מנהל|אחמ"?ש|אחראי|עובד|מפתח|מהנדס|יועץ|מתכנת|ראש צוות|סוכן|נציג|מדריך|בתור|תפקיד)/i.test(company);
+        });
       },
       questionId: 'experience_title'
     },
     {
       id: 'dates',
-      he: 'תאריכי עבודה',
-      en: 'Employment dates',
+      he: 'נדרשים תאריכי עבודה (שנים בלבד: 2020-2023 או 20-23)',
+      en: 'Employment dates required (years only: 2020-2023 or 20-23)',
       validate: (text: string) => {
-        return /\b(19|20)\d{2}\s*-\s*(19|20)\d{2}\b|\b(19|20)\d{2}\b/.test(text);
+        const companies = text.split(/(?:ב|ו)?(?:הראל|פסגות)/i).filter(Boolean);
+        return companies.every(company => {
+          const yearPattern = /(?:19|20)?\d{2}(?:\s*-\s*|\s*(?:ל|עד)\s*|\s+)(?:19|20)?\d{2}|(?:בין\s+)?(?:19|20)?\d{2}(?:\s+(?:ל|עד)\s+)(?:19|20)?\d{2}/;
+          return yearPattern.test(company);
+        });
       },
       questionId: 'experience_dates'
     },
     {
       id: 'responsibilities',
-      he: 'תיאור אחריות ותפקידים',
-      en: 'Job responsibilities description',
+      he: 'נדרש תיאור קצר של התפקיד (לפחות 3 מילים)',
+      en: 'Brief job description required (minimum 3 words)',
       validate: (text: string) => {
-        const words = text.split(/\s+/).length;
-        const hasActionVerbs = /(ניהול|פיתוח|אחריות|הובלה|תכנון|ביצוע|יישום|managed|developed|led|implemented|designed)/i.test(text);
-        return words >= 15 && hasActionVerbs;
+        const companies = text.split(/(?:ב|ו)?(?:הראל|פסגות)/i).filter(Boolean);
+        return companies.every(company => {
+          const words = company
+            .replace(/(?:בין|עד|ל|ב|ו|את|של|עם)\s+/g, ' ')
+            .split(/\s+/)
+            .filter(word => word.length >= 2 && !/^\d+$/.test(word));
+          return words.length >= 3;
+        });
       },
       questionId: 'experience_description'
     }
@@ -62,21 +74,24 @@ export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
   education: [
     {
       id: 'degree',
-      he: 'תואר/תעודה ומוסד לימודים',
-      en: 'Degree/Certificate and institution',
+      he: 'נדרש תואר/תעודה ושם מוסד הלימודים',
+      en: 'Degree/Certificate and institution name required',
       validate: (text: string) => {
-        const hasEducation = /(תואר|תעודה|הנסאי|טכנאי|בוגר|מוסמך|דוקטור|degree|certificate|diploma|bachelor|master|phd)/i.test(text);
-        const hasInstitution = /(אוניברסיטת|מכללת|סמינר|בית ספר|university|college|institute|school)/i.test(text);
-        return hasEducation && hasInstitution;
+        const hasEducation = /(תואר ראשון|תואר שני|תואר|תעודה|הנדסאי|טכנאי|בוגר|מוסמך|דוקטור|degree|certificate|diploma|bachelor|master|phd|bsc|ba|ma|msc)/i.test(text);
+        const hasInstitution = /(אוניברסיט[הת]|מכלל[הת]|סמינר|בית ספר|university|college|institute|school|מכון|המרכז|הטכניון)/i.test(text);
+        const hasField = text.split(/\s+/).length >= 3;
+        
+        return hasEducation && hasInstitution && hasField;
       },
       questionId: 'education_degree'
     },
     {
       id: 'years',
-      he: 'שנות לימוד',
-      en: 'Study period',
+      he: 'נדרשות שנות לימוד (2020-2023 או 20-23)',
+      en: 'Study period required (2020-2023 or 20-23)',
       validate: (text: string) => {
-        return /\b(19|20)\d{2}\s*-\s*(19|20)\d{2}\b|\b(19|20)\d{2}\b/.test(text);
+        const yearPattern = /\b(?:19|20)?\d{2}(?:\s*-\s*|\s*עד\s*|[-\s]+)(?:19|20)?\d{2}\b|\b(?:19|20)\d{2}\b|\b\d{2}\b/;
+        return yearPattern.test(text);
       },
       questionId: 'education_years'
     }
@@ -112,10 +127,13 @@ export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
   military_service: [
     {
       id: 'serviceDetails',
-      he: 'פרטי שירות צבאי',
-      en: 'Military service details',
+      he: 'נדרשים פרטי שירות (או ציון שלא רלוונטי)',
+      en: 'Service details required (or mark as not applicable)',
       validate: (text: string) => {
-        return /(צה"ל|חיל|יחידה|דרגה|תפקיד|idf|unit|rank|role)/i.test(text);
+        if (/לא רלוונטי|לא שירתתי|פטור|not applicable|exempt/i.test(text)) {
+          return true;
+        }
+        return /(צה"ל|חיל|יחידה|דרגה|תפקיד|idf|unit|rank|role)/i.test(text) && containsYear(text);
       },
       questionId: 'military_details'
     }
@@ -172,4 +190,10 @@ export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
   ]
 } as const;
 
-export type ValidationRules = typeof validationRules; 
+export type ValidationRules = typeof validationRules;
+
+// פונקציית עזר לבדיקת שנים
+function containsYear(text: string): boolean {
+  const yearPattern = /\b(19|20)\d{2}\b|\b\d{2}\b/;
+  return yearPattern.test(text);
+} 
