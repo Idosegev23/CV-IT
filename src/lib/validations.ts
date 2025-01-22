@@ -29,6 +29,46 @@ export interface ValidationIssue {
   missingData: string[];
 }
 
+// הודעות שגיאה מותאמות אישית
+const errorMessages = {
+  email: {
+    he: 'כתובת אימייל לא תקינה',
+    en: 'Invalid email address'
+  },
+  phone: {
+    he: 'מספר טלפון לא תקין',
+    en: 'Invalid phone number'
+  },
+  id: {
+    he: 'תעודת זהות חייבת להכיל 9 ספרות',
+    en: 'ID must contain 9 digits'
+  }
+} as const;
+
+// סכמות ולידציה לשדות קריטיים
+export const criticalFieldSchemas = {
+  email: z.string().email(),
+  phone: z.string().regex(/^05\d{8}$|^07\d{8}$|^0[23489]\d{7}$/),
+  id: z.string().regex(/^\d{9}$/)
+} as const;
+
+// פונקציה לבדיקת ולידציה מיידית לשדה בודד
+export const validateField = (
+  fieldType: keyof typeof criticalFieldSchemas,
+  value: string,
+  lang: 'he' | 'en'
+): { isValid: boolean; message?: string } => {
+  try {
+    criticalFieldSchemas[fieldType].parse(value);
+    return { isValid: true };
+  } catch (error) {
+    return {
+      isValid: false,
+      message: errorMessages[fieldType][lang]
+    };
+  }
+};
+
 // פונקציית הולידציה הראשית
 export const validateContent = async (content: Record<string, string>, lang: 'he' | 'en'): Promise<ValidationIssue[]> => {
   try {
@@ -120,7 +160,7 @@ export const getValidationGuide = (
           'Include start and end dates'
         ],
         example: lang === 'he' ? 
-          'הובלתי צוות של 5 מפתחים בפרויקט שהגדיל את התפוקה ב-30% והפחית את זמ��י הטעינה ב-50%' :
+          'הובלתי צוות של 5 מפתחים בפרויקט שהגדיל את התפוקה ב-30% והפחית את זמן הטעינה ב-50%' :
           'Led a team of 5 developers in a project that increased productivity by 30% and reduced loading times by 50%'
       }
     },
