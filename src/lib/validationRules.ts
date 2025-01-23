@@ -24,6 +24,32 @@ export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
         return /[א-ת]{2,}|[a-zA-Z]{2,}/.test(text);
       },
       questionId: 'personal_details_address'
+    },
+    {
+      id: 'email',
+      he: 'כתובת אימייל לא תקינה',
+      en: 'Invalid email address',
+      validate: (text: string) => {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const emails = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+        if (!emails) return false;
+        return emailRegex.test(emails[0]) && emails[0].length > 5;
+      },
+      questionId: 'personal_details_main',
+      critical: true
+    },
+    {
+      id: 'phone',
+      he: 'מספר טלפון לא תקין',
+      en: 'Invalid phone number',
+      validate: (text: string) => {
+        const phoneRegex = /^(?:0[23489]|05[0-9])[0-9]{7}$/;
+        const phones = text.match(/0[23489][0-9]{7}|05[0-9][0-9]{7}/);
+        if (!phones) return false;
+        return phoneRegex.test(phones[0]);
+      },
+      questionId: 'personal_details_main',
+      critical: true
     }
   ],
   

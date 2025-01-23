@@ -10,16 +10,14 @@
   @apply bg-gradient-to-r from-primary via-primary-light to-accent bg-clip-text text-transparent;
 }
 
-/* Add no-scrollbar utility */
-@layer utilities {
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-} 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
 @keyframes progressFill {
   0% {
@@ -34,9 +32,31 @@
   animation: progressFill 0.5s ease-out forwards;
 }
 
-/* הוספה ל-Tailwind */
-@layer utilities {
-  .animate-progressFill {
-    animation: progressFill 0.5s ease-out forwards;
+.animate-progressFill {
+  animation: progressFill 0.5s ease-out forwards;
+}
+
+.validationError {
+  background-color: #FEE2E2;
+  border: 1px solid #FCA5A5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  color: #DC2626;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 } 

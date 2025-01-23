@@ -14,6 +14,7 @@ export interface ValidationRule {
   en: string;
   validate: (text: string) => boolean;
   questionId: string;
+  critical?: boolean;
 }
 
 export type FormValidationStatus = Record<ValidationSchemaKey, SectionValidation>;
