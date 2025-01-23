@@ -11,6 +11,7 @@ import { PACKAGE_PRICES } from '@/lib/constants';
 import { useAppStore } from '@/lib/store';
 import { ReservistCouponPopup } from './ReservistCouponPopup';
 import Link from 'next/link';
+import styles from './PaymentModal.module.css';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -559,16 +560,56 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
   const validateField = (name: string, value: string): string => {
     switch (name) {
       case 'name':
-        return value.trim().length < 2 ? (isRTL ? 'נא להזין שם מלא' : 'Please enter full name') : '';
+        if (!value.trim()) {
+          return isRTL ? 'שם הוא שדה חובה' : 'Name is required';
+        }
+        if (value.length < 2) {
+          return isRTL ? 'שם חייב להכיל לפחות 2 תווים' : 'Name must be at least 2 characters';
+        }
+        if (!/^[\u0590-\u05FFa-zA-Z\s'-]+$/.test(value)) {
+          return isRTL ? 'שם יכול להכיל רק אותיות בעברית ובאנגלית' : 'Name can only contain letters';
+        }
+        return '';
+
       case 'email':
-        return !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? 
-          (isRTL ? 'נא להזין כתובת אימייל תקינה' : 'Please enter a valid email') : '';
+        if (!value.trim()) {
+          return isRTL ? 'אימייל הוא שדה חובה' : 'Email is required';
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          return isRTL ? 'כתובת אימייל לא תקינה' : 'Invalid email address';
+        }
+        return '';
+
       case 'phone':
-        return !/^0\d{8,9}$/.test(value.replace(/[-\s]/g, '')) ?
-          (isRTL ? 'נא להזין מספר טלפון תקין' : 'Please enter a valid phone number') : '';
+        if (!value.trim()) {
+          return isRTL ? 'מספר טלפון הוא שדה חובה' : 'Phone number is required';
+        }
+        // מאפשר מספרי טלפון ישראליים עם או בלי קידומת
+        if (!/^(?:\+972|0)(?:[23489]|5[0-9]|77)[0-9]{7}$/.test(value.replace(/[-\s]/g, ''))) {
+          return isRTL ? 'מספר טלפון לא תקין' : 'Invalid phone number';
+        }
+        return '';
+
       case 'id':
-        return !/^\d{9}$/.test(value) ?
-          (isRTL ? 'נא להזין מספר תעודת זהות תקין (9 ספרות)' : 'Please enter a valid ID (9 digits)') : '';
+        if (!value.trim()) {
+          return isRTL ? 'תעודת זהות היא שדה חובה' : 'ID is required';
+        }
+        if (!/^\d{9}$/.test(value)) {
+          return isRTL ? 'תעודת זהות חייבת להכיל 9 ספרות' : 'ID must be 9 digits';
+        }
+        // בדיקת ספרת ביקורת
+        const id = value.trim();
+        let sum = 0;
+        for (let i = 0; i < 8; i++) {
+          let digit = Number(id[i]) * ((i % 2) + 1);
+          if (digit > 9) digit -= 9;
+          sum += digit;
+        }
+        if ((sum + Number(id[8])) % 10 !== 0) {
+          return isRTL ? 'תעודת זהות לא תקינה' : 'Invalid ID number';
+        }
+        return '';
+
       default:
         return '';
     }
@@ -577,7 +618,8 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    setFormErrors(prev => ({ ...prev, [name]: validateField(name, value) }));
+    const error = validateField(name, value);
+    setFormErrors(prev => ({ ...prev, [name]: error }));
   };
 
   const isFormValid = () => {
@@ -843,89 +885,84 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                     </div>
 
                     {/* כופס פרטים */}
-                    <form className="space-y-4 mt-6" onSubmit={handlePayment}>
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
+                    <form className={styles.form} onSubmit={handlePayment}>
+                      <div className={styles.formGroup}>
+                        <label className={styles.label}>
                           {isRTL ? 'שם מלא' : 'Full Name'}
                         </label>
                         <input
                           type="text"
                           name="name"
-                          className={cn(
-                            "w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]",
-                            formErrors.name && "border-red-500"
-                          )}
-                          placeholder={isRTL ? 'ישראל ישראלי' : 'John Doe'}
                           value={formData.name}
                           onChange={handleInputChange}
-                          required
+                          className={cn(
+                            styles.input,
+                            formErrors.name && styles.inputError
+                          )}
+                          dir={isRTL ? 'rtl' : 'ltr'}
                         />
                         {formErrors.name && (
-                          <p className="mt-1 text-sm text-red-500">{formErrors.name}</p>
+                          <span className={styles.errorMessage}>{formErrors.name}</span>
                         )}
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
-                          {isRTL ? 'דוא"ל' : 'Email'}
+                      <div className={styles.formGroup}>
+                        <label className={styles.label}>
+                          {isRTL ? 'אימייל' : 'Email'}
                         </label>
                         <input
                           type="email"
                           name="email"
-                          className={cn(
-                            "w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]",
-                            formErrors.email && "border-red-500"
-                          )}
-                          placeholder="example@email.com"
                           value={formData.email}
                           onChange={handleInputChange}
-                          required
+                          className={cn(
+                            styles.input,
+                            formErrors.email && styles.inputError
+                          )}
+                          dir="ltr"
                         />
                         {formErrors.email && (
-                          <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
+                          <span className={styles.errorMessage}>{formErrors.email}</span>
                         )}
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
+                      <div className={styles.formGroup}>
+                        <label className={styles.label}>
                           {isRTL ? 'טלפון' : 'Phone'}
                         </label>
                         <input
                           type="tel"
                           name="phone"
-                          className={cn(
-                            "w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]",
-                            formErrors.phone && "border-red-500"
-                          )}
-                          placeholder="050-0000000"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          required
+                          className={cn(
+                            styles.input,
+                            formErrors.phone && styles.inputError
+                          )}
+                          dir="ltr"
                         />
                         {formErrors.phone && (
-                          <p className="mt-1 text-sm text-red-500">{formErrors.phone}</p>
+                          <span className={styles.errorMessage}>{formErrors.phone}</span>
                         )}
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#4754D7]">
+                      <div className={styles.formGroup}>
+                        <label className={styles.label}>
                           {isRTL ? 'תעודת זהות' : 'ID Number'}
                         </label>
                         <input
                           type="text"
                           name="id"
-                          maxLength={9}
-                          className={cn(
-                            "w-full px-4 py-2 rounded-lg border focus:border-[#4856CD] outline-none text-[#4754D7]",
-                            formErrors.id && "border-red-500"
-                          )}
-                          placeholder="123456789"
                           value={formData.id}
                           onChange={handleInputChange}
-                          required
+                          className={cn(
+                            styles.input,
+                            formErrors.id && styles.inputError
+                          )}
+                          dir="ltr"
                         />
                         {formErrors.id && (
-                          <p className="mt-1 text-sm text-red-500">{formErrors.id}</p>
+                          <span className={styles.errorMessage}>{formErrors.id}</span>
                         )}
                       </div>
 
