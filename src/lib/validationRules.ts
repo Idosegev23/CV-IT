@@ -1,6 +1,33 @@
 import { ValidationSchemaKey } from '@/lib/validations';
 import { ValidationRule } from '@/types/form';
 
+// פונקציית עזר לבדיקת תאריכים
+function validateDates(text: string): boolean {
+  // אם מצוין שלא רלוונטי
+  if (/לא רלוונטי|לא עשיתי|פטור|לא שירתתי|not applicable|exempt|n\/a/i.test(text)) {
+    return true;
+  }
+
+  // פורמטים אפשריים לתאריכים:
+  const dateFormats = [
+    // שנה מלאה: 2020-2023, 2020 עד 2023
+    /(?:19|20)\d{2}(?:\s*-\s*|\s*(?:ל|עד)\s*)(?:19|20)\d{2}/,
+    
+    // שנה מקוצרת: 20-23, 20 עד 23
+    /\b\d{2}(?:\s*-\s*|\s*(?:ל|עד)\s*)\d{2}\b/,
+    
+    // שנה וחודש: 01/2020-03/2023, 01.2020 עד 03.2023
+    /(?:0?[1-9]|1[0-2])[\/.]\d{2,4}(?:\s*-\s*|\s*(?:ל|עד)\s*)(?:0?[1-9]|1[0-2])[\/.]\d{2,4}/,
+    
+    // עד היום / נוכחי / current
+    /(?:19|20)\d{2}(?:\s*-\s*|\s*(?:ל|עד)\s*)(?:היום|כיום|עכשיו|current|present|now)/i,
+    /\b\d{2}(?:\s*-\s*|\s*(?:ל|עד)\s*)(?:היום|כיום|עכשיו|current|present|now)/i,
+    /(?:0?[1-9]|1[0-2])[\/.]\d{2,4}(?:\s*-\s*|\s*(?:ל|עד)\s*)(?:היום|כיום|עכשיו|current|present|now)/i
+  ];
+
+  return dateFormats.some(format => format.test(text));
+}
+
 export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
   personal_details: [
     {
@@ -68,16 +95,11 @@ export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
     },
     {
       id: 'dates',
-      he: 'נדרשים תאריכי עבודה (שנים בלבד: 2020-2023 או 20-23)',
-      en: 'Employment dates required (years only: 2020-2023 or 20-23)',
-      validate: (text: string) => {
-        const companies = text.split(/(?:ב|ו)?(?:הראל|פסגות)/i).filter(Boolean);
-        return companies.every(company => {
-          const yearPattern = /(?:19|20)?\d{2}(?:\s*-\s*|\s*(?:ל|עד)\s*|\s+)(?:19|20)?\d{2}|(?:בין\s+)?(?:19|20)?\d{2}(?:\s+(?:ל|עד)\s+)(?:19|20)?\d{2}/;
-          return yearPattern.test(company);
-        });
-      },
-      questionId: 'experience_dates'
+      he: 'נדרשים תאריכי התחלה וסיום (או "עד היום" אם זו עבודה נוכחית)',
+      en: 'Start and end dates required (or "present" if current job)',
+      validate: validateDates,
+      questionId: 'experience_dates',
+      critical: true
     },
     {
       id: 'responsibilities',
@@ -112,14 +134,12 @@ export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
       questionId: 'education_degree'
     },
     {
-      id: 'years',
-      he: 'נדרשות שנות לימוד (2020-2023 או 20-23)',
-      en: 'Study period required (2020-2023 or 20-23)',
-      validate: (text: string) => {
-        const yearPattern = /\b(?:19|20)?\d{2}(?:\s*-\s*|\s*עד\s*|[-\s]+)(?:19|20)?\d{2}\b|\b(?:19|20)\d{2}\b|\b\d{2}\b/;
-        return yearPattern.test(text);
-      },
-      questionId: 'education_years'
+      id: 'dates',
+      he: 'נדרשים תאריכי התחלה וסיום הלימודים',
+      en: 'Study period start and end dates required',
+      validate: validateDates,
+      questionId: 'education_dates',
+      critical: true
     }
   ],
 
@@ -159,9 +179,17 @@ export const validationRules: Record<ValidationSchemaKey, ValidationRule[]> = {
         if (/לא רלוונטי|לא שירתתי|פטור|not applicable|exempt/i.test(text)) {
           return true;
         }
-        return /(צה"ל|חיל|יחידה|דרגה|תפקיד|idf|unit|rank|role)/i.test(text) && containsYear(text);
+        return /(צה"ל|חיל|יחידה|דרגה|תפקיד|idf|unit|rank|role)/i.test(text) && validateDates(text);
       },
       questionId: 'military_details'
+    },
+    {
+      id: 'dates',
+      he: 'נדרשים תאריכי שירות (או ציון שלא רלוונטי)',
+      en: 'Service dates required (or mark as not applicable)',
+      validate: validateDates,
+      questionId: 'military_dates',
+      critical: true
     }
   ],
 
