@@ -146,7 +146,6 @@ const QuestionContent: React.FC<{
   lang: 'he' | 'en';
   showGenie: boolean;
   setShowGenie: (show: boolean) => void;
-  wordCount: number;
 }> = ({
   currentQuestion,
   currentAnswer,
@@ -156,7 +155,6 @@ const QuestionContent: React.FC<{
   lang,
   showGenie,
   setShowGenie,
-  wordCount
 }) => {
   const [isMobile, setIsMobile] = useState(false);
   const isRTL = lang === 'he';
@@ -230,91 +228,7 @@ const QuestionContent: React.FC<{
             lineHeight: '1.6'
           }}
         />
-
-        <div className={cn(
-          "mt-2 text-sm text-[#4754D7]/70",
-          isRTL ? "text-right" : "text-left"
-        )}>
-          {isRTL ? `מילים: ${wordCount}` : `Words: ${wordCount}`}
-        </div>
       </div>
-
-      <AnimatePresence>
-  {showGenie && (
-    <motion.div
-      initial={isMobile ? { y: "100%" } : { opacity: 0, x: 20 }}
-      animate={isMobile ? { y: "40%" } : { opacity: 1, x: 0 }}
-      exit={isMobile ? { y: "100%" } : { opacity: 0, x: 20 }}
-      className={cn(
-        "bg-[#4856CD]",
-        "rounded-[40px]",
-        "shadow-lg",
-        "border border-white/10",
-        "overflow-hidden",
-        "text-white",
-        
-        // מובייל
-        "fixed bottom-0 left-0 right-0",
-        "w-full",
-        "max-w-full",
-        "rounded-b-none",
-        "max-h-[60vh]",
-        
-        // דסקטופ
-        "md:absolute",
-        "md:right-[-40px]",
-        "md:top-[115px]",
-        "md:w-[300px]",
-        "md:min-w-[280px]",
-        "md:max-w-[400px]",
-        "md:h-auto",
-        "md:mt-0",
-        "md:rounded-[40px]",
-        "md:bottom-auto",
-        "md:left-auto",
-        "md:max-h-none"
-      )}
-    >
-      {/* אינדיקטור משיכה - רק במובייל */}
-      {isMobile && (
-        <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mt-3" />
-      )}
-      
-      {/* כותרת עם כפתור סגירה */}
-      <div className="flex items-center justify-between p-6">
-        <div className="flex items-center gap-2 whitespace-nowrap">
-          <span className="text-base font-medium">
-            {isRTL ? 'ה-CVIT הפרטי שלך' : 'Your Personal CVIT'}
-          </span>
-          <Sparkles className="h-5 w-5 text-white" />
-        </div>
-
-        <button
-          onClick={() => setShowGenie(false)}
-          className="p-2 hover:bg-white/10 rounded-full transition-colors"
-        >
-          <Image
-            src="/design/exitmobilemenu.svg"
-            alt="Close"
-            width={36}
-            height={36}
-            className="opacity-90"
-          />
-        </button>
-      </div>
-
-      <div className="p-6 overflow-y-auto max-h-[calc(80vh-120px)]">
-        <WritingTips
-          questionType={currentQuestion.type}
-          validationId={currentQuestion.validationId}
-          content={currentAnswer}
-          lang={lang}
-          setShowGenie={setShowGenie}
-        />
-      </div>
-    </motion.div>
-  )}
-</AnimatePresence>
     </div>
   );
 };
@@ -350,7 +264,6 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showGenie, setShowGenie] = useState(false);
-  const [wordCount, setWordCount] = useState(0);
   const isRTL = lang === 'he';
   const supabase = createClientComponentClient();
   const [isMobile, setIsMobile] = useState(false);
@@ -559,14 +472,12 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       localStorage.setItem('cvit_form_answers', JSON.stringify(updated));
       return updated;
     });
-    const words = newAnswer.trim().split(/\s+/).filter(Boolean).length;
-    setWordCount(words);
     
     // בדיקת ולידציה בזמן אמת לשדות קריטיים
     if (currentQuestion) {
       validateCriticalFields(currentQuestion, newAnswer);
     }
-  }, [currentQuestionIndex, questions]);
+  }, [currentQuestionIndex, questions, currentQuestion, validateCriticalFields]);
 
   const handleFocus = useCallback(() => {
     if (textareaRef.current) {
@@ -741,14 +652,6 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
                 lineHeight: '1.6'
               }}
             />
-            
-            {/* מונה מילים */}
-            <div className={cn(
-              "mt-2 text-sm text-[#4754D7]/70",
-              isRTL ? "text-right" : "text-left"
-            )}>
-              {isRTL ? `מילים: ${wordCount}` : `Words: ${wordCount}`}
-            </div>
             
             {/* כפתורי ניווט */}
             <div className="flex justify-center gap-4 mt-8">
