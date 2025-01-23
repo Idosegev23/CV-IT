@@ -308,7 +308,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   });
 
   const [packageType, setPackageType] = useState<Package>('basic');
-  const [isEditable, setIsEditable] = useState(false);
+  const [isEditable, setIsEditable] = useState(true);
   const [showTutorial, setShowTutorial] = useState(true);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [highlightedElement, setHighlightedElement] = useState<'edit' | 'preview' | 'download' | null>(null);
@@ -384,7 +384,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
         if (data) {
           setPackageType(data.package as Package);
-          setIsEditable(data.is_editable);
+          setIsEditable(true);
           // עדכון ה-store
           setSelectedPackage(data.package as Package);
         }
