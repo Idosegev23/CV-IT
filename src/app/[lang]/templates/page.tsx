@@ -25,7 +25,7 @@ const templates = {
     },
     {
       id: 'professional',
-      title: 'תבנית Pro',
+      title: 'תבנית מקצועית',
       description: 'עיצוב נקי ומדויק שאומר ״אני פה כדי לעבוד״.',
       suitable: ['הייטק', 'פיננסים', 'ניהול בכיר', 'תפקידים מקצועיים'],
       image: '/design/classic/pros.png'
