@@ -9,16 +9,20 @@ export async function POST(req: Request) {
   const { type, content, lang } = await req.json();
 
   const prompt = lang === 'he' ? 
-    `אתה עוזר יצר וממוקד לקורות חיים. בדוק את התוכן ב-${type}:
+    `בתור עוזר.ת מקצועי.ת לכתיבת קורות חיים, נתח.י את התוכן הבא בשדה ${type}:
     
     "${content}"
     
-    תן 1-2 טיפים קצרים בלבד. אם הכל טוב - תן מחמאה קצרה של משפט אחד.` :
-    `You're a concise CV assistant. Check this ${type} content:
+    יש לתת טיפ אחד קצר וממוקד לשיפור התוכן. להתייחס רק לשינוי האחרון שבוצע בטקסט.
+    אם התוכן טוב - לתת מחמאה קצרה וספציפית על מה שנכתב.
+    חשוב: להתמקד רק בתוכן עצמו ולא להציע דברים לא קשורים (כמו לינקדאין או דברים חיצוניים).` :
+    `You're a professional CV writing assistant. Analyze the following ${type} content:
     
     "${content}"
     
-    Give only 1-2 short tips. If it's good - give a one-sentence compliment.`;
+    Give one short, focused tip for improving the content. Only address the latest change in the text.
+    If the content is good - give a short, specific compliment about what was written.
+    Important: Focus only on the content itself and don't suggest unrelated things (like LinkedIn or external items).`;
 
   try {
     const completion = await openai.chat.completions.create({
@@ -27,8 +31,8 @@ export async function POST(req: Request) {
         { 
           role: "system", 
           content: lang === 'he' ? 
-            "תן תשובה של 1-2 משפטים בלבד. היה ידידותי אבל תמציתי מאוד." :
-            "Give only 1-2 sentences. Be friendly but very concise."
+            "יש לתת תשובה של משפט אחד בלבד. לשמור על טון ידידותי אך תמציתי. להתמקד רק בתוכן הטקסט ובשיפורו." :
+            "Give only one sentence. Be friendly but very concise. Focus only on the text content and its improvement."
         },
         { role: "user", content: prompt }
       ],

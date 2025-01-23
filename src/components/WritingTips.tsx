@@ -60,8 +60,8 @@ export const WritingTips = ({
   const checkContent = useCallback(debounce(async (text: string) => {
     if (text.length < 3) {
       setFeedback(isRTL ? 
-        'אני ה-CVIT האישי שלך! אשמח לעזור לך לכתוב תשובה מעולה 🤖' : 
-        'I\'m your personal CVIT! I\'ll help you write a great answer 🤖'
+        'היי! 👋 אפשר להתחיל לכתוב ונעבוד יחד על שיפור התוכן בזמן אמת עם טיפים והצעות 🚀' : 
+        'Hi! 👋 Start writing and I\'ll help improve your content in real-time with tips and suggestions 🚀'
       );
       return;
     }
@@ -83,7 +83,7 @@ export const WritingTips = ({
     } catch (error) {
       console.error('Error checking content:', error);
       setFeedback(isRTL ? 
-        'אופס, נראה שיש לי קצת בעיות קסם... אבל אל דאגה, המשך לכתוב! 🪄' : 
+        'אופס, יש לנו קצת בעיות טכניות... אפשר להמשיך לכתוב ונתחבר שוב בקרוב! 🪄' : 
         'Oops, having some magic issues... But keep writing! 🪄'
       );
     } finally {
