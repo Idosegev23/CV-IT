@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
-import { Edit2, Download, Eye } from 'lucide-react';
+import { Edit2, Download, Eye, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface CVTutorialStepsProps {
   isOpen: boolean;
@@ -32,32 +33,44 @@ export function CVTutorialSteps({
   isMobile
 }: CVTutorialStepsProps) {
   const [currentStep, setCurrentStep] = useState(0);
+  const [exitPosition, setExitPosition] = useState({ x: 0, y: 0 });
+  const isRTL = language === 'he';
 
   const steps: TutorialStep[] = [
     {
-      title: 'ברוכים הבאים לקורות החיים שלכם',
-      content: 'כאן תוכלו לצפות בקורות החיים שלכם ולהוריד אותם. בואו נעבור על האפשרויות העומדות לרשותכם.',
+      title: isRTL ? 'ברוכים הבאים לקורות החיים שלכם' : 'Welcome to Your CV',
+      content: isRTL 
+        ? 'כאן תוכלו לצפות בקורות החיים שלכם ולהוריד אותם. בואו נעבור על האפשרויות העומדות לרשותכם.'
+        : 'Here you can view and download your CV. Let\'s go over the options available to you.',
       highlightedElement: null,
     },
     {
-      title: 'צפייה בקורות החיים',
-      content: 'במכשיר הנייד תוכלו לצפות בקורות החיים שלכם בצורה נוחה ומותאמת למסך.',
+      title: isRTL ? 'צפייה בקורות החיים' : 'View Your CV',
+      content: isRTL
+        ? 'במכשיר הנייד תוכלו לצפות בקורות החיים שלכם בצורה נוחה ומותאמת למסך.'
+        : 'On mobile, you can view your CV in a comfortable, screen-adapted format.',
       highlightedElement: 'preview',
       icon: <Eye className="w-4 h-4" />,
       mobileOnly: true
     },
     {
-      title: 'עריכת קורות החיים',
+      title: isRTL ? 'עריכת קורות החיים' : 'Edit Your CV',
       content: canEdit 
-        ? 'עריכת קורות החיים אפשרית רק במחשב. לאחר הורדת קורות החיים, תקבלו למייל קישור שיאפשר לכם לערוך אותם בזמנכם החופשי דרך המחשב.'
-        : 'בחבילה הנוכחית אין אפשרות עריכה. כדי לערוך את קורות החיים, תוכלו לשדרג לחבילה הכוללת אפשרות זו.',
+        ? (isRTL 
+          ? 'עריכת קורות החיים אפשרית רק במחשב. לאחר הורדת קורות החיים, תקבלו למייל קישור שיאפשר לכם לערוך אותם בזמנכם החופשי דרך המחשב.'
+          : 'CV editing is only available on desktop. After downloading your CV, you\'ll receive an email link allowing you to edit it at your convenience through your computer.')
+        : (isRTL
+          ? 'בחבילה הנוכחית אין אפשרות עריכה. כדי לערוך את קורות החיים, תוכלו לשדרג לחבילה הכוללת אפשרות זו.'
+          : 'Editing is not available in your current package. To edit your CV, you can upgrade to a package that includes this option.'),
       highlightedElement: 'edit',
       icon: <Edit2 className="w-4 h-4" />,
       desktopOnly: true
     },
     {
-      title: 'הורדת קורות החיים',
-      content: 'לאחר הורדת קורות החיים כקובץ PDF, תקבלו למייל קישור שיאפשר לכם לערוך אותם בהמשך דרך המחשב. חשוב להוריד את הקובץ כדי להמשיך לשלב הבא.',
+      title: isRTL ? 'הורדת קורות החיים' : 'Download Your CV',
+      content: isRTL
+        ? 'לאחר הורדת קורות החיים כקובץ PDF, תקבלו למייל קישור שיאפשר לכם לערוך אותם בהמשך דרך המחשב. חשוב להוריד את הקובץ כדי להמשיך לשלב הבא.'
+        : 'After downloading your CV as a PDF file, you\'ll receive an email link allowing you to edit it later through your computer. Downloading is important to proceed to the next step.',
       highlightedElement: 'download',
       icon: <Download className="w-4 h-4" />
     }
@@ -76,12 +89,24 @@ export function CVTutorialSteps({
     }
   }, [currentStep, onStepChange]);
 
+  useEffect(() => {
+    // עדכון מיקום כפתור העזרה בעת טעינת הקומפוננטה
+    const helpButton = document.querySelector('.help-button');
+    if (helpButton) {
+      const rect = helpButton.getBoundingClientRect();
+      setExitPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      });
+    }
+  }, []);
+
   const handleNext = () => {
     if (currentStep < filteredSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       if (onStepChange) onStepChange(null);
-      onClose();
+      handleClose();
     }
   };
 
@@ -91,39 +116,66 @@ export function CVTutorialSteps({
     }
   };
 
-  return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/30" />
-        </Transition.Child>
+  const handleClose = () => {
+    // עדכון מיקום כפתור העזרה לפני הסגירה
+    const helpButton = document.querySelector('.help-button');
+    if (helpButton) {
+      const rect = helpButton.getBoundingClientRect();
+      setExitPosition({
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2
+      });
+    }
+    onClose();
+  };
 
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl transition-all">
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <Dialog 
+          as={motion.div} 
+          className="relative z-50" 
+          onClose={() => {}} // מניעת סגירה בלחיצה מחוץ למודל
+          static
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm"
+          />
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{
+                  scale: 0.3,
+                  opacity: 0,
+                  x: exitPosition.x - window.innerWidth / 2,
+                  y: exitPosition.y - window.innerHeight / 2
+                }}
+                transition={{
+                  duration: 0.3,
+                  ease: "easeInOut"
+                }}
+                className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-right align-middle shadow-xl"
+              >
+                {/* כפתור סגירה */}
+                <button
+                  onClick={handleClose}
+                  className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-4 p-1 rounded-full hover:bg-gray-100 transition-colors`}
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 mb-4 flex items-center gap-2"
+                  className={`text-lg font-medium leading-6 text-gray-900 mb-4 flex items-center gap-2 ${isRTL ? 'justify-start' : 'justify-end'} pr-8`}
                 >
                   {filteredSteps[currentStep].icon && (
-                    <span className="text-blue-500">{filteredSteps[currentStep].icon}</span>
+                    <span className="text-[#4856CD]">{filteredSteps[currentStep].icon}</span>
                   )}
                   {filteredSteps[currentStep].title}
                 </Dialog.Title>
@@ -134,28 +186,42 @@ export function CVTutorialSteps({
                   </p>
                 </div>
 
-                <div className="mt-6 flex justify-between">
+                {/* נקודות התקדמות */}
+                <div className="mt-6 flex justify-center gap-2">
+                  {filteredSteps.map((_, index) => (
+                    <div
+                      key={index}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        index === currentStep ? 'bg-[#4856CD] w-4' : 'bg-gray-300'
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <div className={`mt-6 flex ${isRTL ? 'flex-row-reverse' : ''} justify-between`}>
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-[#4856CD]/10 px-4 py-2 text-sm font-medium text-[#4856CD] hover:bg-[#4856CD]/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4856CD] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     onClick={handleBack}
                     disabled={currentStep === 0}
                   >
-                    חזרה
+                    {isRTL ? 'חזרה' : 'Back'}
                   </button>
                   <button
                     type="button"
-                    className="inline-flex justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    className="inline-flex justify-center rounded-md border border-transparent bg-[#4856CD] px-4 py-2 text-sm font-medium text-white hover:bg-[#4856CD]/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4856CD] focus-visible:ring-offset-2"
                     onClick={handleNext}
                   >
-                    {currentStep === filteredSteps.length - 1 ? 'סיום' : 'הבא'}
+                    {currentStep === filteredSteps.length - 1 
+                      ? (isRTL ? 'סיום' : 'Finish')
+                      : (isRTL ? 'הבא' : 'Next')}
                   </button>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </motion.div>
+            </div>
           </div>
-        </div>
-      </Dialog>
-    </Transition>
+        </Dialog>
+      )}
+    </AnimatePresence>
   );
 } 
