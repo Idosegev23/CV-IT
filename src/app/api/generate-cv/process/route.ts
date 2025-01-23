@@ -78,7 +78,29 @@ export async function POST(request: Request) {
       ? JSON.parse(completion.content[0].text)
       : null;
 
-    // 4. יצירת גרסה באנגלית אם המשתמש הוא Pro
+    // ולידציה של התוכן שהתקבל
+    if (!formattedCV || Object.keys(formattedCV).length === 0) {
+      throw new Error('Generated CV content is empty or invalid');
+    }
+
+    // בדיקה שאין שדות undefined או null
+    const validateContent = (obj: any) => {
+      for (const key in obj) {
+        if (obj[key] === null || obj[key] === undefined) {
+          delete obj[key];
+        } else if (typeof obj[key] === 'object') {
+          validateContent(obj[key]);
+          // מחיקת אובייקטים ריקים
+          if (Object.keys(obj[key]).length === 0) {
+            delete obj[key];
+          }
+        }
+      }
+    };
+
+    validateContent(formattedCV);
+
+    // בדיקה דומה לגרסה האנגלית אם קיימת
     let englishCV = null;
     if (isPro && lang === 'he') {
       const englishCompletion = await anthropic.messages.create({
@@ -99,6 +121,10 @@ export async function POST(request: Request) {
       englishCV = englishCompletion.content[0].type === 'text' 
         ? JSON.parse(englishCompletion.content[0].text)
         : null;
+
+      if (englishCV) {
+        validateContent(englishCV);
+      }
     }
 
     // 5. עדכון כל הנתונים בדאטהבייס
