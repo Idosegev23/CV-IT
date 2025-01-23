@@ -192,7 +192,7 @@ export default function TemplatesPage() {
     <main className="min-h-screen bg-[#EAEAE7] relative" dir={isRTL ? 'rtl' : 'ltr'}>
       <button
         onClick={() => setShowTutorial(true)}
-        className="fixed bottom-8 left-8 bg-gradient-to-r from-[#4856CD] to-[#4856CD]/90 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 z-50"
+        className="help-button fixed bottom-8 left-8 bg-gradient-to-r from-[#4856CD] to-[#4856CD]/90 text-white px-6 py-3 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 z-50"
       >
         <HelpCircle className="w-5 h-5" />
         <span>{isRTL ? 'צריכים עזרה?' : 'Need help?'}</span>

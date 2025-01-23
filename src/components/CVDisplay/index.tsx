@@ -352,6 +352,12 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         const formattedData = transformResumeData(rawData);
         const dictionary = await getDictionary(lang);
         
+        // עדכון התבנית הנבחרת בהתאם למה שנשמר בסופהבייס
+        const savedTemplate = sessionData.template_id as keyof typeof templateComponents;
+        if (savedTemplate && templateComponents[savedTemplate]) {
+          setSelectedTemplate(savedTemplate);
+        }
+        
         setTemplate(sessionData.template_id || 'modern');
         setCvData(formattedData);
         setDictionary(dictionary);
@@ -1175,6 +1181,20 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     router.push(`/${lang}/finish/${sessionId}`);
   };
 
+  const updateTemplateInSupabase = async (newTemplate: keyof typeof templateComponents) => {
+    try {
+      const { error } = await supabase
+        .from('sessions')
+        .update({ template_id: newTemplate })
+        .eq('id', sessionId);
+
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error updating template:', err);
+      toast.error(lang === 'he' ? 'שגיאה בשמירת התבנית' : 'Error saving template');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -1257,7 +1277,10 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                     whileTap={{ scale: 0.98 }}
                   >
                     <Button
-                      onClick={() => setSelectedTemplate(key as keyof typeof templateComponents)}
+                      onClick={() => {
+                        setSelectedTemplate(key as keyof typeof templateComponents);
+                        updateTemplateInSupabase(key as keyof typeof templateComponents);
+                      }}
                       className={cn(
                         "w-full h-full",
                         "text-sm md:text-base",
