@@ -626,7 +626,7 @@
   font-family: var(--font-family) !important;
 }
 
-/* התאמות ספציפיות למשקלי פונט */
+/* התאמות למשקלי פונט */
 .professional-name-first {
   font-weight: 700 !important;
 }
@@ -710,4 +710,97 @@
   .professional-template * {
     font-family: var(--font-family) !important;
   }
+}
+
+/* כפתורי עריכה והוספה */
+.edit-button,
+.add-button {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid rgba(72, 86, 205, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 10;
+  opacity: 1;
+}
+
+.edit-button {
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.add-button {
+  right: -30px;
+  bottom: -12px;
+}
+
+.professional-section-title,
+.professional-experience-item,
+.professional-education-item,
+.professional-skill-item,
+.professional-header,
+.professional-summary {
+  position: relative;
+}
+
+.edit-button:hover,
+.add-button:hover {
+  background: rgba(72, 86, 205, 0.1);
+  transform: scale(1.1) translateY(-50%);
+}
+
+.add-button:hover {
+  transform: scale(1.1);
+}
+
+.edit-button svg,
+.add-button svg {
+  width: 14px;
+  height: 14px;
+  color: #4856CD;
+}
+
+/* טולטיפים */
+.edit-button::after,
+.add-button::after {
+  content: attr(title);
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(72, 86, 205, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.edit-button:hover::after,
+.add-button:hover::after {
+  opacity: 1;
+}
+
+/* התאמות לעמודה הימנית */
+.professional-right-column .edit-button,
+.professional-right-column .add-button {
+  right: auto;
+  left: -20px;
+}
+
+.professional-right-column .edit-button::after,
+.professional-right-column .add-button::after {
+  right: auto;
+  left: calc(100% + 8px);
 } 

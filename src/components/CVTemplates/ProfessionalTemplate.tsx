@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { ResumeData } from '../../types/resume';
+import { ResumeData, Language, Degree, MilitaryService } from '../../types/resume';
 import '../../styles/templates/professional.css';
 import { Assistant } from 'next/font/google';
 import { EditableText } from '../EditableFields/EditableText';
@@ -9,6 +9,12 @@ import { EditButton } from '../EditableFields/EditButton';
 import { EditPopup } from '../EditableFields/EditPopup';
 import { AddItemPopup } from '../EditableFields/AddItemPopup';
 import { formatDescription, formatDate } from './utils';
+import { Edit2, Plus } from 'lucide-react';
+import { PersonalInfoEdit } from '../EditableFields/PersonalInfoEdit';
+import { cn } from '../../lib/utils';
+import { SkillsEdit } from '../EditableFields/SkillsEdit';
+import { EducationEdit } from '../EditableFields/EducationEdit';
+import { MilitaryEdit } from '../EditableFields/MilitaryEdit';
 
 interface ProfessionalTemplateProps {
   data: ResumeData;
@@ -25,6 +31,14 @@ interface Field {
   type: 'text' | 'textarea' | 'list' | 'date';
   value?: any;
   placeholder?: string;
+}
+
+interface OldDegree {
+  type: string;
+  field: string;
+  institution: string;
+  years?: string;
+  specialization?: string;
 }
 
 const assistant = Assistant({ 
@@ -82,7 +96,8 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
 }) => {
   const cvLang = data.lang;
   const t = translations[cvLang as keyof typeof translations];
-  const { personalInfo, experience, education, skills, military } = data;
+  const { personalInfo, experience, education, skills } = data;
+  const military = data.military as MilitaryService | undefined;
   const isRTL = cvLang === 'he';
 
   const [editingSection, setEditingSection] = useState<{
@@ -95,6 +110,9 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
     type: string;
     fields: any[];
   } | null>(null);
+
+  const [isEducationEditOpen, setIsEducationEditOpen] = useState(false);
+  const [isMilitaryEditOpen, setIsMilitaryEditOpen] = useState(false);
 
   useEffect(() => {
     const adjustSize = () => {
@@ -326,42 +344,75 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
     setIsAddingItem(null);
   };
 
+  const handlePersonalInfoSave = (newData: any) => {
+    onUpdate('personalInfo', {
+      ...personalInfo,
+      ...newData
+    });
+  };
+
+  // Convert old education format to new format
+  const convertEducationData = (degrees: any[]): Degree[] => {
+    return degrees.map(degree => ({
+      type: degree.type || '',
+      field: degree.field || '',
+      institution: degree.institution || '',
+      startDate: degree.startDate || (degree.years ? degree.years.split('-')[0].trim() : ''),
+      endDate: degree.endDate || (degree.years ? degree.years.split('-')[1].trim() : ''),
+      specialization: degree.specialization
+    }));
+  };
+
+  const handleEducationSave = (newDegrees: Degree[]) => {
+    onUpdate('education', { ...education, degrees: newDegrees });
+  };
+
+  const handleMilitaryServiceSave = (newData: MilitaryService) => {
+    onUpdate('military', newData);
+  };
+
   return (
-    <div 
-      className={`${assistant.className} professional-template`}
-      data-cv-lang={cvLang}
-      dir={isRTL ? 'rtl' : 'ltr'}
-    >
-      {/* עמודה ימנית */}
+    <div className={cn(
+      "professional-template",
+      assistant.className
+    )}>
       <div className="professional-right-column">
-        <header className="professional-header relative">
-          {isEditing && (
-            <div className="absolute left-[-40px] top-0">
-              <EditButton
-                onClick={() => handleEdit('personalInfo', undefined, personalInfo)}
+        <div className="professional-header">
+          {/* Personal Info Section */}
+          <div className="professional-name relative">
+            <div className="professional-name-first">{splitName(personalInfo.name).firstName}</div>
+            <div className="professional-name-last">{splitName(personalInfo.name).lastName}</div>
+            {isEditing && (
+              <button
+                onClick={() => onEdit('personalInfo', 0)}
+                className="edit-button"
                 title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
-                variant="light"
-              />
-            </div>
-          )}
-          <div className="professional-name">
-            {(() => {
-              const { firstName, lastName } = splitName(personalInfo.name);
-              return (
-                <>
-                  <span className="professional-name-first">{firstName}</span>
-                  {lastName && <span className="professional-name-last">{lastName}</span>}
-                </>
-              );
-            })()}
+              >
+                <Edit2 size={14} />
+              </button>
+            )}
           </div>
+
           <div className="professional-separator" />
+
           <div className="professional-contact">
-            {personalInfo.email && <span>{personalInfo.email}</span>}
-            {personalInfo.phone && <span>{personalInfo.phone}</span>}
-            {personalInfo.address && <span>{personalInfo.address}</span>}
+            {personalInfo.phone && (
+              <div className="professional-contact-item">
+                {t.phone}: {personalInfo.phone}
+              </div>
+            )}
+            {personalInfo.email && (
+              <div className="professional-contact-item">
+                {t.email}: {personalInfo.email}
+              </div>
+            )}
+            {personalInfo.linkedin && (
+              <div className="professional-contact-item">
+                LinkedIn: {personalInfo.linkedin}
+              </div>
+            )}
           </div>
-        </header>
+        </div>
 
         {/* כישורים */}
         {((skills.technical && skills.technical.length > 0) || 
@@ -371,60 +422,31 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
             <h2 className="professional-section-title">
               {t.skills}
               {isEditing && (
-                <div className="flex gap-4 text-base font-normal">
-                  <span className="flex items-center gap-1 text-white hover:text-gray-200 cursor-pointer" onClick={() => handleAdd('technicalSkill')}>
-                    הוסף כישור טכני
-                    <EditButton
-                      onClick={() => handleAdd('technicalSkill')}
-                      title={lang === 'he' ? 'הוסף כישור טכני' : 'Add Technical Skill'}
-                      variant="light"
-                    />
-                  </span>
-                  <span className="flex items-center gap-1 text-white hover:text-gray-200 cursor-pointer" onClick={() => handleAdd('softSkill')}>
-                    הוסף כישור רך
-                    <EditButton
-                      onClick={() => handleAdd('softSkill')}
-                      title={lang === 'he' ? 'הוסף כישור רך' : 'Add Soft Skill'}
-                      variant="light"
-                    />
-                  </span>
-                </div>
+                <button 
+                  onClick={() => onEdit('skills', 0)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               )}
             </h2>
             <div className="professional-separator" />
             <div className="professional-skills">
-              {/* כישורים טכניים */}
               {skills.technical.map((skill, index) => (
-                <div key={`tech-${index}`} className="professional-skill-item relative">
+                <div key={`tech-${index}`} className="professional-skill-item">
                   <div className="professional-skill-content">
                     <span className="professional-skill-name">{skill.name}</span>
-                    {isEditing && (
-                      <EditButton
-                        onClick={() => handleEdit('technicalSkill', index, skills.technical[index])}
-                        title={lang === 'he' ? 'ערוך כישור טכני' : 'Edit Technical Skill'}
-                        className="mr-1"
-                        variant="light"
-                      />
-                    )}
                     <span className="professional-skill-separator">|</span>
                     <span className="professional-skill-level">{getSkillLevel(skill.level)}</span>
                   </div>
                 </div>
               ))}
               
-              {/* כישורים רכים */}
               {skills.soft.map((skill, index) => (
-                <div key={`soft-${index}`} className="professional-skill-item relative">
+                <div key={`soft-${index}`} className="professional-skill-item">
                   <div className="professional-skill-content">
                     <span className="professional-skill-name">{skill.name}</span>
-                    {isEditing && (
-                      <EditButton
-                        onClick={() => handleEdit('softSkill', index, skills.soft[index])}
-                        title={lang === 'he' ? 'ערוך כישור רך' : 'Edit Soft Skill'}
-                        className="mr-1"
-                        variant="light"
-                      />
-                    )}
                   </div>
                 </div>
               ))}
@@ -438,32 +460,23 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
             <h2 className="professional-section-title">
               {t.languages}
               {isEditing && (
-                <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('language')}>
-                  הוסף שפה
-                  <EditButton
-                    onClick={() => handleAdd('language')}
-                    title={lang === 'he' ? 'הוסף שפה' : 'Add Language'}
-                    variant="dark"
-                  />
-                </span>
+                <button 
+                  onClick={() => onEdit('languages', 0)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               )}
             </h2>
             <div className="professional-separator" />
             <div className="professional-skills">
-              {skills.languages.map((lang, index) => (
-                <div key={`lang-${index}`} className="professional-skill-item relative">
+              {skills.languages.map((langItem: Language, index) => (
+                <div key={`lang-${index}`} className="professional-skill-item">
                   <div className="professional-skill-content">
-                    <span className="professional-skill-name">{lang.language}</span>
-                    {isEditing && (
-                      <EditButton
-                        onClick={() => handleEdit('language', index, skills.languages[index])}
-                        title={cvLang === 'he' ? 'ערוך שפה' : 'Edit Language'}
-                        className="mr-1"
-                        variant="light"
-                      />
-                    )}
+                    <span className="professional-skill-name">{langItem.language}</span>
                     <span className="professional-skill-separator">|</span>
-                    <span className="professional-skill-level">{lang.level}</span>
+                    <span className="professional-skill-level">{langItem.level}</span>
                   </div>
                 </div>
               ))}
@@ -479,20 +492,20 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
 
       {/* עמודה שמאלית */}
       <div className="professional-left-column">
-        {/* נקציר מקצועי */}
+        {/* תקציר מקצועי */}
         <section className="professional-summary relative">
           {isEditing && (
-            <div className="absolute left-[-40px] top-0">
-              <EditButton
-                onClick={() => handleEdit('summary', -1)}
-                title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
-                variant="light"
-              />
-            </div>
+            <button 
+              onClick={() => onEdit('summary', 0)}
+              className="edit-button"
+              title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
+            >
+              <Edit2 className="w-4 h-4" />
+            </button>
           )}
           <h2 className="professional-section-title">{t.professionalSummary}</h2>
           <p className="professional-summary-text">
-            {personalInfo.summary || (isEditing ? 'הוסף תקציר מקצועי' : '')}
+            {personalInfo.summary || (isEditing ? (lang === 'he' ? 'לחץ על העיפרון כדי להוסיף תקציר מקצועי' : 'Click the pencil to add a professional summary') : '')}
           </p>
         </section>
 
@@ -502,39 +515,26 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
             <h2 className="professional-section-title">
               {t.workExperience}
               {isEditing && (
-                <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('experience')}>
-                  הוסף ניסיון תעסוקתי
-                  <EditButton
-                    onClick={() => handleAdd('experience')}
-                    title={lang === 'he' ? 'הוסף ניסיון תעסוקתי' : 'Add Work Experience'}
-                    variant="dark"
-                  />
-                </span>
+                <button 
+                  onClick={() => onEdit('experience', 0)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               )}
             </h2>
-            {experience.map((exp, index) => (
+            {[...experience]
+              .sort((a, b) => {
+                const yearA = parseInt(a.startDate) || 0;
+                const yearB = parseInt(b.startDate) || 0;
+                return yearB - yearA; // החדש ביותר למעלה
+              })
+              .map((exp, index) => (
               <div key={index} className="professional-experience-item relative">
-                {isEditing && (
-                  <div className="absolute left-[-40px] top-0">
-                    <EditButton
-                      onClick={() => handleEdit('experience', index, experience[index])}
-                      title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
-                      className="mr-1"
-                      variant="dark"
-                    />
-                  </div>
-                )}
                 <div className="professional-experience-header">
                   <div className="professional-experience-title-wrapper">
                     <span className="professional-experience-title">{exp.position}</span>
-                    {isEditing && (
-                      <EditButton
-                        onClick={() => handleEdit('experience', index, experience[index])}
-                        title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
-                        className="mr-1"
-                        variant="dark"
-                      />
-                    )}
                     {exp.company && (
                       <>
                         <span className="professional-experience-separator">|</span>
@@ -564,41 +564,22 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
             <h2 className="professional-section-title">
               {t.education}
               {isEditing && (
-                <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('education')}>
-                  הוסף השכלה
-                  <EditButton
-                    onClick={() => handleAdd('education')}
-                    title={lang === 'he' ? 'הוסף השכלה' : 'Add Education'}
-                    variant="dark"
-                  />
-                </span>
+                <button 
+                  onClick={() => setIsEducationEditOpen(true)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               )}
             </h2>
-            {education.degrees.map((degree, index) => (
+            {education.degrees.map((degree: any, index) => (
               <div key={index} className="professional-education-item relative">
-                {isEditing && (
-                  <div className="absolute left-[-40px] top-0">
-                    <EditButton
-                      onClick={() => handleEdit('education', index, education.degrees[index])}
-                      title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
-                      className="mr-1"
-                      variant="dark"
-                    />
-                  </div>
-                )}
                 <div className="professional-education-header">
                   <div className="professional-education-title-wrapper">
                     <span className="professional-education-title">
                       {degree.type} {degree.field}
                     </span>
-                    {isEditing && (
-                      <EditButton
-                        onClick={() => handleEdit('education', index, education.degrees[index])}
-                        title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
-                        className="mr-1"
-                        variant="dark"
-                      />
-                    )}
                     {degree.institution && (
                       <>
                         <span className="professional-experience-separator">|</span>
@@ -606,9 +587,11 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
                       </>
                     )}
                   </div>
-                  {degree.years && (
-                    <span className="professional-education-date">{degree.years}</span>
-                  )}
+                  <span className="professional-education-date">
+                    {formatDate(degree.startDate || degree.years?.split('-')[0] || '', 
+                               degree.endDate || degree.years?.split('-')[1] || '', 
+                               lang)}
+                  </span>
                 </div>
                 {degree.specialization && (
                   <div className="professional-education-specialization">
@@ -621,50 +604,45 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
         )}
 
         {/* שירות צבאי */}
-        {military && (
+        {(military || isEditing) && (
           <section className="professional-military-section">
-            <h2 className="professional-section-title">{t.militaryService}</h2>
-            <div className="professional-military-item relative">
+            <h2 className="professional-section-title">
+              {t.militaryService}
               {isEditing && (
-                <div className="absolute left-[-40px] top-0">
-                  <EditButton
-                    onClick={() => handleEdit('military', undefined, military)}
-                    title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
-                    className="mr-1"
-                    variant="dark"
-                  />
-                </div>
+                <button 
+                  onClick={() => setIsMilitaryEditOpen(true)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               )}
-              <div className="professional-military-header">
-                <div className="professional-military-title-wrapper">
-                  <span className="professional-military-title">{military.role}</span>
-                  {isEditing && (
-                    <EditButton
-                      onClick={() => handleEdit('military', undefined, military)}
-                      title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
-                      className="mr-1"
-                      variant="dark"
-                    />
-                  )}
-                  {military.unit && (
-                    <>
-                      <span className="professional-experience-separator">|</span>
-                      <span className="professional-military-unit">{military.unit}</span>
-                    </>
-                  )}
+            </h2>
+            {military && (
+              <div className="professional-military-item relative">
+                <div className="professional-military-header">
+                  <div className="professional-military-title-wrapper">
+                    <span className="professional-military-title">{military.role}</span>
+                    {military.unit && (
+                      <>
+                        <span className="professional-experience-separator">|</span>
+                        <span className="professional-military-unit">{military.unit}</span>
+                      </>
+                    )}
+                  </div>
+                  <span className="professional-military-date">
+                    {formatDate(military.startDate, military.endDate, lang)}
+                  </span>
                 </div>
-                <span className="professional-military-date">
-                  {formatDate(military.startDate, military.endDate, lang)}
-                </span>
+                {military.description && military.description.length > 0 && (
+                  <ul className="professional-experience-description">
+                    {military.description.map((desc, i) => (
+                      <li key={i}>{desc}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              {military.description && military.description.length > 0 && (
-                <ul className="professional-experience-description">
-                  {military.description.map((desc, i) => (
-                    <li key={i}>{desc}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
+            )}
           </section>
         )}
       </div>
@@ -684,6 +662,28 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
           onClose={() => setIsAddingItem(null)}
           onAdd={handleAddItem}
           section={isAddingItem.type}
+        />
+      )}
+
+      {isEducationEditOpen && (
+        <EducationEdit
+          isOpen={isEducationEditOpen}
+          onClose={() => setIsEducationEditOpen(false)}
+          data={convertEducationData(education?.degrees || [])}
+          onSave={handleEducationSave}
+          isRTL={isRTL}
+          template={data.template}
+        />
+      )}
+
+      {isMilitaryEditOpen && (
+        <MilitaryEdit
+          isOpen={isMilitaryEditOpen}
+          onClose={() => setIsMilitaryEditOpen(false)}
+          data={military || null}
+          onSave={handleMilitaryServiceSave}
+          isRTL={isRTL}
+          template={data.template}
         />
       )}
     </div>

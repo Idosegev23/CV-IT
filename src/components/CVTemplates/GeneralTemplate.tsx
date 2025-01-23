@@ -402,43 +402,32 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               <Image src={BusiIcon} alt="work" width={48} height={48} />
             </div>
             {t.workExperience}
-            {isEditing && (
-              <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('experience')}>
-                הוסף ניסיון תעסוקתי
-                <EditButton
-                  onClick={() => handleAdd('experience')}
-                  title={lang === 'he' ? 'הוסף ניסיון תעסוקתי' : 'Add Work Experience'}
-                  variant="dark"
-                />
-              </span>
-            )}
           </h3>
-          <div className="timeline-container">
+          <div className="section-content">
             {data.experience.map((exp, index) => (
-              <div key={index} className="timeline-item">
-                <div className="timeline-header">
-                  <div className="timeline-title-wrapper">
-                    <span className="timeline-position">{exp.position}</span>
+              <div key={index} className="experience-item">
+                <div className="experience-header">
+                  <h4 className="experience-title">
+                    {exp.position}
                     {isEditing && (
                       <EditButton
-                        onClick={() => handleEdit('experience', index, experience[index])}
+                        onClick={() => handleEdit('experience', index)}
                         title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                         variant="dark"
                       />
                     )}
-                    {exp.company && (
-                      <>
-                        <span className="timeline-separator">|</span>
-                        <span className="timeline-company">{exp.company}</span>
-                      </>
-                    )}
-                  </div>
-                  <span className="timeline-date">
+                  </h4>
+                  {exp.company && (
+                    <span className="experience-company">
+                      {exp.company}
+                    </span>
+                  )}
+                  <span className="experience-date">
                     {formatDate(exp.startDate, exp.endDate, lang)}
                   </span>
                 </div>
                 {exp.description && exp.description.length > 0 && (
-                  <ul className="timeline-description">
+                  <ul className="experience-description">
                     {formatDescription(exp.description, data.experience.length).map((desc, i) => (
                       <li key={i}>{desc}</li>
                     ))}

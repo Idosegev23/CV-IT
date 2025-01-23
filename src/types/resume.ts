@@ -31,36 +31,37 @@ export interface MilitaryService {
   description: string[];
 }
 
-export interface EducationDegree {
+export interface Degree {
   type: string;
   field: string;
-  years: string;
   institution: string;
+  startDate: string;
+  endDate: string;
   specialization?: string;
 }
 
 export interface Education {
-  degrees: EducationDegree[];
+  degrees: Degree[];
 }
 
 export interface Experience {
   position: string;
   company: string;
-  location?: string;
   startDate: string;
   endDate: string;
   description: string[];
   achievements?: string[];
+  location?: string;
 }
 
 export interface PersonalInfo {
-  title: string;
   name: string;
+  title: string;
   email: string;
   phone: string;
   address: string;
-  summary: string;
   linkedin: string;
+  summary?: string;
 }
 
 export interface Recommendation {
@@ -99,13 +100,7 @@ export interface ResumeData {
     description: string[];
   }>;
   education: {
-    degrees: Array<{
-      type: string;
-      field: string;
-      institution: string;
-      years: string;
-      specialization?: string;
-    }>;
+    degrees: Degree[];
   };
   skills: {
     technical: Array<{ name: string; level: number }>;

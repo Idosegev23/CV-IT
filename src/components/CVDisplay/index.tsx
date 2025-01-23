@@ -39,6 +39,12 @@ import { UpgradePaymentModal } from '@/components/PaymentModal/UpgradePaymentMod
 import { PACKAGE_PRICES } from '@/lib/constants';
 import type { Package } from '@/lib/store';
 import { CVTutorialSteps } from '../cv/CVTutorialSteps';
+import { PersonalInfoEdit } from '../EditableFields/PersonalInfoEdit';
+import { SkillsEdit } from '../EditableFields/SkillsEdit';
+import { LanguagesEdit } from '../EditableFields/LanguagesEdit';
+import { ProfessionalSummaryEdit } from '../EditableFields/ProfessionalSummaryEdit';
+import { ExperienceEdit } from '../EditableFields/ExperienceEdit';
+import { MilitaryEdit } from '../EditableFields/MilitaryEdit';
 
 // סגנונות חדשים למובייל
 const mobileStyles = `
@@ -83,10 +89,90 @@ const mobileStyles = `
   }
 `;
 
+// הוספת סגנונות חדשים לכפתורי עריכה
+const editingStyles = `
+  .section-edit-button {
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+
+  .section-add-button {
+    position: absolute;
+    right: -12px;
+    bottom: -12px;
+    opacity: 0;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+
+  .section-container {
+    position: relative;
+  }
+
+  .section-container:hover .section-edit-button,
+  .section-container:hover .section-add-button {
+    opacity: 1;
+  }
+
+  .tooltip {
+    position: absolute;
+    right: calc(100% + 8px);
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(72, 86, 205, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+
+  .section-edit-button:hover .tooltip,
+  .section-add-button:hover .tooltip {
+    opacity: 1;
+  }
+
+  .section-edit-button button,
+  .section-add-button button {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    border: 1px solid rgba(72, 86, 205, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .section-edit-button button:hover,
+  .section-add-button button:hover {
+    background: rgba(72, 86, 205, 0.1);
+    transform: scale(1.1);
+  }
+
+  .section-edit-button svg,
+  .section-add-button svg {
+    width: 14px;
+    height: 14px;
+    color: #4856CD;
+  }
+`;
+
 // הוספת הסגנונות לראש המסמך
 if (typeof document !== 'undefined') {
   const style = document.createElement('style');
-  style.textContent = mobileStyles;
+  style.textContent = mobileStyles + editingStyles;
   document.head.appendChild(style);
 }
 
@@ -126,7 +212,8 @@ const transformResumeData = (rawData: any): ResumeData => {
         type: deg.type || '',
         field: deg.field || '',
         institution: deg.institution || '',
-        years: deg.years || '',
+        startDate: deg.years?.split('-')[0] || '',
+        endDate: deg.years?.split('-')[1] || '',
         specialization: deg.specialization || ''
       }))
     },
@@ -289,6 +376,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     type: string;
     index?: number;
     data: any;
+    template: keyof typeof templateComponents;
   } | null>(null);
   const [isEditMode, setIsEditMode] = useState(() => {
     const savedEditMode = localStorage.getItem('isEditMode');
@@ -427,20 +515,18 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           years: `${exp.startDate} - ${exp.endDate}`,
           achievements: exp.description
         })),
-        education: editedData.education.degrees.map(degree => {
-          console.log('Processing degree for save:', degree);
-          return {
-            degree: degree.type + (degree.field ? `, ${degree.field}` : ''),
-            institution: degree.institution || '',
-            specialization: degree.specialization || '',
-            years: degree.years || ''
-          };
-        }),
-        military_service: editedData.military ? {
+        education: editedData.education.degrees.map(degree => ({
+          degree: degree.type + (degree.field ? `, ${degree.field}` : ''),
+          institution: degree.institution,
+          specialization: degree.specialization,
+          years: `${degree.startDate} - ${degree.endDate}`
+        })),
+        military_service: editedData.military && {
           role: editedData.military.role,
+          unit: editedData.military.unit,
           years: `${editedData.military.startDate} - ${editedData.military.endDate}`,
-          achievements: editedData.military.description
-        } : undefined,
+          achievements: editedData.military.description || []
+        },
         skills: [
           ...editedData.skills.technical,
           ...editedData.skills.soft
@@ -895,102 +981,69 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     }
   };
 
-  const onUpdate = (field: string, value: any) => {
-    const newData = { ...cvData! } as ResumeDataWithIndex;
-    if (field.includes('.')) {
-      const [section, subField] = field.split('.');
-      newData[section] = { ...newData[section], [subField]: value };
-    } else {
-      newData[field] = value;
-    }
-    handleSave(newData);
-  };
-
-  const onDelete = (section: string, index: number) => {
-    const newData = { ...cvData! } as ResumeDataWithIndex;
-    if (section.includes('.')) {
-      const [mainSection, subSection] = section.split('.');
-      const sectionData = newData[mainSection] as CVSection;
-      sectionData[subSection] = (sectionData[subSection] as any[]).filter((_: any, i: number) => i !== index);
-    } else {
-      newData[section] = (newData[section] as any[]).filter((_: any, i: number) => i !== index);
-    }
-    handleSave(newData);
-  };
-
   const handleEdit = (type: string, index: number) => {
     let itemData;
     switch (type) {
+      case 'personalInfo':
+        itemData = cvData?.personalInfo;
+        break;
       case 'experience':
-        itemData = cvData?.experience[index];
+        itemData = cvData?.experience;
         break;
       case 'education':
         itemData = cvData?.education?.degrees[index];
         break;
-      case 'language':
-        itemData = cvData?.skills?.languages[index];
+      case 'skills':
+        itemData = cvData?.skills;
         break;
-      case 'technicalSkill':
-        itemData = cvData?.skills?.technical[index];
+      case 'languages':
+        itemData = cvData?.skills.languages;
         break;
-      case 'softSkill':
-        itemData = cvData?.skills?.soft[index];
+      case 'summary':
+        itemData = cvData?.personalInfo.summary;
         break;
       default:
         return;
     }
-    setEditingItem({ type, index, data: itemData });
+
+    setEditingItem({ 
+      type, 
+      index, 
+      data: itemData,
+      template: selectedTemplate 
+    });
   };
 
-  const handleEditSave = (type: string, index: number, newData: any) => {
+  const handleEditSave = (type: string, index: number | undefined, newData: any) => {
     const newCvData = { ...cvData! };
+    
     switch (type) {
+      case 'personalInfo':
+        newCvData.personalInfo = newData;
+        break;
       case 'experience':
-        const experienceData = {
-          position: newData.position || '',
-          company: newData.company || '',
-          startDate: newData.startDate || '',
-          endDate: newData.endDate || '',
-          description: newData.description || []
-        };
-        newCvData.experience[index] = experienceData;
+        newCvData.experience = newData;
         break;
       case 'education':
-        const educationData = {
-          type: newData.type || '',
-          field: newData.field || '',
-          institution: newData.institution || '',
-          years: newData.years || '',
-          specialization: newData.specialization || ''
-        };
-        if (!newCvData.education) newCvData.education = { degrees: [] };
-        newCvData.education.degrees[index] = educationData;
+        if (index !== undefined) {
+          if (!newCvData.education) newCvData.education = { degrees: [] };
+          newCvData.education.degrees[index] = newData;
+        }
         break;
-      case 'language':
-        const languageData = {
-          language: newData.language || '',
-          level: newData.level || ''
-        };
-        if (!newCvData.skills) newCvData.skills = { technical: [], soft: [], languages: [] };
-        newCvData.skills.languages[index] = languageData;
+      case 'skills':
+        newCvData.skills = newData;
         break;
-      case 'technicalSkill':
-        const technicalSkillData = {
-          name: newData.name || '',
-          level: newData.level || 3
-        };
-        if (!newCvData.skills) newCvData.skills = { technical: [], soft: [], languages: [] };
-        newCvData.skills.technical[index] = technicalSkillData;
+      case 'languages':
+        newCvData.skills.languages = newData;
         break;
-      case 'softSkill':
-        const softSkillData = {
-          name: newData.name || '',
-          level: newData.level || 3
-        };
-        if (!newCvData.skills) newCvData.skills = { technical: [], soft: [], languages: [] };
-        newCvData.skills.soft[index] = softSkillData;
+      case 'summary':
+        newCvData.personalInfo.summary = newData;
+        break;
+      case 'military':
+        newCvData.military = newData;
         break;
     }
+    
     handleSave(newCvData);
     setEditingItem(null);
   };
@@ -1013,7 +1066,8 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           type: '',
           field: '',
           institution: '',
-          years: '',
+          startDate: '',
+          endDate: '',
           specialization: ''
         };
         if (!newCvData.education) newCvData.education = { degrees: [] };
@@ -1069,7 +1123,8 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           type: values.type || '',
           field: values.field || '',
           institution: values.institution || '',
-          years: values.years || '',
+          startDate: values.startDate || '',
+          endDate: values.endDate || '',
           specialization: values.specialization || ''
         };
         if (!newCvData.education) newCvData.education = { degrees: [] };
@@ -1193,6 +1248,29 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       console.error('Error updating template:', err);
       toast.error(lang === 'he' ? 'שגיאה בשמירת התבנית' : 'Error saving template');
     }
+  };
+
+  const onUpdate = (field: string, value: any) => {
+    const newData = { ...cvData! } as ResumeDataWithIndex;
+    if (field.includes('.')) {
+      const [section, subField] = field.split('.');
+      newData[section] = { ...newData[section], [subField]: value };
+    } else {
+      newData[field] = value;
+    }
+    handleSave(newData);
+  };
+
+  const onDelete = (section: string, index: number) => {
+    const newData = { ...cvData! } as ResumeDataWithIndex;
+    if (section.includes('.')) {
+      const [mainSection, subSection] = section.split('.');
+      const sectionData = newData[mainSection] as CVSection;
+      sectionData[subSection] = (sectionData[subSection] as any[]).filter((_: any, i: number) => i !== index);
+    } else {
+      newData[section] = (newData[section] as any[]).filter((_: any, i: number) => i !== index);
+    }
+    handleSave(newData);
   };
 
   if (isLoading) {
@@ -1337,12 +1415,60 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                     border: isEditing ? '1px solid rgba(72, 86, 205, 0.1)' : 'none'
                   }}
                 >
+                  {isEditing && selectedTemplate === 'professional' && (
+                    <>
+                      {/* כפתורי עריכה לכל חלק */}
+                      <div className="section-container">
+                        <div className="section-edit-button">
+                          <button onClick={() => handleEdit('personalInfo', 0)}>
+                            <Edit2 />
+                            <span className="tooltip">
+                              {lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="section-container">
+                        <div className="section-edit-button">
+                          <button onClick={() => handleEdit('experience', 0)}>
+                            <Edit2 />
+                            <span className="tooltip">
+                              {lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Experience'}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="section-container">
+                        <div className="section-edit-button">
+                          <button onClick={() => handleEdit('education', 0)}>
+                            <Edit2 />
+                            <span className="tooltip">
+                              {lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="section-container">
+                        <div className="section-edit-button">
+                          <button onClick={() => handleEdit('skills', 0)}>
+                            <Edit2 />
+                            <span className="tooltip">
+                              {lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  )}
                   <TemplateComponent
                     data={cvData!}
                     lang={cvData?.lang || 'he'}
                     isEditing={isEditing}
-                    onUpdate={onUpdate}
-                    onDelete={onDelete}
+                    onUpdate={handleEdit}
+                    onDelete={(section, index) => handleEdit(section, index)}
                     onEdit={handleEdit}
                   />
                 </div>
@@ -1508,12 +1634,67 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         </Dialog>
 
         {/* פופאפים קיימים */}
-        {editingItem && (
+        {editingItem && editingItem.type === 'personalInfo' ? (
+          <PersonalInfoEdit
+            isOpen={true}
+            onClose={() => setEditingItem(null)}
+            data={editingItem.data}
+            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
+            isRTL={isRTL}
+            template={editingItem.template}
+          />
+        ) : editingItem && editingItem.type === 'skills' ? (
+          <SkillsEdit
+            isOpen={true}
+            onClose={() => setEditingItem(null)}
+            data={editingItem.data}
+            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
+            isRTL={isRTL}
+            template={editingItem.template}
+          />
+        ) : editingItem && editingItem.type === 'languages' ? (
+          <LanguagesEdit
+            isOpen={true}
+            onClose={() => setEditingItem(null)}
+            data={editingItem.data}
+            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
+            isRTL={isRTL}
+            template={editingItem.template}
+          />
+        ) : editingItem && editingItem.type === 'military' ? (
+          <MilitaryEdit
+            isOpen={true}
+            onClose={() => setEditingItem(null)}
+            data={editingItem.data}
+            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
+            isRTL={isRTL}
+            template={editingItem.template}
+          />
+        ) : editingItem && editingItem.type === 'summary' ? (
+          <ProfessionalSummaryEdit
+            isOpen={true}
+            onClose={() => setEditingItem(null)}
+            data={editingItem.data as string}
+            onSave={(newData) => handleEditSave('summary', editingItem.index, newData)}
+            isRTL={isRTL}
+            template={editingItem.template}
+            cvData={cvData}
+          />
+        ) : editingItem && editingItem.type === 'experience' ? (
+          <ExperienceEdit
+            isOpen={true}
+            onClose={() => setEditingItem(null)}
+            data={editingItem.data}
+            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
+            isRTL={isRTL}
+            template={editingItem.template}
+          />
+        ) : editingItem && (
           <EditPopup
             isOpen={true}
             onClose={() => setEditingItem(null)}
             data={editingItem.data}
-            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index!, newData)}
+            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
             section={editingItem.type}
             className={cn(
               "fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0",
