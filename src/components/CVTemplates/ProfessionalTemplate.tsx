@@ -504,7 +504,14 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
             </button>
           )}
           <h2 className="professional-section-title">{t.professionalSummary}</h2>
-          <p className="professional-summary-text">
+          <p className="professional-summary-text" style={{
+            textAlign: 'justify',
+            padding: '0 1rem',
+            margin: '0.5rem 0',
+            maxWidth: '100%',
+            wordWrap: 'break-word',
+            overflow: 'hidden'
+          }}>
             {personalInfo.summary || (isEditing ? (lang === 'he' ? 'לחץ על העיפרון כדי להוסיף תקציר מקצועי' : 'Click the pencil to add a professional summary') : '')}
           </p>
         </section>

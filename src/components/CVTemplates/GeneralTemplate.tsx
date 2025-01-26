@@ -1,6 +1,6 @@
 'use client';
-import React, { useState } from 'react';
-import { ResumeData } from '../../types/resume';
+import React, { useState, useEffect } from 'react';
+import { ResumeData, Language, Degree, MilitaryService } from '../../types/resume';
 import MailIcon from '../../../public/design/general/MailIcon.svg';
 import PhoneIcon from '../../../public/design/general/PhoneIcon.svg';
 import LocIcon from '../../../public/design/general/LocIcon.svg';
@@ -20,6 +20,15 @@ import { formatDescription, formatDate } from './utils';
 import { EditButton } from '../EditableFields/EditButton';
 import { EditPopup } from '../EditableFields/EditPopup';
 import { AddItemPopup } from '../EditableFields/AddItemPopup';
+import { Edit2, Plus } from 'lucide-react';
+import { PersonalInfoEdit } from '../EditableFields/PersonalInfoEdit';
+import { SkillsEdit } from '../EditableFields/SkillsEdit';
+import { EducationEdit } from '../EditableFields/EducationEdit';
+import { MilitaryEdit } from '../EditableFields/MilitaryEdit';
+import { ExperienceEdit } from '../EditableFields/ExperienceEdit';
+import { ProfessionalSummaryEdit } from '../EditableFields/ProfessionalSummaryEdit';
+import { LanguagesEdit } from '../EditableFields/LanguagesEdit';
+import { cn } from '@/lib/utils';
 
 interface Field {
   name: string;
@@ -100,6 +109,14 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
     fields: Field[];
   } | null>(null);
 
+  const [isPersonalInfoEditOpen, setIsPersonalInfoEditOpen] = useState(false);
+  const [isEducationEditOpen, setIsEducationEditOpen] = useState(false);
+  const [isMilitaryEditOpen, setIsMilitaryEditOpen] = useState(false);
+  const [isSkillsEditOpen, setIsSkillsEditOpen] = useState(false);
+  const [isLanguagesEditOpen, setIsLanguagesEditOpen] = useState(false);
+  const [isExperienceEditOpen, setIsExperienceEditOpen] = useState(false);
+  const [isSummaryEditOpen, setIsSummaryEditOpen] = useState(false);
+
   const cvLang = data.lang;
   const t = translations[cvLang as keyof typeof translations];
   const isRTL = cvLang === 'he';
@@ -159,7 +176,8 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
           { name: 'type', label: isRTL ? 'סוג תואר' : 'Degree Type', type: 'text', value: edu.type },
           { name: 'field', label: isRTL ? 'תחום' : 'Field', type: 'text', value: edu.field },
           { name: 'institution', label: isRTL ? 'מוסד' : 'Institution', type: 'text', value: edu.institution },
-          { name: 'years', label: isRTL ? 'שנים' : 'Years', type: 'text', value: edu.years },
+          { name: 'startDate', label: isRTL ? 'תאריך התחלה' : 'Start Date', type: 'text', value: edu.startDate },
+          { name: 'endDate', label: isRTL ? 'תאריך סיום' : 'End Date', type: 'text', value: edu.endDate },
           { name: 'specialization', label: isRTL ? 'התמחות' : 'Specialization', type: 'text', value: edu.specialization }
         ];
         break;
@@ -215,7 +233,8 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
           { name: 'type', label: isRTL ? 'סוג תואר' : 'Degree Type', type: 'text' },
           { name: 'field', label: isRTL ? 'תחום' : 'Field', type: 'text' },
           { name: 'institution', label: isRTL ? 'מוסד' : 'Institution', type: 'text' },
-          { name: 'years', label: isRTL ? 'שנים' : 'Years', type: 'text' },
+          { name: 'startDate', label: isRTL ? 'תאריך התחלה' : 'Start Date', type: 'text' },
+          { name: 'endDate', label: isRTL ? 'תאריך סיום' : 'End Date', type: 'text' },
           { name: 'specialization', label: isRTL ? 'התמחות' : 'Specialization', type: 'text' }
         ];
         break;
@@ -323,6 +342,43 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
     setIsAddingItem(null);
   };
 
+  const handlePersonalInfoSave = (newData: any) => {
+    onUpdate('personalInfo', {
+      ...personalInfo,
+      ...newData
+    });
+  };
+
+  const handleEducationSave = (newDegrees: Degree[]) => {
+    onUpdate('education', { ...education, degrees: newDegrees });
+  };
+
+  const handleMilitaryServiceSave = (newData: MilitaryService) => {
+    onUpdate('military', newData);
+  };
+
+  const handleSkillsSave = (newData: any) => {
+    onUpdate('skills', newData);
+  };
+
+  const handleLanguagesSave = (newData: Language[]) => {
+    onUpdate('skills', {
+      ...skills,
+      languages: newData
+    });
+  };
+
+  const handleExperienceSave = (newData: any[]) => {
+    onUpdate('experience', newData);
+  };
+
+  const handleSummarySave = (newSummary: string) => {
+    onUpdate('personalInfo', {
+      ...personalInfo,
+      summary: newSummary
+    });
+  };
+
   return (
     <div 
       className={`${assistant.className} general-template`}
@@ -332,16 +388,18 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
       {/* Header */}
       <header className="general-header">
         <div className="general-header-content">
-          <div className="general-header-name">
+          <div className="general-header-name relative">
             <h1>
               <span className="firstname">{firstName}</span>
               <span className="lastname">{lastName}</span>
               {isEditing && (
-                <EditButton
-                  onClick={() => handleEdit('personalInfo', undefined, personalInfo)}
+                <button
+                  onClick={() => setIsPersonalInfoEditOpen(true)}
+                  className="edit-button"
                   title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
-                  variant="dark"
-                />
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               )}
             </h1>
           </div>
@@ -402,6 +460,15 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               <Image src={BusiIcon} alt="work" width={48} height={48} />
             </div>
             {t.workExperience}
+            {isEditing && (
+              <button
+                onClick={() => setIsExperienceEditOpen(true)}
+                className="edit-button"
+                title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
           </h3>
           <div className="section-content">
             {data.experience.map((exp, index) => (
@@ -409,13 +476,6 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 <div className="experience-header">
                   <h4 className="experience-title">
                     {exp.position}
-                    {isEditing && (
-                      <EditButton
-                        onClick={() => handleEdit('experience', index)}
-                        title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
-                        variant="dark"
-                      />
-                    )}
                   </h4>
                   {exp.company && (
                     <span className="experience-company">
@@ -448,14 +508,13 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
             </div>
             {t.education}
             {isEditing && (
-              <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('education')}>
-                הוסף השכלה
-                <EditButton
-                  onClick={() => handleAdd('education')}
-                  title={lang === 'he' ? 'הוסף השכלה' : 'Add Education'}
-                  variant="dark"
-                />
-              </span>
+              <button
+                onClick={() => setIsEducationEditOpen(true)}
+                className="edit-button"
+                title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
             )}
           </h3>
           <div className="timeline-container">
@@ -464,13 +523,6 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 <div className="timeline-header">
                   <div className="timeline-title-wrapper">
                     <span className="timeline-position">{degree.type} {degree.field}</span>
-                    {isEditing && (
-                      <EditButton
-                        onClick={() => handleEdit('education', index, education.degrees[index])}
-                        title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
-                        variant="dark"
-                      />
-                    )}
                     {degree.institution && (
                       <>
                         <span className="timeline-separator">|</span>
@@ -478,7 +530,9 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                       </>
                     )}
                   </div>
-                  <span className="timeline-date">{degree.years}</span>
+                  <span className="timeline-date">
+                    {formatDate(degree.startDate, degree.endDate, lang)}
+                  </span>
                 </div>
                 {degree.specialization && (
                   <div className="timeline-description">
@@ -499,19 +553,21 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               <Image src={MilIcon} alt="military" width={48} height={48} />
             </div>
             {t.militaryService}
+            {isEditing && (
+              <button
+                onClick={() => setIsMilitaryEditOpen(true)}
+                className="edit-button"
+                title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
           </h3>
           <div className="timeline-container">
             <div className="timeline-item">
               <div className="timeline-header">
                 <div className="timeline-title-wrapper">
                   <span className="timeline-position">{data.military.role}</span>
-                  {isEditing && (
-                    <EditButton
-                      onClick={() => handleEdit('military', undefined, military)}
-                      title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
-                      variant="dark"
-                    />
-                  )}
                   {data.military.unit && (
                     <>
                       <span className="timeline-separator">|</span>
@@ -547,24 +603,13 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
             </div>
             {t.skills}
             {isEditing && (
-              <div className="flex flex-col gap-2">
-                <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('technicalSkill')}>
-                  הוסף כישור טכני
-                  <EditButton
-                    onClick={() => handleAdd('technicalSkill')}
-                    title={lang === 'he' ? 'הוסף כישור טכני' : 'Add Technical Skill'}
-                    variant="dark"
-                  />
-                </span>
-                <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('softSkill')}>
-                  הוסף כישור רך
-                  <EditButton
-                    onClick={() => handleAdd('softSkill')}
-                    title={lang === 'he' ? 'הוסף כישור רך' : 'Add Soft Skill'}
-                    variant="dark"
-                  />
-                </span>
-              </div>
+              <button
+                onClick={() => setIsSkillsEditOpen(true)}
+                className="edit-button"
+                title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
             )}
           </h3>
           <div className="skills-items">
@@ -575,13 +620,6 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                   <span className="skill-name">{skill.name}</span>
                   {skill.level && (
                     <span className="skill-level"> - {getSkillLevel(skill.level)}</span>
-                  )}
-                  {isEditing && (
-                    <EditButton
-                      onClick={() => handleEdit('technicalSkill', index)}
-                      title={lang === 'he' ? 'ערוך כישור טכני' : 'Edit Technical Skill'}
-                      variant="dark"
-                    />
                   )}
                 </span>
                 {index < data.skills.technical.length - 1 && <span className="skill-separator">|</span>}
@@ -599,13 +637,6 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               <React.Fragment key={`soft-${index}`}>
                 <span className="skill-item">
                   <span className="skill-name">{skill.name}</span>
-                  {isEditing && (
-                    <EditButton
-                      onClick={() => handleEdit('softSkill', index)}
-                      title={lang === 'he' ? 'ערוך כישור רך' : 'Edit Soft Skill'}
-                      variant="dark"
-                    />
-                  )}
                 </span>
                 {index < data.skills.soft.length - 1 && <span className="skill-separator">|</span>}
               </React.Fragment>
@@ -623,14 +654,13 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
             </div>
             {t.languages}
             {isEditing && (
-              <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('language')}>
-                הוסף שפה
-                <EditButton
-                  onClick={() => handleAdd('language')}
-                  title={lang === 'he' ? 'הוסף שפה' : 'Add Language'}
-                  variant="dark"
-                />
-              </span>
+              <button
+                onClick={() => setIsLanguagesEditOpen(true)}
+                className="edit-button"
+                title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
             )}
           </h3>
           <div className="languages-items">
@@ -639,13 +669,6 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 <span>{lang.language}</span>
                 <span> - </span>
                 <span>{lang.level}</span>
-                {isEditing && (
-                  <EditButton
-                    onClick={() => handleEdit('language', index, skills.languages[index])}
-                    title={cvLang === 'he' ? 'ערוך שפה' : 'Edit Language'}
-                    variant="dark"
-                  />
-                )}
               </span>
             ))}
           </div>
@@ -700,6 +723,85 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
           />
         </div>
       </div>
+
+      {/* Edit Popups */}
+      {isPersonalInfoEditOpen && (
+        <PersonalInfoEdit
+          isOpen={isPersonalInfoEditOpen}
+          onClose={() => setIsPersonalInfoEditOpen(false)}
+          data={personalInfo}
+          onSave={handlePersonalInfoSave}
+          isRTL={isRTL}
+          template="general"
+        />
+      )}
+
+      {isEducationEditOpen && (
+        <EducationEdit
+          isOpen={isEducationEditOpen}
+          onClose={() => setIsEducationEditOpen(false)}
+          data={education?.degrees || []}
+          onSave={handleEducationSave}
+          isRTL={isRTL}
+          template="general"
+        />
+      )}
+
+      {isMilitaryEditOpen && (
+        <MilitaryEdit
+          isOpen={isMilitaryEditOpen}
+          onClose={() => setIsMilitaryEditOpen(false)}
+          data={military || null}
+          onSave={handleMilitaryServiceSave}
+          isRTL={isRTL}
+          template="general"
+        />
+      )}
+
+      {isSkillsEditOpen && (
+        <SkillsEdit
+          isOpen={isSkillsEditOpen}
+          onClose={() => setIsSkillsEditOpen(false)}
+          data={skills}
+          onSave={handleSkillsSave}
+          isRTL={isRTL}
+          template="general"
+        />
+      )}
+
+      {isLanguagesEditOpen && (
+        <LanguagesEdit
+          isOpen={isLanguagesEditOpen}
+          onClose={() => setIsLanguagesEditOpen(false)}
+          data={skills.languages || []}
+          onSave={handleLanguagesSave}
+          isRTL={isRTL}
+          template="general"
+        />
+      )}
+
+      {isExperienceEditOpen && (
+        <ExperienceEdit
+          isOpen={isExperienceEditOpen}
+          onClose={() => setIsExperienceEditOpen(false)}
+          data={experience || []}
+          onSave={handleExperienceSave}
+          isRTL={isRTL}
+          template="general"
+        />
+      )}
+
+      {isSummaryEditOpen && (
+        <ProfessionalSummaryEdit
+          isOpen={isSummaryEditOpen}
+          onClose={() => setIsSummaryEditOpen(false)}
+          data={personalInfo.summary || ''}
+          onSave={handleSummarySave}
+          isRTL={isRTL}
+          template="general"
+          cvData={data}
+        />
+      )}
     </div>
   );
 };

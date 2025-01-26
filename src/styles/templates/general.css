@@ -224,6 +224,9 @@
   position: relative;
   padding-right: 3rem;
   transform: translateY(-8px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* הקו האופקי מהאייקון */
@@ -862,4 +865,172 @@
 .skills-section {
   margin-bottom: 2rem;
   margin-left: 10rem;
+}
+
+/* כפתורי עריכה והוספה */
+.edit-button {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid rgba(72, 86, 205, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: 10;
+  opacity: 1;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.section-title .edit-button {
+  position: relative;
+  right: 0;
+  top: 0;
+  transform: none;
+  margin-right: 8px;
+}
+
+[dir="rtl"] .section-title .edit-button {
+  margin-right: 0;
+  margin-left: 8px;
+}
+
+.edit-button:hover {
+  background: rgba(72, 86, 205, 0.1);
+  transform: scale(1.1) translateY(-50%);
+}
+
+.edit-button svg {
+  width: 14px;
+  height: 14px;
+  color: #4856CD;
+}
+
+/* טולטיפים */
+.edit-button::after {
+  content: attr(title);
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(72, 86, 205, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.edit-button:hover::after {
+  opacity: 1;
+}
+
+/* התאמות לעמודה הימנית */
+.right-column .edit-button,
+.right-column .add-button {
+  right: auto;
+  left: -20px;
+}
+
+.right-column .edit-button::after,
+.right-column .add-button::after {
+  right: auto;
+  left: calc(100% + 8px);
+}
+
+/* כפתורי עריכה */
+.edit-button {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid rgba(72, 86, 205, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.edit-button:hover {
+  background: rgba(72, 86, 205, 0.1);
+  transform: scale(1.1) translateY(-50%);
+}
+
+.edit-button svg {
+  width: 14px;
+  height: 14px;
+  color: #4856CD;
+}
+
+/* טולטיפים */
+.edit-button::after {
+  content: attr(title);
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(72, 86, 205, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.edit-button:hover::after {
+  opacity: 1;
+}
+
+/* התאמות לכיוון RTL */
+[dir="rtl"] .edit-button {
+  right: auto;
+  left: -20px;
+}
+
+[dir="rtl"] .edit-button::after {
+  right: auto;
+  left: calc(100% + 8px);
+}
+
+/* התאמות לסקשנים ספציפיים */
+.section {
+  position: relative;
+}
+
+.section-title {
+  position: relative;
+}
+
+.section .edit-button {
+  top: 0;
+  transform: translateY(0);
+}
+
+.section .edit-button:hover {
+  transform: scale(1.1);
+}
+
+/* התאמות למצב הדפסה */
+@media print {
+  .edit-button {
+    display: none;
+  }
 } 

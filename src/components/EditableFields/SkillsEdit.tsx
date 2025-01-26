@@ -6,6 +6,13 @@ import {
   DialogTitle,
 } from '@/components/theme/ui/dialog';
 import { Input } from '@/components/theme/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/theme/ui/select"
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Skills, Skill } from '@/types/resume';
@@ -91,6 +98,17 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
     onClose();
   };
 
+  const getLevelText = (level: number, isRTL: boolean) => {
+    const levels = {
+      1: { he: 'מתחיל', en: 'Beginner' },
+      2: { he: 'מתחיל מתקדם', en: 'Advanced Beginner' },
+      3: { he: 'בינוני', en: 'Intermediate' },
+      4: { he: 'מתקדם', en: 'Advanced' },
+      5: { he: 'מומחה', en: 'Expert' }
+    };
+    return isRTL ? levels[level as keyof typeof levels].he : levels[level as keyof typeof levels].en;
+  };
+
   const renderSkillList = (type: 'technical' | 'soft') => {
     const skills = formData[type];
     const icon = type === 'technical' ? <Wrench className="w-5 h-5" /> : <Brain className="w-5 h-5" />;
@@ -110,22 +128,48 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
             <div key={index} className="flex items-center gap-3">
               <Input
                 value={skill.name}
-                readOnly
-                className="flex-1"
+                onChange={(e) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    [type]: prev[type].map((s, i) => 
+                      i === index ? { ...s, name: e.target.value } : s
+                    )
+                  }));
+                }}
+                placeholder={isRTL ? "שם הכישור" : "Skill name"}
+                className="flex-1 text-right"
               />
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((level) => (
-                  <button
-                    key={level}
-                    onClick={() => handleLevelChange(type, index, level)}
-                    className={cn(
-                      "w-6 h-6 rounded-full",
-                      "transition-colors",
-                      level <= skill.level ? "bg-[#4856CD]" : "bg-gray-200"
-                    )}
-                  />
-                ))}
-              </div>
+              <Select
+                value={skill.level.toString()}
+                onValueChange={(value) => handleLevelChange(type, index, parseInt(value))}
+              >
+                <SelectTrigger className={cn(
+                  "w-[180px] bg-white text-[#4856CD]",
+                  "border-[#4856CD] border-2",
+                  "hover:bg-[#4856CD] hover:text-white",
+                  "transition-colors",
+                  "text-right"
+                )}>
+                  <SelectValue placeholder={isRTL ? "בחר רמה" : "Select Level"} />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-[#4856CD] border-2">
+                  {[1, 2, 3, 4, 5].map((level) => (
+                    <SelectItem 
+                      key={level} 
+                      value={level.toString()}
+                      className={cn(
+                        "text-[#4856CD]",
+                        "hover:bg-[#4856CD] hover:text-white",
+                        "focus:bg-[#4856CD] focus:text-white",
+                        "cursor-pointer transition-colors",
+                        "text-right"
+                      )}
+                    >
+                      {getLevelText(level, isRTL)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <button
                 onClick={() => handleRemoveSkill(type, index)}
                 className="text-red-500 hover:text-red-600 transition-colors"
@@ -134,29 +178,29 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
               </button>
             </div>
           ))}
-        </div>
 
-        <div className="flex items-center gap-3 mt-4">
-          <Input
-            value={newSkill.type === type ? newSkill.name : ''}
-            onChange={(e) => setNewSkill(prev => ({
-              ...prev,
-              type,
-              name: e.target.value
-            }))}
-            placeholder={isRTL ? 'הוסף כישור חדש' : 'Add new skill'}
-            className="flex-1"
-          />
-          <button
-            onClick={() => handleAddSkill(type)}
-            className={cn(
-              "p-2 rounded-full",
-              "bg-[#4856CD] text-white",
-              "hover:bg-[#4856CD]/90 transition-colors"
-            )}
-          >
-            <Plus className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-3 mt-4">
+            <Input
+              value={newSkill.type === type ? newSkill.name : ''}
+              onChange={(e) => setNewSkill(prev => ({
+                ...prev,
+                type,
+                name: e.target.value
+              }))}
+              placeholder={isRTL ? "הוסף כישור חדש" : "Add new skill"}
+              className="flex-1 text-right"
+            />
+            <button
+              onClick={() => handleAddSkill(type)}
+              className={cn(
+                "p-2 rounded-full",
+                "bg-[#4856CD] text-white",
+                "hover:bg-[#4856CD]/90 transition-colors"
+              )}
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -167,9 +211,10 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={onClose}>
           <DialogContent className={cn(
-            "sm:max-w-[600px] p-0 gap-0",
+            "sm:max-w-[900px] p-0 gap-0",
             "bg-gradient-to-b from-white to-gray-50",
             "rounded-2xl shadow-xl border-0",
+            "max-h-[80vh] overflow-y-auto",
             isRTL ? "rtl" : "ltr",
             template === 'professional' && "font-rubik",
             template === 'creative' && "font-heebo",
@@ -188,8 +233,10 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
             </div>
 
             <div className="p-6 space-y-8">
-              {renderSkillList('technical')}
-              {renderSkillList('soft')}
+              <div className="grid grid-cols-2 gap-6">
+                {renderSkillList('technical')}
+                {renderSkillList('soft')}
+              </div>
 
               <div className="flex gap-3 mt-6">
                 <button

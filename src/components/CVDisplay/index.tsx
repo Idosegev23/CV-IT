@@ -400,6 +400,8 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   const [showTutorial, setShowTutorial] = useState(true);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [highlightedElement, setHighlightedElement] = useState<'edit' | 'preview' | 'download' | null>(null);
+  const [showScrollPopup, setShowScrollPopup] = useState(false);
+  const [hasShownPopup, setHasShownPopup] = useState(false);
 
   useEffect(() => {
     mounted.current = true;
@@ -410,6 +412,18 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       mounted.current = false;
     };
   }, []);
+
+  // מחליף את האפקט הקודם של הגלילה באפקט חדש שמתבסס על סגירת ההדרכה
+  useEffect(() => {
+    if (!showTutorial && !hasShownPopup) {
+      const timer = setTimeout(() => {
+        setShowScrollPopup(true);
+        setHasShownPopup(true);
+      }, 5000); // 5 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [showTutorial, hasShownPopup]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -789,12 +803,12 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       } catch (error) {
         console.error('Error generating PDF:', error);
         toast.error(dictionary.messages.downloadError);
+      } finally {
+        setIsDownloadingPdf(false);
       }
     } catch (error) {
       console.error('Error preparing PDF:', error);
       toast.error(dictionary.messages.downloadError);
-    } finally {
-      setIsDownloadingPdf(false);
     }
   };
 
@@ -1551,7 +1565,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
               <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
                 {selectedTemplate === 'classic' 
                   ? (lang === 'he' ? 'התבנית בבנייה' : 'Template Under Construction')
-                  : (lang === 'he' ? 'הורדת הקורות חיים והמשך למסך ההטבות' : 'Download CV and Continue to Benefits Screen')
+                  : (lang === 'he' ? 'סיימתי, בואו נוריד את זה ' : 'Download CV and Continue to Benefits Screen')
                 }
               </span>
             </div>
@@ -1755,6 +1769,56 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           ]}
           upgradePrice={upgradeModalData.upgradePrice}
         />
+
+        {/* פופאפ גלילה */}
+        <Dialog open={showScrollPopup} onOpenChange={setShowScrollPopup}>
+          <DialogContent className="sm:max-w-[500px] p-0 gap-0 bg-white rounded-2xl">
+            <div className="p-6">
+              <DialogHeader>
+                <DialogTitle className={`text-center text-xl ${lang === 'he' ? 'font-heebo' : ''}`}>
+                  {lang === 'he' ? 'לא אהבת?' : 'Not satisfied?'}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mt-4 space-y-4">
+                <p className={`text-center text-gray-600 ${lang === 'he' ? 'font-heebo' : ''}`}>
+                  {lang === 'he' 
+                    ? 'תמיד ניתן לערוך - לחיצה אחת על כפתור העריכה ונערוך את הכל.'
+                    : 'You can always edit - one click on the edit button and we\'ll edit everything.'}
+                </p>
+                <p className={`text-center text-gray-600 ${lang === 'he' ? 'font-heebo' : ''}`}>
+                  {lang === 'he'
+                    ? 'דרך אגב, תמיד אפשר לחזור לעריכה בכפתור'
+                    : 'By the way, you can always return to editing with the button'}
+                </p>
+                <div className="flex justify-center">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <Button
+                      onClick={() => {
+                        setIsEditing(true);
+                        setShowScrollPopup(false);
+                      }}
+                      className="bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Edit2 className="h-6 w-6" />
+                    </Button>
+                  </motion.div>
+                </div>
+              </div>
+            </div>
+            <div className="p-4 border-t border-[#4856CD]/10 flex justify-center">
+              <Button
+                onClick={() => setShowScrollPopup(false)}
+                variant="ghost"
+                className="text-[#4856CD] hover:bg-[#4856CD]/5 rounded-full"
+              >
+                {lang === 'he' ? 'הבנתי, תודה' : 'Got it, thanks'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

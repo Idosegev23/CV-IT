@@ -34,10 +34,11 @@ export const ProfessionalSummaryEdit: React.FC<ProfessionalSummaryEditProps> = (
   const [summary, setSummary] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const MAX_CHARS = 500;
 
   useEffect(() => {
     if (isOpen && data) {
-      setSummary(data);
+      setSummary(data.slice(0, MAX_CHARS));
     }
   }, [data, isOpen]);
 
@@ -303,7 +304,7 @@ Please return only the new summary, without additional explanations.`;
                 <Textarea
                   ref={textareaRef}
                   value={summary}
-                  onChange={(e) => setSummary(e.target.value)}
+                  onChange={(e) => setSummary(e.target.value.slice(0, MAX_CHARS))}
                   placeholder={isRTL ? 'הכנס תקציר מקצועי...' : 'Enter professional summary...'}
                   className={cn(
                     "p-4 overflow-hidden",
@@ -320,7 +321,20 @@ Please return only the new summary, without additional explanations.`;
                     minHeight: '100px'
                   }}
                   disabled={isLoading}
+                  maxLength={MAX_CHARS}
                 />
+
+                <div className="flex justify-between items-center text-sm text-gray-500 mt-2">
+                  <div>
+                    {isRTL ? 'טיפ: כתוב תקציר קצר וממוקד שמתאר את הניסיון והכישורים העיקריים שלך' : 'Tip: Write a short and focused summary that describes your main experience and skills'}
+                  </div>
+                  <div className={cn(
+                    "text-right",
+                    summary.length >= MAX_CHARS && "text-red-500"
+                  )}>
+                    {summary.length}/{MAX_CHARS}
+                  </div>
+                </div>
 
                 <div className="flex flex-wrap gap-2 mt-4">
                   <button
@@ -367,10 +381,6 @@ Please return only the new summary, without additional explanations.`;
                     <ArrowDownWideNarrow className="w-4 h-4" />
                     {isRTL ? 'קצר את התקציר' : 'Make it shorter'}
                   </button>
-                </div>
-
-                <div className="text-sm text-gray-500">
-                  {isRTL ? 'טיפ: כתוב תקציר קצר וממוקד שמתאר את הניסיון והכישורים העיקריים שלך' : 'Tip: Write a short and focused summary that describes your main experience and skills'}
                 </div>
               </div>
 

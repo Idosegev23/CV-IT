@@ -119,6 +119,7 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
   const [expandedItem, setExpandedItem] = useState<string | undefined>(undefined);
   const [newDescription, setNewDescription] = useState('');
   const [dateErrors, setDateErrors] = useState<{[key: string]: string}>({});
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (isOpen && data) {
@@ -424,32 +425,71 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
                           <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                         </div>
 
-                        <div className="space-y-2">
-                          <div className="flex gap-2">
-                            <Input
+                        <div className="space-y-4">
+                          <div className="flex flex-col gap-2">
+                            <textarea
                               value={newDescription}
                               onChange={(e) => setNewDescription(e.target.value)}
-                              placeholder={isRTL ? 'הוסף תיאור תפקיד' : 'Add job description'}
-                              maxLength={MAX_DESCRIPTION_LENGTH}
+                              placeholder={isRTL ? 'תאר את תפקידך והישגיך המקצועיים...' : 'Describe your role and professional achievements...'}
                               className={cn(
-                                "flex-1",
+                                "w-full min-h-[120px] p-3",
                                 "bg-white text-gray-900",
                                 "rounded-xl border-gray-200",
-                                "focus:border-[#4856CD] focus:ring-[#4856CD]/10"
+                                "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
+                                "resize-none"
                               )}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  handleAddDescription(index);
-                                }
-                              }}
                             />
                             <Button
                               type="button"
-                              onClick={() => handleAddDescription(index)}
-                              className="bg-[#4856CD] text-white rounded-xl hover:bg-[#4856CD]/90"
+                              onClick={async () => {
+                                if (!newDescription.trim() || isProcessing) return;
+                                
+                                setIsProcessing(true);
+                                try {
+                                  const response = await fetch('/api/process-job-description', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                      description: newDescription,
+                                      lang: isRTL ? 'he' : 'en'
+                                    }),
+                                  });
+
+                                  if (!response.ok) throw new Error('Failed to process description');
+
+                                  const { bulletPoints } = await response.json();
+                                  
+                                  // הוספת כל נקודה כתיאור נפרד
+                                  bulletPoints.forEach((point: string) => {
+                                    handleExperienceChange(index, 'description', [
+                                      ...exp.description,
+                                      point.trim()
+                                    ]);
+                                  });
+
+                                  // ניקוי השדה
+                                  setNewDescription('');
+                                  
+                                } catch (error) {
+                                  console.error('Error processing description:', error);
+                                  // כאן אפשר להוסיף הודעת שגיאה למשתמש
+                                } finally {
+                                  setIsProcessing(false);
+                                }
+                              }}
+                              className="bg-[#4856CD] text-white rounded-xl hover:bg-[#4856CD]/90 px-4 py-2 w-full"
+                              disabled={isProcessing}
                             >
-                              <Plus className="w-4 h-4" />
+                              {isProcessing ? (
+                                <div className="flex items-center justify-center gap-2">
+                                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                  {isRTL ? 'מעבד...' : 'Processing...'}
+                                </div>
+                              ) : (
+                                isRTL ? 'עבד תיאור מקצועי' : 'Process Professional Description'
+                              )}
                             </Button>
                           </div>
 

@@ -77,6 +77,17 @@ Content Enhancement Guidelines:
 1. Experience Section:
    - Use ONLY the experiences provided in the input
    - Fix any spelling or grammar mistakes
+   - For minimal input:
+     * Expand on responsibilities using industry-standard tasks
+     * Break down achievements into detailed components
+     * Add specific tools and methodologies used
+     * Elaborate on team size and project scope
+     * Detail impact and results quantitatively
+   - For detailed input:
+     * Consolidate similar responsibilities
+     * Focus on key achievements
+     * Highlight most impactful metrics
+     * Keep most relevant details to position
    - Improve the phrasing of existing achievements
    - Standardize job titles to professional terminology
    - Keep all factual information exactly as provided
@@ -84,14 +95,30 @@ Content Enhancement Guidelines:
    - Use industry-specific language for the target role
    - Frame responsibilities in terms relevant to the desired position
 
-2. Education Section:
-   - Use ONLY the education details provided
-   - Correct spelling of institution names
-   - Standardize degree names to official terminology
-   - Fix formatting of dates and academic terms
-   - DO NOT add courses or specializations that weren't mentioned
+2. Professional Summary:
+   - For minimal input:
+     * Expand on core competencies
+     * Detail industry expertise
+     * Elaborate on key achievements
+     * Add relevant methodologies and approaches
+     * Include specific tools and technologies
+   - For detailed input:
+     * Focus on most impressive achievements
+     * Highlight key expertise areas
+     * Summarize core value proposition
+     * Keep most relevant skills and experiences
 
 3. Skills Section:
+   - For minimal input:
+     * Break down general skills into specific components
+     * Add related sub-skills and technologies
+     * Include methodologies and frameworks
+     * Detail proficiency levels comprehensively
+   - For detailed input:
+     * Group related skills together
+     * Focus on most relevant abilities
+     * Highlight key expertise areas
+     * Keep skills directly related to target position
    - Extract ALL skills mentioned throughout the CV content, including:
      * Skills directly mentioned in the skills section
      * Technologies and tools mentioned in work experiences
@@ -127,14 +154,21 @@ Content Enhancement Guidelines:
    - Always include at least basic soft skills that can be derived from work experience
      (e.g., "Team Work" if worked in teams, "Communication" if client-facing roles)
 
-4. Military Service (for Israeli CVs):
+4. Education Section:
+   - Use ONLY the education details provided
+   - Correct spelling of institution names
+   - Standardize degree names to official terminology
+   - Fix formatting of dates and academic terms
+   - DO NOT add courses or specializations that weren't mentioned
+
+5. Military Service (for Israeli CVs):
    - Use ONLY the service details provided
    - Correct spelling of unit names and roles
    - Standardize military terminology
    - Fix formatting of ranks and positions
    - Format existing achievements professionally
 
-5. Language Guidelines:
+6. Language Guidelines:
    - Fix all spelling and grammar issues
    - Use consistent professional terminology
    - Maintain proper capitalization and punctuation
