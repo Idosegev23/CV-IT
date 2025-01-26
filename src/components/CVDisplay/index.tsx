@@ -237,7 +237,7 @@ const transformResumeData = (rawData: any): ResumeData => {
     interfaceLang: rawData.interfaceLang || 'he',
     military: rawData.military_service ? {
       role: rawData.military_service.role,
-      unit: 'צה"ל',
+      unit: rawData.military_service.unit || 'צה"ל',
       startDate: rawData.military_service.years.split('-')[0],
       endDate: rawData.military_service.years.split('-')[1],
       description: rawData.military_service.achievements
@@ -981,8 +981,9 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     }
   };
 
-  const handleEdit = (type: string, index: number) => {
+  const handleEdit = (type: string, index?: number) => {
     let itemData;
+    
     switch (type) {
       case 'personalInfo':
         itemData = cvData?.personalInfo;
@@ -991,7 +992,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         itemData = cvData?.experience;
         break;
       case 'education':
-        itemData = cvData?.education?.degrees[index];
+        itemData = cvData?.education?.degrees[index!];
         break;
       case 'skills':
         itemData = cvData?.skills;
@@ -1002,13 +1003,22 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       case 'summary':
         itemData = cvData?.personalInfo.summary;
         break;
+      case 'military':
+        itemData = cvData?.military || {
+          role: '',
+          unit: '',
+          startDate: '',
+          endDate: '',
+          description: []
+        };
+        break;
       default:
         return;
     }
 
     setEditingItem({ 
       type, 
-      index, 
+      index: type === 'military' ? undefined : index,
       data: itemData,
       template: selectedTemplate 
     });
@@ -1040,7 +1050,13 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         newCvData.personalInfo.summary = newData;
         break;
       case 'military':
-        newCvData.military = newData;
+        newCvData.military = {
+          role: newData.role || '',
+          unit: newData.unit || '',
+          startDate: newData.startDate || '',
+          endDate: newData.endDate || '',
+          description: newData.description || []
+        };
         break;
     }
     
