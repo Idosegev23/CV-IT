@@ -24,6 +24,13 @@ const templates = {
       image: '/design/classic/clasics.png'
     },
     {
+      id: 'creative',
+      title: 'תבנית קריאטיבית',
+      description: 'בשביל מי שרוצה לבלוט בים של קורות חיים.',
+      suitable: ['עיצוב', 'שיווק', 'מדיה', 'אמנות'],
+      image: '/design/creative/creatives.png'
+    },
+    {
       id: 'professional',
       title: 'תבנית מקצועית',
       description: 'עיצוב נקי ומדויק שאומר ״אני פה כדי לעבוד״.',
@@ -36,23 +43,9 @@ const templates = {
       description: 'מושלמת למשרה ראשונה או לשינוי כיוון.',
       suitable: ['שירות לקוחות', 'מכירות', 'סטודנטים וסטודנטיות', 'משרות התחלתיות'],
       image: '/design/general/generals.png'
-    },
-    {
-      id: 'creative',
-      title: 'תבנית קריאטיבית',
-      description: 'בשביל מי שרוצה לבלוט בים של קורות חיים.',
-      suitable: ['עיצוב', 'שיווק', 'מדיה', 'אמנות'],
-      image: '/design/creative/creatives.png'
     }
   ],
   en: [
-    {
-      id: 'professional',
-      title: 'Professional',
-      description: 'Clean and precise design that says "I mean business".',
-      suitable: ['High-Tech', 'Finance', 'Senior Management', 'Professional Roles'],
-      image: '/design/classic/pros.png'
-    },
     {
       id: 'classic',
       title: 'Classic',
@@ -61,18 +54,25 @@ const templates = {
       image: '/design/classic/clasics.png'
     },
     {
-      id: 'general',
-      title: 'Flexible',
-      description: 'Perfect for your first job or changing directions.',
-      suitable: ['First Job', 'Career Change', 'Students', 'Internship'],
-      image: '/design/general/generals.png'
-    },
-    {
       id: 'creative',
       title: 'Creative',
       description: 'For those who want to stand out from the crowd.',
       suitable: ['Design', 'Marketing', 'Digital', 'Media'],
       image: '/design/creative/creatives.png'
+    },
+    {
+      id: 'professional',
+      title: 'Professional',
+      description: 'Clean and precise design that says "I mean business".',
+      suitable: ['High-Tech', 'Finance', 'Senior Management', 'Professional Roles'],
+      image: '/design/classic/pros.png'
+    },
+    {
+      id: 'general',
+      title: 'Flexible',
+      description: 'Perfect for your first job or changing directions.',
+      suitable: ['First Job', 'Career Change', 'Students', 'Internship'],
+      image: '/design/general/generals.png'
     }
   ]
 };
@@ -262,13 +262,6 @@ export default function TemplatesPage() {
             >
               <div className="bg-white/38 pt-[10px] px-[10px]">
                 <div className="bg-white border border-white rounded-[32px] overflow-hidden relative">
-                  {template.id === 'classic' && (
-                    <div className="absolute top-0 left-0 right-0 bottom-0 bg-black/70 z-10 flex items-center justify-center">
-                      <span className="bg-[#4856CD] text-white px-4 py-2 rounded-lg text-lg font-bold">
-                        {isRTL ? 'בבנייה' : 'Under Construction'}
-                      </span>
-                    </div>
-                  )}
                   <div className="pb-[50%]">
                     <Image
                       src={template.image}

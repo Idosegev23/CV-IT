@@ -10,7 +10,7 @@ import { TextEditor } from '@/components/TextEditor/page';
 import { ResumeData } from '@/types/resume';
 import { getDictionary } from '@/dictionaries';
 import { Button } from '@/components/theme/ui/button';
-import { Edit2, Eye, Download, FileText, Loader2, Menu, X, Globe, LayoutTemplate, Plus, Briefcase, GraduationCap, Languages, Wrench, Star, CheckCircle2, HelpCircle } from 'lucide-react';
+import { Edit2, Eye, Download, FileText, Loader2, Menu, X, Globe, LayoutTemplate, Plus, Briefcase, GraduationCap, Languages, Wrench, Star, CheckCircle2, HelpCircle, Minus } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dictionary } from '@/dictionaries/dictionary';
 import { useAppStore } from '@/lib/store';
@@ -166,6 +166,52 @@ const editingStyles = `
     width: 14px;
     height: 14px;
     color: #4856CD;
+  }
+
+  .font-size-controls {
+    position: absolute;
+    top: -50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 100;
+  }
+
+  .font-size-button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #4856CD;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .font-size-button:hover {
+    background: #3A45B4;
+    transform: scale(1.05);
+  }
+
+  .font-size-button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+  }
+
+  .font-size-controls::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2px;
+    height: 8px;
+    background: #4856CD;
   }
 `;
 
@@ -548,7 +594,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         languages: editedData.skills.languages.reduce((acc, curr) => ({
           ...acc,
           [curr.language]: curr.level
-        }), {})
+        }), {}),
       };
 
       console.log('Formatted Data for Save:', formattedForSave);
@@ -1220,14 +1266,11 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   };
 
   const renderEditButton = () => {
-    if (selectedTemplate === 'classic') {
-      return null;
-    }
-
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 relative">
         <motion.div
           animate={highlightedElement === 'edit' ? pulseAnimation : {}}
+          className="relative"
         >
           <Button
             onClick={() => setIsEditing(!isEditing)}
@@ -1241,7 +1284,35 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           >
             {isEditing ? <X className="h-6 w-6" /> : <Edit2 className="h-6 w-6" />}
           </Button>
+
+          {/* כפתורי שינוי גודל פונט */}
+          {isEditing && (
+            <div className="font-size-controls absolute top-[-50px] left-1/2 transform -translate-x-1/2">
+              <div className="text-center mb-2 text-sm text-gray-600">
+                {lang === 'he' ? 'שינוי גודל פונט' : 'Font Size'}
+              </div>
+              <div className="flex gap-2 justify-center">
+                <button 
+                  className="font-size-button"
+                  onClick={() => handleFontSizeChange('decrease')}
+                  aria-label={lang === 'he' ? 'הקטן גודל פונט' : 'Decrease font size'}
+                >
+                  <span className="sr-only">{lang === 'he' ? 'הקטן גודל פונט' : 'Decrease font size'}</span>
+                  <Minus className="h-4 w-4" />
+                </button>
+                <button 
+                  className="font-size-button"
+                  onClick={() => handleFontSizeChange('increase')}
+                  aria-label={lang === 'he' ? 'הגדל גודל פונט' : 'Increase font size'}
+                >
+                  <span className="sr-only">{lang === 'he' ? 'הגדל גודל פונט' : 'Increase font size'}</span>
+                  <Plus className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </motion.div>
+
         <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
           {isEditing 
             ? (lang === 'he' ? 'סיום עריכה' : 'Finish Editing')
@@ -1250,6 +1321,20 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         </span>
       </div>
     );
+  };
+
+  // נוסיף פונקציה לטיפול בשינוי גודל הפונט
+  const handleFontSizeChange = (action: 'increase' | 'decrease') => {
+    const cvContent = document.getElementById('cv-content');
+    if (!cvContent) return;
+
+    const currentSize = parseFloat(getComputedStyle(cvContent).getPropertyValue('--base-font-size'));
+    const newSize = action === 'increase' ? currentSize + 1 : currentSize - 1;
+
+    // הגבלת הגודל המינימלי והמקסימלי
+    if (newSize >= 12 && newSize <= 16) {
+      cvContent.style.setProperty('--base-font-size', `${newSize}px`);
+    }
   };
 
   const handleContinueWithoutDownload = () => {
@@ -1547,10 +1632,10 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
               >
                 <Button
                   onClick={handleDownloadAndContinue}
-                  disabled={isDownloadingPdf || isEditing || selectedTemplate === 'classic'}
+                  disabled={isDownloadingPdf || isEditing}
                   className={cn(
                     "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
-                    (isEditing || selectedTemplate === 'classic') && "opacity-50 cursor-not-allowed",
+                    isEditing && "opacity-50 cursor-not-allowed",
                     highlightedElement === 'download' && "ring-4 ring-[#4856CD]/30"
                   )}
                   aria-label={lang === 'he' ? 'הורדת קובץ PDF והמשך' : 'Download PDF and Continue'}
@@ -1563,10 +1648,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                 </Button>
               </motion.div>
               <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
-                {selectedTemplate === 'classic' 
-                  ? (lang === 'he' ? 'התבנית בבנייה' : 'Template Under Construction')
-                  : (lang === 'he' ? 'סיימתי, בואו נוריד את זה ' : 'Download CV and Continue to Benefits Screen')
-                }
+                {lang === 'he' ? 'סיימתי, בואו נוריד את זה ' : 'Download CV and Continue to Benefits Screen'}
               </span>
             </div>
           ) : (

@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { ResumeData } from '../../types/resume';
+import { ResumeData, Language, Degree, MilitaryService } from '../../types/resume';
 import '../../styles/templates/classic.css';
 import Image from 'next/image';
 import { Assistant } from 'next/font/google';
@@ -11,7 +11,14 @@ import { EditPopup } from '../EditableFields/EditPopup';
 import { EditButton } from '../EditableFields/EditButton';
 import { AddItemPopup } from '../EditableFields/AddItemPopup';
 import { Button } from '@/components/theme/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2 } from 'lucide-react';
+import { PersonalInfoEdit } from '../EditableFields/PersonalInfoEdit';
+import { SkillsEdit } from '../EditableFields/SkillsEdit';
+import { EducationEdit } from '../EditableFields/EducationEdit';
+import { MilitaryEdit } from '../EditableFields/MilitaryEdit';
+import { ExperienceEdit } from '../EditableFields/ExperienceEdit';
+import { ProfessionalSummaryEdit } from '../EditableFields/ProfessionalSummaryEdit';
+import { LanguagesEdit } from '../EditableFields/LanguagesEdit';
 
 // הגדרת טיפוסים
 interface TechnicalSkill {
@@ -117,6 +124,11 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
   onDelete = () => {},
   onEdit = () => {}
 }) => {
+  // הוספת לוג לבדיקת הנתונים
+  console.log('Full CV Data:', data);
+  console.log('Skills Data:', data.skills);
+  console.log('Languages Data:', data?.skills?.languages);
+
   const [editingSection, setEditingSection] = useState<{
     type: string;
     index?: number;
@@ -128,16 +140,21 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
     fields: any[];
   } | null>(null);
 
+  const [fontSize, setFontSize] = useState(16); // גודל ברירת מחדל
+
   const cvLang = data.lang;
   const t = translations[cvLang as keyof typeof translations];
   const { personalInfo, experience, education, skills, military } = data;
   const isRTL = cvLang === 'he';
 
-  // הוספת לוגים לבדיקת הנתונים
-  console.log('CV Data:', data);
-  console.log('Skills:', skills);
-  console.log('Technical Skills:', skills?.technical);
-  console.log('Soft Skills:', skills?.soft);
+  // הוספת states חדשים לפופאפים
+  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(false);
+  const [isSkillsOpen, setIsSkillsOpen] = useState(false);
+  const [isEducationOpen, setIsEducationOpen] = useState(false);
+  const [isMilitaryOpen, setIsMilitaryOpen] = useState(false);
+  const [isExperienceOpen, setIsExperienceOpen] = useState(false);
+  const [isProfessionalSummaryOpen, setIsProfessionalSummaryOpen] = useState(false);
+  const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
 
   const handlePersonalInfoUpdate = (field: keyof typeof personalInfo, value: string) => {
     onUpdate('personalInfo', { ...personalInfo, [field]: value });
@@ -206,55 +223,55 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
 
   const { firstName, lastName } = splitName(personalInfo.name);
 
+  const adjustFontSizeToContent = () => {
+    const content = document.querySelector('.classic-content');
+    
+    if (!content) return;
+    
+    // קביעת גודל פונט מקסימלי קבוע
+    const maxFontSize = 16;
+    document.documentElement.style.setProperty('--base-font-size', `${maxFontSize}px`);
+  };
+
+  const adjustFontSize = (direction: 'increase' | 'decrease') => {
+    const newSize = direction === 'increase' ? fontSize + 0.5 : fontSize - 0.5;
+    
+    // הגבלת הגודל בין 12 ל-20 פיקסלים
+    if (newSize >= 12 && newSize <= 20) {
+      setFontSize(newSize);
+      document.documentElement.style.setProperty('--base-font-size', `${newSize}px`);
+    }
+  };
+
   useEffect(() => {
     adjustTemplateSize('.classic-template');
+    adjustFontSizeToContent();
   }, [data]);
 
-  const handleEdit = (type: string, index?: number, data?: any) => {
-    let fields: Field[] = [];
+  const handleEdit = (type: string, index?: number) => {
     switch (type) {
       case 'personalInfo':
-        fields = [
-          { name: 'name', label: isRTL ? 'שם מלא' : 'Full Name', type: 'text', value: data.name },
-          { name: 'email', label: isRTL ? 'דוא"ל' : 'Email', type: 'text', value: data.email },
-          { name: 'phone', label: isRTL ? 'טלפון' : 'Phone', type: 'text', value: data.phone },
-          { name: 'address', label: isRTL ? 'כתובת' : 'Address', type: 'text', value: data.address },
-          { name: 'summary', label: isRTL ? 'תקציר מקצועי' : 'Professional Summary', type: 'textarea', value: data.summary }
-        ];
+        setIsPersonalInfoOpen(true);
         break;
-      case 'military':
-        if (military) {
-          fields = [
-            { name: 'role', label: isRTL ? 'תפקיד' : 'Role', type: 'text', value: military.role || '' },
-            { name: 'unit', label: isRTL ? 'יחידה' : 'Unit', type: 'text', value: military.unit || '' },
-            { name: 'startDate', label: isRTL ? 'תאריך התחלה' : 'Start Date', type: 'text', value: military.startDate || '' },
-            { name: 'endDate', label: isRTL ? 'תאריך סיום' : 'End Date', type: 'text', value: military.endDate || '' },
-            { name: 'description', label: isRTL ? 'תיאור השירות' : 'Service Description', type: 'list', value: military.description || [] }
-          ];
-        }
-        break;
-      case 'experience':
-        const exp = experience[index || 0];
-        fields = [
-          { name: 'position', label: isRTL ? 'תפקיד' : 'Position', type: 'text', value: exp.position },
-          { name: 'company', label: isRTL ? 'חברה' : 'Company', type: 'text', value: exp.company },
-          { name: 'startDate', label: isRTL ? 'תאריך התחלה' : 'Start Date', type: 'text', value: exp.startDate },
-          { name: 'endDate', label: isRTL ? 'תאריך סיום' : 'End Date', type: 'text', value: exp.endDate },
-          { name: 'description', label: isRTL ? 'תיאור התפקיד' : 'Job Description', type: 'list', value: exp.description }
-        ];
+      case 'skills':
+        setIsSkillsOpen(true);
         break;
       case 'education':
-        const edu = education.degrees[index || 0];
-        fields = [
-          { name: 'type', label: isRTL ? 'סוג תואר' : 'Degree Type', type: 'text', value: edu.type },
-          { name: 'field', label: isRTL ? 'תחום' : 'Field', type: 'text', value: edu.field },
-          { name: 'institution', label: isRTL ? 'מוסד' : 'Institution', type: 'text', value: edu.institution },
-          { name: 'years', label: isRTL ? 'שנים' : 'Years', type: 'text', value: edu.years },
-          { name: 'specialization', label: isRTL ? 'התמחות' : 'Specialization', type: 'text', value: edu.specialization }
-        ];
+        setIsEducationOpen(true);
+        break;
+      case 'military':
+        setIsMilitaryOpen(true);
+        break;
+      case 'experience':
+        setIsExperienceOpen(true);
+        break;
+      case 'summary':
+        setIsProfessionalSummaryOpen(true);
+        break;
+      case 'languages':
+        setIsLanguagesOpen(true);
         break;
     }
-    setEditingSection({ type, index, data: fields });
   };
 
   const handleAdd = (type: string) => {
@@ -274,7 +291,8 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
           { name: 'type', label: isRTL ? 'סוג תואר' : 'Degree Type', type: 'text' },
           { name: 'field', label: isRTL ? 'תחום' : 'Field', type: 'text' },
           { name: 'institution', label: isRTL ? 'מוסד' : 'Institution', type: 'text' },
-          { name: 'years', label: isRTL ? 'שנים' : 'Years', type: 'text' },
+          { name: 'startDate', label: isRTL ? 'תאריך התחלה' : 'Start Date', type: 'text' },
+          { name: 'endDate', label: isRTL ? 'תאריך סיום' : 'End Date', type: 'text' },
           { name: 'specialization', label: isRTL ? 'התמחות' : 'Specialization', type: 'text' }
         ];
         break;
@@ -330,309 +348,405 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
       data-cv-lang={cvLang}
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      <div className="under-construction">
-        <div className="flex flex-col items-center gap-4">
-          <span className="bg-[#4856CD] text-white px-6 py-3 rounded-lg text-xl font-bold">
-            {cvLang === 'he' ? 'בבנייה' : 'Under Construction'}
-          </span>
-          <span className="text-white text-lg">
-            {cvLang === 'he' ? 'התבנית אינה זמינה כרגע' : 'This template is currently unavailable'}
-          </span>
-        </div>
+      {/* כפתורי שליטה בגודל */}
+      <div className="font-size-controls" style={{
+        position: 'absolute',
+        top: '10px',
+        left: '10px',
+        zIndex: 1000,
+        display: 'none',
+        gap: '0.5rem',
+        alignItems: 'center'
+      }}>
+        <button 
+          onClick={() => adjustFontSize('decrease')}
+          className="font-size-button"
+          style={{
+            padding: '4px 8px',
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            background: 'white'
+          }}
+        >
+          -
+        </button>
+        <span style={{ fontSize: '14px' }}>{fontSize}px</span>
+        <button 
+          onClick={() => adjustFontSize('increase')}
+          className="font-size-button"
+          style={{
+            padding: '4px 8px',
+            border: '1px solid #ccc',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            background: 'white'
+          }}
+        >
+          +
+        </button>
       </div>
-      {/* מונע אינטראקציה עם התבנית */}
-      <div className="pointer-events-none">
-        <div className="classic-header relative">
-          <Image
-            src="/design/classic/dec.svg"
-            alt="header decoration"
-            width={15}
-            height={15}
-            className="absolute top-1/2 -translate-y-1/2 right-12 header-corner-decoration"
-            priority={true}
-          />
-          <div className="relative z-10">
-            <div className="header-name-wrapper">
-              <h1 className="header-name">
-                <div className="flex items-center gap-1">
-                  <span className="header-name-first">{firstName}</span>
-                  {lastName && <span className="header-name-last">{lastName}</span>}
-                  {isEditing && (
-                    <EditButton
-                      onClick={() => handleEdit('personalInfo', undefined, personalInfo)}
-                      title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
-                      variant="light"
-                    />
-                  )}
-                </div>
-              </h1>
-            </div>
-            <div className="header-contact">
-              {personalInfo.email && <span>{personalInfo.email}</span>}
-              {personalInfo.email && personalInfo.phone && <span className="contact-separator">|</span>}
-              {personalInfo.phone && <span>{personalInfo.phone}</span>}
-              {personalInfo.phone && personalInfo.address && <span className="contact-separator">|</span>}
-              {personalInfo.address && <span>{personalInfo.address}</span>}
-            </div>
+
+      <div className="classic-header relative">
+        <Image
+          src="/design/classic/dec.svg"
+          alt="header decoration"
+          width={15}
+          height={15}
+          className="absolute top-1/2 -translate-y-1/2 right-12 header-corner-decoration"
+          priority={true}
+        />
+        <div className="relative z-10">
+          <div className="header-name-wrapper">
+            <h1 className="header-name">
+              <span className="header-name-first">{firstName}</span>
+              {lastName && <span className="header-name-last">{lastName}</span>}
+            </h1>
+            {isEditing && (
+              <button 
+                onClick={() => handleEdit('personalInfo', 0)}
+                className="edit-button"
+                title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <div className="header-contact">
+            {personalInfo.email && <span>{personalInfo.email}</span>}
+            {personalInfo.email && personalInfo.phone && <span className="contact-separator">|</span>}
+            {personalInfo.phone && <span>{personalInfo.phone}</span>}
+            {personalInfo.phone && personalInfo.address && <span className="contact-separator">|</span>}
+            {personalInfo.address && <span>{personalInfo.address}</span>}
           </div>
         </div>
+      </div>
 
-        <main className="classic-content">
-          {/* תקציר */}
-          {data.personalInfo.summary && (
-            <section className="summary-section">
-              <div className="summary-content">
-                {data.personalInfo.summary}
-              </div>
-            </section>
-          )}
+      <main className="classic-content">
+        {/* תקציר */}
+        <section className="summary-section">
+          <h2 className="section-title">
+            {t.professionalSummary}
+            {isEditing && (
+              <button 
+                onClick={() => handleEdit('summary', 0)}
+                className="edit-button"
+                title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
+          </h2>
+          <div className="summary-content">
+            {data.personalInfo.summary}
+          </div>
+        </section>
 
-          {/* ניסיון תעסוקתי */}
-          {experience && experience.length > 0 && (
-            <section className="experience-section">
-              <h2 className="section-title relative flex items-center gap-4">
-                {t.workExperience}
-                {isEditing && (
-                  <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('experience')}>
-                    הוסף ניסיון תעסוקתי
-                    <EditButton
-                      onClick={() => handleAdd('experience')}
-                      title={lang === 'he' ? 'הוסף ניסיון תעסוקתי' : 'Add Work Experience'}
-                      variant="dark"
-                    />
-                  </span>
-                )}
-              </h2>
-              <div className="experience-items">
-                {experience.map((exp, index) => (
-                  <div key={index} className="experience-item relative">
-                    <div className="experience-header">
-                      <div className="experience-title-wrapper">
-                        <div className="flex items-center gap-1">
-                          <span className="experience-title">{exp.position}</span>
-                          {isEditing && (
-                            <EditButton
-                              onClick={() => onEdit('experience', index)}
-                              title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
-                              variant="dark"
-                            />
-                          )}
-                        </div>
-                        {exp.company && (
-                          <>
-                            <span className="experience-separator">|</span>
-                            <span className="experience-company">{exp.company}</span>
-                          </>
-                        )}
+        {/* ניסיון תעסוקתי */}
+        {experience && experience.length > 0 && (
+          <section className="experience-section">
+            <h2 className="section-title">
+              {t.workExperience}
+              {isEditing && (
+                <button 
+                  onClick={() => handleEdit('experience', 0)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              )}
+            </h2>
+            <div className="experience-items">
+              {experience.map((exp, index) => (
+                <div key={index} className="experience-item relative">
+                  <div className="experience-header">
+                    <div className="experience-title-wrapper">
+                      <div className="flex items-center gap-1">
+                        <span className="experience-title">{exp.position}</span>
                       </div>
-                      <div className="experience-date">
-                        {formatDate(exp.startDate, exp.endDate, cvLang)}
-                      </div>
+                      {exp.company && (
+                        <>
+                          <span className="experience-separator">|</span>
+                          <span className="experience-company">{exp.company}</span>
+                        </>
+                      )}
                     </div>
-                    {exp.description && exp.description.length > 0 && (
-                      <ul className="experience-description" style={{ listStyle: 'none', paddingRight: 0 }}>
-                        {formatDescription(exp.description, data.experience.length).map((desc, i) => (
-                          <li key={i}>{desc}</li>
-                        ))}
-                      </ul>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* השכלה */}
-          {education?.degrees && education.degrees.length > 0 && (
-            <section className="education-section">
-              <h2 className="section-title relative flex items-center gap-4">
-                {t.education}
-                {isEditing && (
-                  <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('education')}>
-                    הוסף השכלה
-                    <EditButton
-                      onClick={() => handleAdd('education')}
-                      title={lang === 'he' ? 'הוסף השכלה' : 'Add Education'}
-                      variant="dark"
-                    />
-                  </span>
-                )}
-              </h2>
-              <div className="education-items">
-                {education.degrees.map((degree, index) => (
-                  <div key={index} className="education-item relative">
-                    <div className="education-header">
-                      <div className="education-title-wrapper">
-                        <div className="flex items-center gap-1">
-                          <span className="education-degree">
-                            {`${degree.type} ${degree.field}`}
-                          </span>
-                          {isEditing && (
-                            <EditButton
-                              onClick={() => onEdit('education', index)}
-                              title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
-                              variant="dark"
-                            />
-                          )}
-                        </div>
-                        <span className="experience-separator">|</span>
-                        <span className="education-institution">{degree.institution}</span>
-                      </div>
-                      <div className="education-date">{degree.years}</div>
-                    </div>
-                    {degree.specialization && (
-                      <div className="education-specialization">
-                        התמחות: {degree.specialization}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* כירות צבאי/לאומי */}
-          {military && (
-            <section className="military-section">
-              <h2 className="section-title relative flex items-center gap-4">
-                {military.role?.toLowerCase().includes('לאומי') ? t.nationalService : t.militaryService}
-                {isEditing && (
-                  <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleEdit('military', undefined, military)}>
-                    {military.role?.toLowerCase().includes('לאומי') ? 'ערוך שירות לאומי' : 'ערוך שירות צבאי'}
-                    <EditButton
-                      onClick={() => handleEdit('military', undefined, military)}
-                      title={lang === 'he' ? (military.role?.toLowerCase().includes('לאומי') ? 'ערוך שירות לאומי' : 'ערוך שירות צבאי') : 'Edit Service'}
-                      variant="dark"
-                    />
-                  </span>
-                )}
-              </h2>
-              <div className="military-content">
-                <div className="military-header">
-                  <div className="military-title-wrapper">
-                    <div className="flex items-center gap-1">
-                      <h3 className="military-title">{military.role}</h3>
-                      <span className="military-separator">|</span>
-                      <span className="military-unit">{military.unit}</span>
+                    <div className="experience-date">
+                      {formatDate(exp.startDate, exp.endDate, cvLang)}
                     </div>
                   </div>
-                  <div className="military-date">
-                    {formatDate(military.startDate, military.endDate, lang)}
+                  {exp.description && exp.description.length > 0 && (
+                    <ul className="experience-description" style={{ listStyle: 'none', paddingRight: 0 }}>
+                      {formatDescription(exp.description, data.experience.length).map((desc, i) => (
+                        <li key={i}>{desc}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* השכלה */}
+        {education?.degrees && education.degrees.length > 0 && (
+          <section className="education-section">
+            <h2 className="section-title">
+              {t.education}
+              {isEditing && (
+                <button 
+                  onClick={() => handleEdit('education', 0)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              )}
+            </h2>
+            <div className="education-items">
+              {education.degrees.map((degree, index) => (
+                <div key={index} className="education-item relative">
+                  <div className="education-header">
+                    <div className="education-title-wrapper">
+                      <div className="flex items-center gap-1">
+                        <span className="education-degree">
+                          {`${degree.type} ${degree.field}`}
+                        </span>
+                      </div>
+                      <span className="experience-separator">|</span>
+                      <span className="education-institution">{degree.institution}</span>
+                    </div>
+                    <div className="education-date">
+                      {formatDate(degree.startDate, degree.endDate, cvLang)}
+                    </div>
+                  </div>
+                  {degree.specialization && (
+                    <div className="education-specialization">
+                      התמחות: {degree.specialization}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* שירות צבאי/לאומי */}
+        {military && (
+          <section className="military-section">
+            <h2 className="section-title">
+              {military.role?.toLowerCase().includes('לאומי') ? t.nationalService : t.militaryService}
+              {isEditing && (
+                <button 
+                  onClick={() => handleEdit('military', 0)}
+                  className="edit-button"
+                  title={lang === 'he' ? (military.role?.toLowerCase().includes('לאומי') ? 'ערוך שירות לאומי' : 'ערוך שירות צבאי') : 'Edit Service'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              )}
+            </h2>
+            <div className="military-content">
+              <div className="military-header">
+                <div className="military-title-wrapper">
+                  <div className="flex items-center gap-1">
+                    <h3 className="military-title">{military.role}</h3>
+                    <span className="military-separator">|</span>
+                    <span className="military-unit">{military.unit}</span>
                   </div>
                 </div>
-                {military.description && military.description.length > 0 && (
-                  <ul className="military-description" style={{ listStyle: 'none', paddingRight: 0 }}>
-                    {formatDescription(military.description, 3).map((desc, i) => (
-                      <li key={i}>{desc}</li>
-                    ))}
-                  </ul>
-                )}
+                <div className="military-date">
+                  {formatDate(military.startDate, military.endDate, lang)}
+                </div>
               </div>
-            </section>
-          )}
+              {military.description && military.description.length > 0 && (
+                <ul className="military-description" style={{ listStyle: 'none', paddingRight: 0 }}>
+                  {formatDescription(military.description, 3).map((desc, i) => (
+                    <li key={i}>{desc}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </section>
+        )}
 
-          {/* כישורים */}
-          {skills && (
-            <section className="skills-section">
-              <h2 className="section-title relative flex items-center gap-4">
-                {t.skills}
-                {isEditing && (
-                  <div className="flex gap-4 text-base font-normal">
-                    <span className="flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('technicalSkill')}>
-                      הוסף כישור טכני
-                      <EditButton
-                        onClick={() => handleAdd('technicalSkill')}
-                        title={lang === 'he' ? 'הוסף כישור טכני' : 'Add Technical Skill'}
-                        variant="dark"
-                      />
-                    </span>
-                    <span className="flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAdd('softSkill')}>
-                      הוסף כישור רך
-                      <EditButton
-                        onClick={() => handleAdd('softSkill')}
-                        title={lang === 'he' ? 'הוסף כישור רך' : 'Add Soft Skill'}
-                        variant="dark"
-                      />
-                    </span>
-                  </div>
-                )}
-              </h2>
-              <div className="skills-items">
+        {/* כישורים */}
+        {skills && (
+          <section className="skills-section">
+            <h2 className="section-title">
+              {t.skills}
+              {isEditing && (
+                <button 
+                  onClick={() => handleEdit('skills', 0)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              )}
+            </h2>
+            <div className="skills-items" style={{ display: 'block' }}>
+              <span style={{ display: 'inline-block' }}>
                 {skills.technical?.map((skill, index) => (
-                  <span key={`tech-${index}`} className="skill-item">
-                    <span className="skill-name">{skill.name}</span>
+                  <span key={`tech-${index}`} style={{ display: 'inline', textAlign: 'justify' }}>
+                    <span style={{ fontWeight: 600 }}>{skill.name}</span>
                     {" - "}
-                    <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
-                    {index < skills.technical.length - 1 && <span className="skill-separator"> | </span>}
-                    {isEditing && (
-                      <EditButton
-                        onClick={() => onEdit('technicalSkill', index)}
-                        title={lang === 'he' ? 'ערוך כישור טכני' : 'Edit Technical Skill'}
-                        variant="dark"
-                      />
-                    )}
+                    <span style={{ fontWeight: 300, color: '#666' }}>{getSkillLevel(skill.level, cvLang)}</span>
+                    {index < skills.technical.length - 1 && <span style={{ margin: '0 0.2rem', opacity: 0.4 }}>|</span>}
                   </span>
                 ))}
-              </div>
-            </section>
-          )}
-
-          {/* שפות */}
-          {data.skills?.languages && data.skills.languages.length > 0 && (
-            <section className="languages-section">
-              <h2 className="section-title">
-                {t.languages}
-                {isEditing && (
-                  <span className="text-base font-normal flex items-center gap-1 text-gray-600 hover:text-gray-900 cursor-pointer" onClick={() => handleAddLanguage()}>
-                    הוסף שפה
-                    <EditButton
-                      onClick={() => handleAddLanguage()}
-                      title={lang === 'he' ? 'הוסף שפה' : 'Add Language'}
-                      variant="dark"
-                    />
-                  </span>
-                )}
-              </h2>
-              <div className="languages-items">
-                {data.skills.languages.map((langSkill, index) => (
-                  <div key={index} className="language-item">
-                    <span className="language-tag">
-                      {langSkill.language} - {langSkill.level}
+              </span>
+              {skills.soft?.length > 0 && (
+                <span style={{ display: 'inline-block', marginTop: '0.5rem' }}>
+                  {skills.soft.map((skill, index) => (
+                    <span key={`soft-${index}`} style={{ display: 'inline', textAlign: 'justify' }}>
+                      <span style={{ fontWeight: 600 }}>{skill.name}</span>
+                      {" - "}
+                      <span style={{ fontWeight: 300, color: '#666' }}>{getSkillLevel(skill.level, cvLang)}</span>
+                      {index < skills.soft.length - 1 && <span style={{ margin: '0 0.2rem', opacity: 0.4 }}>|</span>}
                     </span>
-                    {isEditing && (
-                      <EditButton
-                        onClick={() => onEdit('language', index)}
-                        title={cvLang === 'he' ? 'ערוך שפה' : 'Edit Language'}
-                        variant="dark"
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </main>
+                  ))}
+                </span>
+              )}
+            </div>
+          </section>
+        )}
 
-        <div className="classic-footer">
-        </div>
-        {editingSection && (
-          <EditPopup
-            isOpen={true}
-            onClose={() => setEditingSection(null)}
-            data={editingSection.data}
-            onSave={handleSave}
-            section={editingSection.type}
-          />
+        {/* שפות */}
+        {data.skills?.languages && data.skills.languages.length > 0 && (
+          <section className="languages-section">
+            <h2 className="section-title">
+              {t.languages}
+              {isEditing && (
+                <button 
+                  onClick={() => handleEdit('languages', 0)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              )}
+            </h2>
+            <div style={{ display: 'inline-block', margin: '0 4rem 0 6rem' }}>
+              {data.skills.languages.map((langSkill, index, arr) => (
+                <span key={`lang-${index}`} style={{ display: 'inline' }}>
+                  <span style={{ fontWeight: 600, fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)' }}>{langSkill.language}</span>
+                  <span style={{ margin: '0 2px' }}>-</span>
+                  <span style={{ fontWeight: 300, color: '#666', fontSize: 'clamp(0.95rem, 1.5vw, 1.05rem)' }}>{langSkill.level}</span>
+                  {index < arr.length - 1 && <span style={{ margin: '0 8px', opacity: 0.4 }}>|</span>}
+                </span>
+              ))}
+            </div>
+          </section>
         )}
-        {isAddingItem && (
-          <AddItemPopup
-            isOpen={true}
-            onClose={() => setIsAddingItem(null)}
-            onAdd={handleAddItem}
-            section={isAddingItem.type}
-          />
-        )}
+      </main>
+
+      <div className="classic-footer">
       </div>
+      {editingSection && (
+        <EditPopup
+          isOpen={true}
+          onClose={() => setEditingSection(null)}
+          data={editingSection.data}
+          onSave={handleSave}
+          section={editingSection.type}
+        />
+      )}
+      {isAddingItem && (
+        <AddItemPopup
+          isOpen={true}
+          onClose={() => setIsAddingItem(null)}
+          onAdd={handleAddItem}
+          section={isAddingItem.type}
+        />
+      )}
+
+      {/* Edit Popups */}
+      <PersonalInfoEdit
+        isOpen={isPersonalInfoOpen}
+        onClose={() => setIsPersonalInfoOpen(false)}
+        data={data.personalInfo}
+        onSave={(newData) => {
+          onUpdate('personalInfo', { ...data.personalInfo, summary: data.personalInfo.summary, ...newData });
+          setIsPersonalInfoOpen(false);
+        }}
+        isRTL={isRTL}
+        template="classic"
+      />
+
+      <SkillsEdit
+        isOpen={isSkillsOpen}
+        onClose={() => setIsSkillsOpen(false)}
+        data={data.skills}
+        onSave={(newData) => {
+          onUpdate('skills', newData);
+          setIsSkillsOpen(false);
+        }}
+        isRTL={isRTL}
+        template="classic"
+      />
+
+      <EducationEdit
+        isOpen={isEducationOpen}
+        onClose={() => setIsEducationOpen(false)}
+        data={data.education?.degrees || []}
+        onSave={(newData) => {
+          onUpdate('education', { degrees: newData });
+          setIsEducationOpen(false);
+        }}
+        isRTL={isRTL}
+        template="classic"
+      />
+
+      <MilitaryEdit
+        isOpen={isMilitaryOpen}
+        onClose={() => setIsMilitaryOpen(false)}
+        data={data.military || null}
+        onSave={(newData) => {
+          onUpdate('military', newData);
+          setIsMilitaryOpen(false);
+        }}
+        isRTL={isRTL}
+        template="classic"
+      />
+
+      <ExperienceEdit
+        isOpen={isExperienceOpen}
+        onClose={() => setIsExperienceOpen(false)}
+        data={data.experience}
+        onSave={(newData) => {
+          onUpdate('experience', newData);
+          setIsExperienceOpen(false);
+        }}
+        isRTL={isRTL}
+        template="classic"
+      />
+
+      <ProfessionalSummaryEdit
+        isOpen={isProfessionalSummaryOpen}
+        onClose={() => setIsProfessionalSummaryOpen(false)}
+        data={data.personalInfo.summary || ''}
+        onSave={(newData) => {
+          onUpdate('personalInfo', { ...data.personalInfo, summary: newData });
+          setIsProfessionalSummaryOpen(false);
+        }}
+        isRTL={isRTL}
+        template="classic"
+        cvData={data}
+      />
+
+      <LanguagesEdit
+        isOpen={isLanguagesOpen}
+        onClose={() => setIsLanguagesOpen(false)}
+        data={data.skills.languages || []}
+        onSave={(newData) => {
+          onUpdate('skills', { ...data.skills, languages: newData });
+          setIsLanguagesOpen(false);
+        }}
+        isRTL={isRTL}
+        template="classic"
+      />
     </div>
   );
 };

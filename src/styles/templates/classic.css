@@ -1,173 +1,284 @@
-/* מערכת בינמית להתאמת גדלים */
+/* משתני בסיס */
 :root {
   --scale-factor: 1;
   --base-font-size: 16px;
   --base-spacing: 0.1rem;
   --a4-width: 210mm;
   --a4-height: 297mm;
-  --header-height: 160px;
-  --content-height: calc(var(--a4-height) - var(--header-height));
+  --header-height: 120px;
+  --footer-height: 30px;
+  --content-height: calc(var(--a4-height) - var(--header-height) - var(--footer-height));
+  --content-margin-right: 4rem;
+  --content-margin-left: 6rem;
   --font-family: 'Assistant', sans-serif;
-}
-
-.classic-template {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: var(--a4-width);
-  height: var(--a4-height);
-  margin: 0 auto;
-  background: #F3F4F1;
-  font-family: var(--font-family);
-  overflow: hidden;
-  transform-origin: top center;
-  transform: scale(var(--scale-factor));
   
-  /* חישוב דינמי של גדלי פונט */
-  --adjusted-font-size: calc(var(--base-font-size) * var(--scale-factor));
-  --adjusted-spacing: calc(var(--base-spacing) * var(--scale-factor));
+  /* צבעים */
+  --color-primary: #1F1B2F;
+  --color-background: #F3F4F1;
+  --color-text-light: #F3F4F1;
+  
+  /* גדלים קבועים */
+  --header-name-size: 2.5rem;    /* קבוע */
+  --header-contact-size: 0.9rem; /* קבוע */
+  
+  /* גדלי פונט דינמיים לתוכן */
+  --min-font-size: 12px;
+  --max-font-size: 16px;
+  --section-title-ratio: 1.2;    /* כותרות סקציה יהיו 1.2 מגודל הבסיס */
 }
 
+/* מבנה בסיסי */
+.classic-template {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: var(--a4-width) !important;
+  height: var(--a4-height) !important;
+  margin: 0 auto !important;
+  background: var(--color-background) !important;
+  font-family: var(--font-family) !important;
+  overflow: hidden !important;
+  transform-origin: top center !important;
+  transform: scale(var(--scale-factor)) !important;
+}
+
+/* הדר */
 .classic-header {
-  height: var(--header-height);
-  background: #1F1B2F;
-  position: relative;
-  width: 100%;
-  padding: 0.5rem 3rem 1rem 3rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.2rem;
-  overflow: hidden;
-  border-bottom-left-radius: 45px;
+  height: var(--header-height) !important;
+  min-height: var(--header-height) !important;
+  max-height: var(--header-height) !important;
+  background: var(--color-primary) !important;
+  position: relative !important;
+  width: 100% !important;
+  padding: 2rem 3.5rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  border-bottom-left-radius: 150px !important;
+  flex-shrink: 0 !important;
 }
 
-.classic-header::after {
-  display: none;
-}
-
-.classic-header::before {
-  display: none;
-}
-
-.classic-template.ltr .classic-header {
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 45px;
-}
-
+/* שם מלא */
 .header-name {
-  color: #F3F4F1;
-  margin: 0;
+  color: var(--color-text-light);
   display: flex;
+  align-items: center;
   gap: 0.5rem;
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
-  margin-right: 2rem;
+  margin: 0 2rem 0.3rem 0;
   line-height: 1;
-  font-family: var(--font-family);
-  letter-spacing: -0.02em;
-  margin-bottom: 0.3rem;
 }
 
-.header-name-first {
-  font-weight: 400;
-  font-family: var(--font-family);
-}
-
+.header-name-first,
 .header-name-last {
-  font-weight: 200;
-  font-family: var(--font-family);
+  font-size: var(--header-name-size) !important;
 }
 
 .header-contact {
-  color: #F3F4F1;
-  font-weight: 200;
+  color: var(--color-text-light);
   display: flex;
-  gap: 0.5rem;
   align-items: center;
-  font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+  gap: 0.3rem;
   margin-right: 2rem;
-  opacity: 0.85;
-  margin-top: 0;
-  font-family: var(--font-family);
-  letter-spacing: 0.02em;
-}
-
-.contact-separator {
-  content: '|';
-  opacity: 0.6;
+  font-size: var(--header-contact-size) !important;
   font-weight: 200;
-  margin: 0 0.2rem;
+  opacity: 1;
 }
 
-.classic-content {
-  flex: 1;
-  padding: 2rem 3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
-  overflow: visible;
-  margin-bottom: 1rem;
-  font-family: var(--font-family);
+/* מפריד בין פרטי הקשר */
+.contact-separator {
+  display: inline-block;
+  content: '|';
+  color: var(--color-text-light);
+  opacity: 0.4;
+  font-weight: 200;
+  padding: 0 0.2rem;
 }
 
-.section-title {
-  font-size: 1.25rem !important;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #1F1B2F;
-  padding-right: 1.5rem !important;
-  position: relative;
-}
-
-.section-title::after {
-  content: '';
+/* אייקון עיצוב */
+.header-corner-decoration {
   position: absolute;
-  right: 1rem !important;
-  bottom: -4px;
-  width: 8rem !important;
-  height: 1px;
-  background-color: #000000;
-  border-radius: 0;
-  border: none;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 1.5rem;
+  width: 80px;
+  height: 80px;
 }
 
-/* מסיר הגדרות מתנגשות */
-.skills-section .section-title::after {
-  right: 1rem !important;
-  width: 10rem !important;
-  border-radius: 0;
-  border: none;
+/* תמיכה ב-RTL/LTR */
+[dir="rtl"] .classic-header {
+  border-bottom-left-radius: 150px;
+  border-bottom-right-radius: 0;
 }
 
-.experience-section .section-title::after {
-  right: 1rem !important;
-  width: 10rem !important;
-  border-radius: 0;
-  border: none;
+[dir="ltr"] .classic-header {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 150px;
 }
 
-.education-section .section-title::after {
-  right: 1rem !important;
-  width: 10rem !important;
-  border-radius: 0;
-  border: none;
+[dir="ltr"] .header-corner-decoration {
+  right: auto;
+  left: 1.5rem;
 }
 
-.military-section .section-title::after {
-  right: 1rem !important;
-  width: 10rem !important;
-  border-radius: 0;
-  border: none;
+/* התאמה למסכים קטנים */
+@media screen and (max-width: 768px) {
+  :root {
+    --scale-factor: clamp(0.7, 0.9vw, 0.9);
+  }
 }
 
-.languages-section .section-title::after {
-  right: 1em !important;
-  width: 10rem !important;
-  border-radius: 0;
-  border: none;
+/* התאמה להדפסה */
+@media print {
+  :root {
+    --scale-factor: 1;
+  }
+  
+  .classic-template {
+    transform: none !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
 }
 
+/* מבנה התוכן */
+.classic-content {
+  flex: 1 !important;
+  padding: 3rem 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+  width: 100% !important;
+  overflow: visible !important;
+  margin-bottom: 2rem !important;
+  font-family: var(--font-family) !important;
+}
+
+/* סקציות וכותרות */
+.summary-section,
+.experience-section,
+.education-section,
+.military-section,
+.skills-section,
+.languages-section,
+.section-title,
+h1.section-title,
+h2.section-title,
+.skills-section .section-title,
+.languages-section .section-title,
+h2.section-title.relative.flex.items-center {
+  margin: 0 !important;
+  padding: 0 !important;
+  position: static !important;
+  transform: none !important;
+  width: auto !important;
+  display: block !important;
+  flex: none !important;
+  gap: 0 !important;
+  align-items: unset !important;
+  justify-content: unset !important;
+  float: none !important;
+  clear: both !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  word-wrap: normal !important;
+  word-break: normal !important;
+  border: none !important;
+  background: none !important;
+}
+
+/* הגדרות ספציפיות לכותרות */
+.section-title,
+h1.section-title,
+h2.section-title,
+.skills-section .section-title,
+.languages-section .section-title,
+h2.section-title.relative.flex.items-center {
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  font-size: calc(var(--base-font-size) * var(--section-title-ratio)) !important;
+  font-weight: 500 !important;
+  margin: 0 var(--content-margin-right) 1rem var(--content-margin-left) !important;
+  font-family: var(--font-family) !important;
+  color: var(--color-primary) !important;
+  line-height: 1.5 !important;
+  text-decoration: none !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  width: calc(100% - var(--content-margin-right) - var(--content-margin-left)) !important;
+}
+
+/* מניעת קווים */
+.section-title::after,
+.section-title::before,
+h1.section-title::after,
+h1.section-title::before,
+h2.section-title::after,
+h2.section-title::before {
+  display: none !important;
+  content: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: none !important;
+  border: none !important;
+  position: static !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* מיכלי תוכן */
+.experience-items,
+.education-items,
+.military-content,
+.skills-items,
+.languages-items,
+.summary-content {
+  margin: 0 var(--content-margin-right) 0 var(--content-margin-left) !important;
+  padding: 0 !important;
+  width: calc(100% - var(--content-margin-right) - var(--content-margin-left)) !important;
+  max-width: calc(100% - var(--content-margin-right) - var(--content-margin-left)) !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  hyphens: auto !important;
+}
+
+/* מניעת קווים אופקיים */
+.section,
+.section-title,
+.experience-section,
+.education-section,
+.skills-section,
+.languages-section,
+.military-section,
+.summary-section {
+  border: none !important;
+  border-bottom: none !important;
+  text-decoration: none !important;
+  background: none !important;
+}
+
+.section::after,
+.section::before,
+.section-title::after,
+.section-title::before {
+  display: none !important;
+  content: none !important;
+}
+
+/* רשימות כישורים וניסיון */
 .skills-list, .experience-list {
   list-style: none;
   padding: 0;
@@ -185,1085 +296,628 @@
   display: inline-block;
   width: 6px;
   height: 6px;
-  background-color: transparent;
-  border-radius: 0;
+  background-color: #4B4553;
+  border-radius: 50%;
   margin-right: 0.5rem;
   opacity: 0.5;
 }
 
+/* תקציר מקצועי */
+.summary-section {
+  min-height: 0;
+  margin: 1rem 0 0.8rem 0;
+}
+
+.summary-content {
+  font-weight: 500;
+  font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+  line-height: 1.5;
+  color: #333;
+  font-family: var(--font-family);
+  text-align: justify !important;
+  margin: 0 4rem 0 6rem !important;
+  padding: 0 !important;
+  width: auto !important;
+  text-align-last: right !important;
+  hyphens: auto !important;
+}
+
+/* ניסיון תעסוקתי */
 .experience-section {
   min-height: 0;
   overflow: hidden;
-  margin-left: 0;
 }
 
-.experience-items {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding-right: 1.5rem;
-}
-
-.experience-item {
+/* השכלה */
+.education-section {
+  min-height: 0;
   margin-bottom: 0.5rem;
 }
 
-.experience-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.3rem;
-  gap: 0.5rem;
+/* שירות צבאי */
+.military-section {
+  min-height: 0;
+  margin: 0.4rem 0;
 }
 
-.experience-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.1rem;
-}
-
-.experience-title {
-  font-weight: 500;
-  font-size: 1rem !important;
-  font-family: var(--font-family);
-}
-
-.experience-company {
-  font-weight: 300;
-  font-size: 0.9rem;
-  font-family: var(--font-family);
-}
-
+/* מפריד כללי */
 .experience-separator {
   opacity: 0.4;
   font-weight: 200;
   margin: 0 0.1rem;
 }
 
-.experience-date {
-  font-size: 0.85rem;
-  color: #666;
-  white-space: nowrap;
-  min-width: fit-content;
-  margin-right: 0;
-  margin-left: 2rem;
-  direction: ltr;
-  text-align: right;
+/* סגנון אחיד לפריטי ניסיון, השכלה ושירות צבאי */
+.experience-item,
+.education-item,
+.military-item {
+  margin: 0 0 1.5rem 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
 }
 
-.experience-description {
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: #333;
-  margin-top: 0.5rem;
-}
-
-.experience-description li {
-  margin-bottom: 0.8rem;
-  line-height: 1.5;
-}
-
-.experience-description li::before {
-  content: "";
-  position: absolute;
-  right: -1.2rem;
-  opacity: 0.7;
-}
-
-.experience-description li:not(:last-child)::after {
-  content: '|';
-  margin: 0 0.5rem;
-  color: #666;
-  opacity: 0.4;
-}
-
-.rtl {
-  direction: rtl;
-}
-
-.ltr {
-  direction: ltr;
-}
-
-.education-section {
-  min-height: 0;
-  margin-left: 0;
-  margin-bottom: 0.5rem;
-}
-
-.education-items {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding-right: 1.5rem;
-}
-
-.education-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  margin-bottom: 0.2rem;
-}
-
-.education-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.3rem;
-  gap: 0.5rem;
-}
-
-.education-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.1rem;
-}
-
-.education-degree {
-  font-weight: 500;
-  font-size: 1rem !important;
-  font-family: var(--font-family);
-}
-
-.education-institution {
-  font-weight: 300;
-  font-size: 0.9rem;
-  font-family: var(--font-family);
-}
-
-.education-date {
-  font-weight: 400;
-  font-size: 0.85rem;
-  color: #666;
-  margin-right: auto;
-  padding-right: 0.5rem;
-}
-
-.education-specialization {
-  font-size: 0.9rem;
-  color: #333;
-  margin-top: 0.2rem;
-  padding-right: 1.5rem;
-}
-
-.classic-footer {
-  position: relative;
-  width: 100%;
-  height: 45px;
-  margin-top: auto;
-  overflow: hidden;
-  border-top-right-radius: 45px;
-  background: #1F1B2F;
-}
-
-.classic-footer::after {
-display: none;
-}
-
-.language-tag {
-  background-color: #4B4553;
-  font-weight: 300;
-  color: #F3F4F1;
-  padding: 0.2rem 0.5rem;
-  border-radius: 3px;
-  font-size: var(--font-small);
-  margin-right: 0.5rem;
-  display: inline-block;
-  font-family: var(--font-family);
-}
-
-.personal-info {
-  font-size: 0.9rem;
-  line-height: 1.6;
-}
-
-.personal-info p {
-  margin: 0.3rem 0;
-}
-
-/* התאמה למסכים קטנים */
-@media screen and (max-width: 768px) {
-  :root {
-    --scale-factor: clamp(0.7, 0.9vw, 0.9);
-  }
-  
-  .classic-template {
-    transform-origin: top center;
-  }
-}
-
-/* התאמה להדפסה */
-@media print {
-  :root {
-    --scale-factor: 1;
-  }
-  
-  .classic-template {
-    transform: none !important;
-    width: 210mm !important;
-    height: 297mm !important;
-    overflow: hidden !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-  
-  #cv-content {
-    width: 210mm;
-    height: 297mm;
-    margin: 0;
-    padding: 0;
-  }
-  
-  .classic-header,
-  .classic-footer {
-    width: 100%;
-    margin-left: 0;
-  }
-}
-
-/* תקציר מקצועי */
-.summary-section {
-  margin: 1rem 0;
-  padding: 0 1.5rem;
-  text-align: right;
-}
-
-.summary-content {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: #333;
-  font-weight: 300;
-  margin: 0;
-  padding: 0;
-  text-align: justify;
-  max-width: 100%;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-
-/* כישורים */
-.skills-section,
-.languages-section {
-  margin: 0.4rem 0;
-}
-
-.skills-section .section-title,
-.languages-section .section-title {
-  padding-right: 1.5rem !important;
-}
-
-.skills-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0 1.5rem;
-}
-
-.skill-item {
-  display: inline;
-}
-
-.skill-item:not(:last-child)::after {
-  content: '|';
-  margin: 0 0.5rem;
-  color: #666;
-}
-
-.skill-name {
-  font-weight: 600;
-  color: #1F1B2F;
-}
-
-.skill-level {
-  font-weight: 300;
-  color: #666;
-  margin-right: 0.2rem;
-}
-
-.skill-separator {
-  color: #666;
-  opacity: 0.4;
-  font-weight: 200;
-  margin: 0 0.8rem;
-  display: inline;
-}
-
-/* מסיר את כל ההגדרות המתנגשות */
-.skills-list,
-.skills-list li,
-.skill-item::before,
-.skill-item::after,
-.skill-item:not(:last-child)::after {
-  display: none !important;
-  content: none !important;
-}
-
-/* רווחים בחלק של השפות */
-.languages-section {
-  margin: 1rem 0;
+/* סגנון אחיד לכל התכנים */
+.experience-items,
+.education-items,
+.military-content,
+.military-items {
+  margin: 0 4rem 0 6rem !important;
+  padding: 0 !important;
+  width: auto !important;
   display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
 }
 
-.languages-items {
-  display: flex !important;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0 1.5rem;
-  margin-top: 0.5rem;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-.language-item {
-  display: inline-flex !important;
-  align-items: center;
-  margin: 0.2rem;
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-.language-name {
-  font-weight: 600;
-  color: #1F1B2F;
-}
-
-.language-level {
-  font-weight: 300;
-  color: #666;
-}
-
-.language-separator {
-  color: #666;
-  opacity: 0.4;
-  font-weight: 200;
-  margin: 0 0.5rem;
-  display: inline;
-}
-
-/* עיצוב התיאורים */
-.experience-description,
-.military-description {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  margin-bottom: 0.2rem;
-  padding-right: 2rem;
-  padding-left: 1.2rem;
-  text-align: justify;
-  white-space: normal;
-  word-wrap: break-word;
-}
-
-.experience-description li,
-.military-description li {
-  display: inline;
-  font-weight: 300;
-  color: #333;
-  font-size: 0.9rem;
-  line-height: 1.4;
-  position: relative;
-}
-
-/* מפריד רק בין פריטים */
-.experience-description li:not(:last-child)::after,
-.military-description li:not(:last-child)::after {
-  content: '|';
-  display: inline-block;
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.7;
-  font-weight: 300;
-  vertical-align: baseline;
-  position: relative;
-}
-
-/* מסיר את כל המפרידים האחרים */
-.experience-description li::before,
-.military-description li::before,
-.experience-description li:last-child::after,
-.military-description li:last-child::after,
-.experience-description li:first-child::before,
-.military-description li:first-child::before {
-  display: none !important;
-  content: none !important;
-}
-
-/* סגנונות דיאלוג */
-[dir="rtl"] .dialog-content,
-[dir="rtl"] div[role="dialog"] {
-  background: white;
-  border: 2px solid rgba(72, 86, 205, 0.2);
-  border-radius: 1rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  font-family: var(--font-family);
-  padding: 1.5rem;
-  max-width: 500px;
-  width: 90vw;
-  margin: 1rem;
-  text-align: right !important;
-  direction: rtl !important;
-}
-
-[dir="rtl"] .dialog-header,
-[dir="rtl"] div[role="dialog"] > div:first-child {
-  text-align: right !important;
-  width: 100%;
-  margin-bottom: 1.5rem;
-  padding: 0;
-  direction: rtl !important;
-}
-
-[dir="rtl"] .dialog-title,
-[dir="rtl"] div[role="dialog"] h2 {
-  color: #4856CD;
-  font-size: 1.5rem;
-  font-weight: 700;
-  text-align: right !important;
-  width: 100%;
-  padding: 0;
-  direction: rtl !important;
-}
-
-[dir="rtl"] .dialog-form,
-[dir="rtl"] div[role="dialog"] form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  width: 100%;
-  text-align: right !important;
-  direction: rtl !important;
-  padding: 0;
-}
-
-[dir="rtl"] .dialog-label,
-[dir="rtl"] div[role="dialog"] label {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #1F1B2F;
-  margin-bottom: 0.5rem;
-  display: block;
-  text-align: right !important;
-  width: 100%;
-  padding: 0;
-  direction: rtl !important;
-}
-
-[dir="rtl"] .dialog-input,
-[dir="rtl"] div[role="dialog"] input,
-[dir="rtl"] div[role="dialog"] textarea {
-  width: 100%;
-  border: 2px solid rgba(72, 86, 205, 0.2);
-  border-radius: 0.5rem;
-  padding: 0.75rem 1rem;
-  font-family: var(--font-family);
-  font-size: 1rem;
-  transition: all 0.2s;
-  background: white;
-  text-align: right !important;
-  direction: rtl !important;
-}
-
-[dir="rtl"] .dialog-button,
-[dir="rtl"] div[role="dialog"] button[type="submit"] {
-  background: #4856CD;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  font-family: var(--font-family);
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 0.5rem;
-  width: 100%;
-  text-align: center;
-  direction: rtl !important;
-}
-
-/* התאמה למובייל */
-@media (max-width: 640px) {
-  .dialog-content {
-    padding: 1rem;
-    margin: 0.5rem;
-  }
-
-  .dialog-title {
-    font-size: 1.25rem;
-  }
-
-  .dialog-label {
-    font-size: 0.875rem;
-  }
-
-  .dialog-input {
-    font-size: 0.875rem;
-    padding: 0.625rem 0.875rem;
-  }
-
-  .dialog-button {
-    padding: 0.75rem 1.25rem;
-    font-size: 0.875rem;
-  }
-}
-
-/* הוספת סגנונות חדשים */
-.military-description {
-  font-size: 0.9em;
-  margin-top: 0.5rem;
-  padding-right: 2rem;
-  list-style-type: disc;
-}
-
-.military-description li {
-  margin-bottom: 0.3rem;
-  line-height: 1.4;
-}
-
-.military-title {
-  font-weight: 600;
-  font-size: 1.5rem;
-}
-
-.military-unit {
-  font-size: 1.1rem;
-}
-
-/* סגנון למפריד */
-.experience-description li strong,
-.military-description li strong {
-  font-weight: 700;
-  color: #1F1B2F;
-  padding: 0 0.25rem;
-}
-
-/* עדכון גודל פונט אחיד לכל התיאורים */
-.experience-description,
-.military-description {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  margin-bottom: 0.2rem;
-  padding-right: 5rem;
-  padding-left: 6rem;
-}
-
-.experience-description li,
-.military-description li {
-  margin-bottom: 0.3rem;
-  position: relative;
-}
-
-/* עיצוב המפריד */
-.experience-description li,
-.military-description li {
-  display: inline;
-}
-
-/* הדגשת המפריד */
-.experience-description li:not(:last-child)::after,
-.military-description li:not(:last-child)::after {
-  content: '|';
-  font-weight: 200;
-  color: #666;
-  padding: 0 0.5rem;
-  opacity: 0.4;
-}
-
-/* המפריד בין התפקיד ליחידה */
-.military-unit::before {
-  content: '|';
-  margin: 0 0.5rem;
-  font-weight: 700;
-  color: #1F1B2F;
-}
-
-/* תאריכים בירות הצבאי */
-.military-date {
-  font-size: 0.85rem;
-  color: #666;
-  white-space: nowrap;
-  min-width: fit-content;
-  margin-right: 0;
-  margin-left: 12rem;
-  direction: ltr;
-  text-align: right;
-  font-weight: 400;
-  position: absolute;
-  left: 0;
-}
-
-[dir="rtl"] .military-date {
-  margin-left: 2rem;
-  margin-right: 10rem;
-  right: auto;
-  left: 4rem;
-}
-
-/* שירות צבאי - התאמה מדויקת לניסיון תעסוקתי */
-.military-section {
-  min-height: 0;
-  margin: 0.4rem 0;
-}
-
-.military-section .section-title {
-  padding-right: 1.5rem !important;
-}
-
-.military-section .section-title::after {
-  right: 1rem !important;
-  width: 10rem !important;
-  border-radius: 0;
-  border: none;
-}
-
-.military-content {
-  padding-right: 1.5rem;
-  padding-left: 2rem;
-}
-
-.military-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.3rem;
-  gap: 0.5rem;
-  padding-right: 1.5rem;
-}
-
-.military-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.1rem;
-}
-
-.military-title {
-  font-weight: 500;
-  font-size: 1rem !important;
-  font-family: var(--font-family);
-  color: #1F1B2F;
-}
-
-.military-unit {
-  font-size: 1rem;
-  font-weight: 300;
-  color: #333;
-}
-
-.military-separator {
-  opacity: 0.4;
-  font-weight: 200;
-  margin: 0 0.5rem;
-  color: #666;
-}
-
-.military-date {
-  font-size: 0.85rem;
-  color: #666;
-  white-space: nowrap;
-  min-width: fit-content;
-  margin-right: 0;
-  margin-left: 8rem;
-  direction: ltr;
-  text-align: right;
-}
-
-.military-description {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  margin-bottom: 0.2rem;
-  padding-right: 3rem;
-  padding-left: 1.2rem;
-}
-
-.military-description li {
-  display: inline;
-  font-weight: 300;
-  color: #333;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-.military-description li:not(:last-child)::after {
-  content: '|';
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.7;
-  font-weight: 300;
-  vertical-align: baseline;
-  position: relative;
-}
-
-/* התאמה ספציפית למצב RTL */
-[dir="rtl"] .military-date {
-  margin-left: 0;
-  margin-right: 2rem;
-}
-
-/* המפריד בין תפקיד לחברה */
-.experience-title::after {
-  content: '|';
-  margin: 0 0.5rem;
-  color: #666;
-  font-weight: 200;
-  opacity: 0.4;
-}
-
-/* מרווח בין החברה לתאריך */
-.experience-company {
-  font-size: 0.85rem;
-  font-weight: 300;
-  color: #666;
-}
-
-/* עדכון סגנון התאריכים */
-.experience-date,
-.education-date,
-.military-date {
-  font-size: 0.85rem;
-  color: #666;
-  white-space: nowrap;
-  min-width: fit-content;
-  margin-right: 0;
-  margin-left: 8rem;
-  direction: ltr;
-  text-align: right;
-}
-
-/* התאמה ספציפית למצב RTL */
-[dir="rtl"] .experience-date,
-[dir="rtl"] .education-date,
-[dir="rtl"] .military-date {
-  margin-left: 0;
-  margin-right: 2rem;
-}
-
-/* התאמת הכותרת של כל חלק */
-.experience-header,
-.education-header,
-.military-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.3rem;
-  gap: 0.5rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
-}
-
-/* התאמת המרווחים בתוכן */
-.experience-title-wrapper,
-.education-title-wrapper,
-.military-title-wrapper {
-  flex: 1;
-  min-width: 0;
-}
-
-/* מסיר את המפריד האוטומטי אחרי התפקיד */
-.experience-title::after,
-.military-title::after {
-  display: none;
-}
-
-/* מעדכן את סנון המפריד בין תפקיד למיקום */
-.experience-separator,
-.military-separator {
-  opacity: 0.4;
-  font-weight: 200;
-  margin: 0 0.5rem;
-  color: #666;
-}
-
-/* עדכון סגנונות השירות הצבאי להיות זהים לניסיון תעסוקתי */
-.military-title {
-  font-weight: 500;
-  font-size: 1rem !important;
-  font-family: var(--font-family);
-}
-
-.military-company {
-  font-weight: 300;
-  font-size: 0.9rem;
-  font-family: var(--font-family);
-}
-
-.military-separator {
-  opacity: 0.4;
-  font-weight: 200;
-  margin: 0 0.5rem;
-  color: #666;
-}
-
-/* מסיר את העיצובים הקודמים שהקטינו את הטקסט */
-.military-unit {
-  font-size: 1rem;
-  font-weight: 300;
-  color: #333;
-}
-
-.military-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.1rem;
-}
-
-/* מסיר את העיצובים המיותרים */
-.military-unit::before {
-  display: none;
-}
-
-.military-title::after {
-  display: none;
-}
-
-/* מוודא שהתיאור זהה לניסיון תעסוקתי */
-.military-description {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  margin-bottom: 0.2rem;
-  padding-right: 1.5rem;
-  padding-left: 1.2rem;
-}
-
-.military-description li {
-  display: inline;
-  font-weight: 300;
-  color: #333;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-/* עדכון מרווחים בין פריטי התיאור */
-.experience-description li:not(:last-child)::after,
-.military-description li:not(:last-child)::after {
-  content: '|';
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.7;
-  font-weight: 300;
-  vertical-align: baseline;
-  position: relative;
-}
-
-/* מסיר את כל המפרידים האחרים */
-.experience-description li::before,
-.military-description li::before,
-.experience-description li::after,
-.military-description li::after,
-.experience-title::before,
-.experience-title::after,
-.military-title::before,
-.military-title::after,
-.military-unit::before,
-.military-unit::after,
-.skill-item::before,
-.skill-item::after {
-  display: none !important;
-  content: none !important;
-}
-
-/* עיצוב אחיד לכל הסקשנים */
-.experience-section,
-.education-section,
-.military-section,
-.skills-section,
-.languages-section {
-  min-height: 0;
-  margin: 0.4rem 0;
-}
-
-.experience-header,
-.education-header,
-.military-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.3rem;
-  gap: 0.5rem;
-  padding-right: 1.5rem;
-}
-
-.experience-title-wrapper,
-.education-title-wrapper,
-.military-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.1rem;
-}
-
+/* סגנון אחיד לכל התכנים */
 .experience-title,
 .education-degree,
-.military-title {
-  font-weight: 500;
-  font-size: 1rem !important;
-  font-family: var(--font-family);
-  color: #1F1B2F;
-}
-
+.military-title,
 .experience-company,
 .education-institution,
-.military-unit {
-  font-size: 0.9rem;
-  font-weight: 300;
-  color: #333;
-}
-
+.military-unit,
 .experience-date,
 .education-date,
-.military-date {
-  font-size: 0.85rem;
-  color: #666;
-  white-space: nowrap;
-  min-width: fit-content;
-  margin-right: 0;
-  margin-left: 12rem;
-  direction: ltr;
-  text-align: right;
-  font-weight: 400;
-}
-
-[dir="rtl"] .experience-date,
-[dir="rtl"] .education-date,
-[dir="rtl"] .military-date {
-  margin-left: 0;
-  margin-right: 12rem;
-}
-
-.experience-description,
-.education-specialization,
-.military-description {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  margin-bottom: 0.2rem;
-  padding-right: 3rem;
-  padding-left: 1.2rem;
-}
-
-.military-header .military-date {
-  font-size: 0.85rem;
-  color: #666;
-  white-space: nowrap;
-  min-width: fit-content;
-  margin-right: 0;
-  margin-left: 12rem;
-  direction: ltr;
-  text-align: right;
-  font-weight: 400;
-}
-
-[dir="rtl"] .military-header .military-date {
-  margin-left: 0;
-  margin-right: 12rem;
-}
-
-/* עיצוב אחיד לכל התוכן */
+.military-date,
 .experience-description,
 .education-specialization,
 .military-description,
-.skills-items,
-.languages-items {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  margin-bottom: 0.2rem;
-  padding-right: 1.5rem;
-  padding-left: 3rem;
-  text-align: right;
-  display: block;
-}
-
-/* עיצוב אחיד לכל הפריטים */
 .experience-description li,
 .military-description li,
-.skill-item,
-.languages-items > div {
-  display: inline;
-  font-weight: 300;
-  color: #333;
-  font-size: 0.9rem;
+.summary-content {
+  font-size: var(--base-font-size) !important;
+  line-height: 1.5 !important;
+  font-family: var(--font-family) !important;
 }
 
-/* עיצוב אחיד למפריד */
-.experience-description li:not(:last-child)::after,
-.military-description li:not(:last-child)::after,
-.skill-item:not(:last-child)::after,
-.languages-items > div:not(:last-child)::after {
-  content: '|';
-  display: inline-block;
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.4;
-  font-weight: 200;
-  vertical-align: baseline;
+/* כותרת ראשית של כל פריט */
+.experience-header,
+.education-header,
+.military-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 0.5rem !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
 }
 
-/* הדגשת שמות הכישורים והשפות */
-.skill-name,
-.languages-items > div > span:first-child {
-  font-weight: 600;
-  color: #1F1B2F;
+/* מיכל כותרת ומיקום */
+.experience-title-wrapper,
+.education-title-wrapper,
+.military-title-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  flex: 1 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
-/* רמת הכישור והשפה */
-.skill-level,
-.languages-items > div > span:last-child {
-  font-weight: 300;
-  color: #666;
-  margin-right: 0.3rem;
+/* כותרת (תפקיד/תואר) */
+.experience-title,
+.education-degree,
+.military-title {
+  font-weight: 600 !important;
+  color: var(--color-primary) !important;
+  display: inline !important;
 }
 
-/* מסיר את כל העיצובים המיותרים */
+/* חברה/מוסד */
+.experience-company,
+.education-institution,
+.military-unit {
+  font-weight: 300 !important;
+  color: var(--color-primary) !important;
+  display: inline !important;
+}
+
+/* מפריד */
+.experience-separator,
+.military-separator {
+  opacity: 0.4 !important;
+  font-weight: 200 !important;
+  margin: 0 0.5rem !important;
+  display: inline !important;
+}
+
+/* תאריכים */
+.experience-date,
+.education-date,
+.military-date {
+  color: #666 !important;
+  white-space: nowrap !important;
+  text-align: left !important;
+  font-weight: 400 !important;
+  min-width: fit-content !important;
+  margin-right: 0 !important;
+  margin-left: 5rem !important;
+}
+
+/* תיאורים */
+.experience-description,
+.education-specialization,
+.military-description {
+  margin: 0.5rem 0 !important;
+  padding-right: 1.5rem !important;
+  color: #333 !important;
+  font-weight: 300 !important;
+  width: 100% !important;
+}
+
+/* Uniform bullet point styling for all sections */
+.experience-description li,
+.education-description li,
+.military-description li {
+  position: relative;
+  padding-right: 12px !important;
+  margin: 0 !important;
+  line-height: 1.5 !important;
+  text-align: justify !important;
+  text-align-last: right !important;
+  hyphens: auto !important;
+}
+
+.experience-description li::before,
+.education-description li::before,
+.military-description li::before {
+  content: "•";
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin-left: 4px !important;
+}
+
+/* Reset any existing padding */
+.experience-description,
+.education-description,
+.military-description {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* תמיכה ב-LTR */
+[dir="ltr"] .experience-date,
+[dir="ltr"] .education-date,
+[dir="ltr"] .military-date {
+  margin-left: 0 !important;
+  margin-right: 5rem !important;
+  text-align: right !important;
+}
+
+[dir="ltr"] .experience-description li::before,
+[dir="ltr"] .military-description li::before {
+  right: auto !important;
+  left: -1.2rem !important;
+}
+
+.military-content {
+  margin: 0 4rem 0 6rem !important;
+  padding: 0 !important;
+  width: auto !important;
+}
+
+/* כישורים ושפות */
+.skills-section,
+.languages-section {
+  min-height: 0;
+  margin: 1rem 0 0.8rem 0;
+}
+
 .skills-items,
 .languages-items {
-  display: block;
-  padding: 0 1.5rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
+  margin: 0 4rem 0 6rem !important;
+  padding: 0 !important;
+  width: auto !important;
+  display: block !important;
+}
+
+.skills-list,
+.languages-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+}
+
+.skills-list li,
+.languages-list li {
+  margin-bottom: 0.5rem !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: clamp(0.85rem, 1.5vw, 0.95rem) !important;
+  line-height: 1.5 !important;
+  font-family: var(--font-family) !important;
+  font-weight: 300 !important;
+}
+
+.language-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  font-size: clamp(0.85rem, 1.5vw, 0.95rem) !important;
+  line-height: 1.5 !important;
+  font-family: var(--font-family) !important;
+  font-weight: 300 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.language-name {
+  font-weight: 400 !important;
+}
+
+.language-separator {
+  opacity: 0.4 !important;
+  font-weight: 200 !important;
+  margin: 0 0.5rem !important;
+  display: inline !important;
+}
+
+.language-level {
+  color: #666 !important;
+  font-weight: 300 !important;
+}
+
+/* תמיכה ב-LTR */
+[dir="ltr"] .skills-items,
+[dir="ltr"] .languages-items {
+  margin: 0 6rem 0 4rem !important;
+}
+
+[dir="ltr"] .skills-list li::before,
+[dir="ltr"] .languages-list li::before {
+  margin-right: 0 !important;
+  margin-left: 0.5rem !important;
+}
+
+.languages-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 4rem 0 6rem !important;
+  font-size: clamp(0.85rem, 1.5vw, 0.95rem) !important;
+  line-height: 1.5;
+}
+
+.language-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.language-name,
+.language-level {
+  color: var(--color-text);
+}
+
+.language-separator {
+  color: var(--color-text);
+  opacity: 0.4;
+  font-weight: 200;
+  margin: 0 0.2rem;
+}
+
+/* RTL Support */
+[dir="rtl"] .languages-list {
   text-align: right;
 }
 
-/* מסיר את כל העיצובים המיותרים */
-.languages-items > div:not(:last-child)::after,
-.languages-items > div::before,
-.languages-items > div::after,
-.language-item::before,
-.language-item::after,
-.language-tag::before,
-.language-tag::after {
-  display: none !important;
-  content: none !important;
+[dir="ltr"] .languages-list {
+  text-align: left;
 }
 
-/* תג בבנייה */
-.under-construction {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+.professional-skill-item {
+  margin-bottom: 0.5rem !important;
+  display: inline !important;
+  align-items: center !important;
+  gap: 0.1rem !important;
+}
+
+.professional-skill-name {
+  font-weight: 600 !important;
+  color: var(--color-primary) !important;
+  margin-right: 0 !important;
+}
+
+.professional-skill-separator {
+  color: var(--color-primary) !important;
+  opacity: 0.4 !important;
+  font-weight: 200 !important;
+  margin: 0 !important;
+  padding: 0 2px !important;
+}
+
+.professional-skill-level {
+  color: #666 !important;
+  font-weight: 300 !important;
+  margin-left: 0 !important;
+}
+
+.languages-items {
+  display: inline !important;
+}
+
+.languages-items > span {
+  display: inline !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.languages-items > span > span {
+  display: inline !important;
+  margin: 0 1px !important;
+  padding: 0 !important;
+}
+
+.languages-items > span > strong {
+  font-weight: 600 !important;
+}
+
+/* RTL Support */
+[dir="rtl"] .languages-items {
+  text-align: right !important;
+}
+
+[dir="ltr"] .languages-items {
+  text-align: left !important;
+  margin: 0 6rem 0 4rem !important;
+}
+
+.professional-skill-item::before {
+  content: "•" !important;
+  color: var(--color-primary) !important;
+  opacity: 0.5 !important;
+  margin-left: 0.5rem !important;
+  font-size: 1.2rem !important;
+}
+
+[dir="ltr"] .professional-skill-item::before {
+  margin-left: 0 !important;
+  margin-right: 0.5rem !important;
+}
+
+/* פוטר */
+.classic-footer {
+  height: var(--footer-height) !important;
+  min-height: var(--footer-height) !important;
+  max-height: var(--footer-height) !important;
+  background: var(--color-primary) !important;
+  position: relative !important;
+  width: 100% !important;
+  border-top-right-radius: 150px !important;
+  margin-top: auto !important;
+  flex-shrink: 0 !important;
+}
+
+[dir="ltr"] .classic-footer {
+  border-top-right-radius: 0 !important;
+  border-top-left-radius: 150px !important;
+}
+
+/* כישורים */
+.skills-items {
+  margin: 0 4rem 0 6rem !important;
+  padding: 0 !important;
+  width: auto !important;
+  display: block !important;
+}
+
+.skills-items .skill-item {
+  display: inline !important;
+  font-size: clamp(0.95rem, 1.5vw, 1.05rem) !important;
+  line-height: 1.5 !important;
+}
+
+.skills-items .skill-item .skill-name {
+  font-weight: 600 !important;
+}
+
+.skills-items .skill-item .skill-level {
+  font-weight: 300 !important;
+  color: #666 !important;
+}
+
+.skills-items .skill-separator {
+  margin: 0 0.2rem !important;
+  opacity: 0.4 !important;
+  font-weight: 200 !important;
+}
+
+[dir="ltr"] .skills-items {
+  margin: 0 6rem 0 4rem !important;
+}
+
+/* עדכון גודל פונט לכל התוכן */
+.experience-title,
+.education-degree,
+.military-title,
+.experience-company,
+.education-institution,
+.military-unit,
+.experience-date,
+.education-date,
+.military-date,
+.experience-description,
+.education-specialization,
+.military-description,
+.experience-description li,
+.military-description li,
+.summary-content,
+.skills-items,
+.languages-items,
+.professional-skill-content,
+.professional-skill-item {
+  font-size: var(--base-font-size) !important;
+}
+
+.skills-items span {
+  text-align: justify !important;
+  text-align-last: right !important;
+  hyphens: auto !important;
+}
+
+[dir="ltr"] .skills-items span,
+[dir="ltr"] .summary-content,
+[dir="ltr"] .experience-description li,
+[dir="ltr"] .education-description li,
+[dir="ltr"] .military-description li {
+  text-align-last: left !important;
+}
+
+/* גבולות התוכן */
+.summary-content,
+.experience-items,
+.education-items,
+.military-content,
+.skills-items,
+.languages-items {
+  margin: 0 var(--content-margin-right) 0 var(--content-margin-left) !important;
+  padding: 0 !important;
+  width: calc(100% - var(--content-margin-right) - var(--content-margin-left)) !important;
+  max-width: calc(100% - var(--content-margin-right) - var(--content-margin-left)) !important;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  hyphens: auto !important;
+}
+
+/* תמיכה ב-LTR */
+[dir="ltr"] .summary-content,
+[dir="ltr"] .experience-items,
+[dir="ltr"] .education-items,
+[dir="ltr"] .military-content,
+[dir="ltr"] .skills-items,
+[dir="ltr"] .languages-items {
+  margin: 0 var(--content-margin-left) 0 var(--content-margin-right) !important;
+}
+
+/* עדכון סגנון כפתורי העריכה */
+.edit-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0.5rem !important;
+  border-radius: 50% !important;
+  background-color: white !important;
+  color: #666 !important;
+  transition: all 0.2s !important;
+  cursor: pointer !important;
+  border: none !important;
+  outline: none !important;
+  margin: 0 !important;
+  width: 32px !important;
+  height: 32px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.edit-button:hover {
+  background-color: #f5f5f5 !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* עדכון כפתור העריכה בהדר */
+.header-name .edit-button {
+  padding: 0.5rem !important;
+  color: var(--color-primary) !important;
+  margin: 0 !important;
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  margin-right: 0.5rem !important;
+  background-color: white !important;
+}
+
+/* עדכון מיקום כפתור העריכה בהדר */
+.header-name-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+  margin-right: 2rem !important;
+}
+
+/* ביטול המיקום המוחלט הקודם */
+.header-name .edit-button {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+[dir="ltr"] .header-name .edit-button {
+  margin-right: 0 !important;
+  margin-left: 0.5rem !important;
+}
+
+[dir="ltr"] .header-name-wrapper {
+  margin-right: 0 !important;
+  margin-left: 2rem !important;
+}
+
+/* מיקום כפתורי עריכה */
+.section-title {
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 9999;
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 1rem !important;
+  flex-direction: row !important;
+  width: calc(100% - var(--content-margin-right) - var(--content-margin-left)) !important;
+  margin-right: var(--content-margin-right) !important;
+  margin-left: var(--content-margin-left) !important;
 }
 
-.under-construction span {
-  text-align: center;
+[dir="ltr"] .section-title {
+  margin-right: var(--content-margin-left) !important;
+  margin-left: var(--content-margin-right) !important;
 }
 
-/* מונע אינטראקציה עם התבנית */
-.pointer-events-none {
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+/* כפתור עריכה בהדר */
+.header-name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-name .edit-button {
+  padding: 0.25rem;
+  color: var(--color-text-light);
+  margin: 0;
+  position: absolute;
+  left: 3.5rem;
+}
+
+[dir="ltr"] .header-name .edit-button {
+  left: auto;
+  right: 3.5rem;
+}
+
+.header-name .edit-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-light);
 }
