@@ -10,7 +10,7 @@ import { TextEditor } from '@/components/TextEditor/page';
 import { ResumeData } from '@/types/resume';
 import { getDictionary } from '@/dictionaries';
 import { Button } from '@/components/theme/ui/button';
-import { Edit2, Eye, Download, FileText, Loader2, Menu, X, Globe, LayoutTemplate, Plus, Briefcase, GraduationCap, Languages, Wrench, Star, CheckCircle2, HelpCircle, Minus } from 'lucide-react';
+import { Edit2, Eye, Download, FileText, Loader2, Menu, X, Globe, LayoutTemplate, Plus, Briefcase, GraduationCap, Languages, Wrench, Star, CheckCircle2, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dictionary } from '@/dictionaries/dictionary';
 import { useAppStore } from '@/lib/store';
@@ -166,52 +166,6 @@ const editingStyles = `
     width: 14px;
     height: 14px;
     color: #4856CD;
-  }
-
-  .font-size-controls {
-    position: absolute;
-    top: -50px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 0.5rem;
-    z-index: 100;
-  }
-
-  .font-size-button {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: #4856CD;
-    color: white;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  .font-size-button:hover {
-    background: #3A45B4;
-    transform: scale(1.05);
-  }
-
-  .font-size-button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-  }
-
-  .font-size-controls::after {
-    content: '';
-    position: absolute;
-    bottom: -8px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 2px;
-    height: 8px;
-    background: #4856CD;
   }
 `;
 
@@ -385,6 +339,22 @@ const pulseAnimation = {
   }
 };
 
+interface EditingState {
+  type: 'personalInfo' | 'professionalSummary' | 'skills' | 'languages' | 'military' | 'experience' | 'education';
+  index?: number;
+}
+
+type EditableField = EditingState['type'];
+
+interface TemplateProps {
+  data: ResumeData;
+  lang: string;
+  isEditing: boolean;
+  onUpdate: (field: EditableField, value: any) => void;
+  onDelete: (section: EditableField, index: number) => void;
+  onEdit: (type: EditableField, index?: number) => void;
+}
+
 export const CVDisplay: React.FC<CVDisplayProps> = ({ 
   sessionId, 
   lang,
@@ -418,12 +388,8 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   const canEdit = selectedPackage === 'advanced' || selectedPackage === 'pro';
   const [isSending, setIsSending] = useState(false);
   const router = useRouter();
-  const [editingItem, setEditingItem] = useState<{
-    type: string;
-    index?: number;
-    data: any;
-    template: keyof typeof templateComponents;
-  } | null>(null);
+  const [editingItem, setEditingItem] = useState<EditingState | null>(null);
+  const [editingIndex, setEditingIndex] = useState<number | undefined>(undefined);
   const [isEditMode, setIsEditMode] = useState(() => {
     const savedEditMode = localStorage.getItem('isEditMode');
     return savedEditMode ? JSON.parse(savedEditMode) : true;
@@ -594,7 +560,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         languages: editedData.skills.languages.reduce((acc, curr) => ({
           ...acc,
           [curr.language]: curr.level
-        }), {}),
+        }), {})
       };
 
       console.log('Formatted Data for Save:', formattedForSave);
@@ -901,7 +867,8 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
       const element = document.getElementById('cv-content');
       if (!element) {
-        throw new Error('CV content element not found');
+        toast.error(dictionary.messages.downloadError);
+        return;
       }
 
       // המתנה לטעינת תמונות - משתמש באותו קוד מ-handlePdfDownload
@@ -1041,86 +1008,62 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     }
   };
 
-  const handleEdit = (type: string, index?: number) => {
-    let itemData;
-    
-    switch (type) {
-      case 'personalInfo':
-        itemData = cvData?.personalInfo;
-        break;
-      case 'experience':
-        itemData = cvData?.experience;
-        break;
-      case 'education':
-        itemData = cvData?.education?.degrees[index!];
-        break;
-      case 'skills':
-        itemData = cvData?.skills;
-        break;
-      case 'languages':
-        itemData = cvData?.skills.languages;
-        break;
-      case 'summary':
-        itemData = cvData?.personalInfo.summary;
-        break;
-      case 'military':
-        itemData = cvData?.military || {
-          role: '',
-          unit: '',
-          startDate: '',
-          endDate: '',
-          description: []
-        };
-        break;
-      default:
-        return;
-    }
-
-    setEditingItem({ 
-      type, 
-      index: type === 'military' ? undefined : index,
-      data: itemData,
-      template: selectedTemplate 
-    });
+  const handleEdit = (type: EditableField, index?: number) => {
+    if (!cvData) return;
+    setEditingItem({ type, index });
   };
 
-  const handleEditSave = (type: string, index: number | undefined, newData: any) => {
-    const newCvData = { ...cvData! };
+  const handleClose = () => {
+    setEditingItem(null);
+  };
+
+  const handleEditSave = (type: EditableField, index: number | undefined, newData: any) => {
+    let updatedData = { ...cvData! };
     
     switch (type) {
       case 'personalInfo':
-        newCvData.personalInfo = newData;
+        updatedData.personalInfo = {
+          ...updatedData.personalInfo,
+          ...newData
+        };
+        break;
+      case 'professionalSummary':
+        updatedData.personalInfo = {
+          ...updatedData.personalInfo,
+          summary: newData
+        };
         break;
       case 'experience':
-        newCvData.experience = newData;
+        if (index !== undefined) {
+          const newExperience = [...updatedData.experience];
+          newExperience[index] = newData;
+          updatedData.experience = newExperience;
+        } else {
+          updatedData.experience = newData;
+        }
         break;
       case 'education':
         if (index !== undefined) {
-          if (!newCvData.education) newCvData.education = { degrees: [] };
-          newCvData.education.degrees[index] = newData;
+          const newEducation = { ...updatedData.education };
+          newEducation.degrees[index] = newData;
+          updatedData.education = newEducation;
+        } else {
+          updatedData.education.degrees = newData;
         }
         break;
       case 'skills':
-        newCvData.skills = newData;
+        updatedData.skills = newData;
         break;
       case 'languages':
-        newCvData.skills.languages = newData;
-        break;
-      case 'summary':
-        newCvData.personalInfo.summary = newData;
+        updatedData.skills.languages = newData;
         break;
       case 'military':
-        newCvData.military = {
-          role: newData.role || '',
-          unit: newData.unit || '',
-          startDate: newData.startDate || '',
-          endDate: newData.endDate || '',
-          description: newData.description || []
-        };
+        updatedData.military = newData;
         break;
     }
-    
-    handleSave(newCvData);
+
+    setCvData(updatedData);
+    handleSave(updatedData);
     setEditingItem(null);
   };
 
@@ -1266,11 +1209,11 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   };
 
   const renderEditButton = () => {
+    // הסרת הבדיקה שחוסמת את כפתור העריכה בתבנית הקלאסית
     return (
-      <div className="flex items-center gap-2 relative">
+      <div className="flex items-center gap-2">
         <motion.div
           animate={highlightedElement === 'edit' ? pulseAnimation : {}}
-          className="relative"
         >
           <Button
             onClick={() => setIsEditing(!isEditing)}
@@ -1284,35 +1227,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           >
             {isEditing ? <X className="h-6 w-6" /> : <Edit2 className="h-6 w-6" />}
           </Button>
-
-          {/* כפתורי שינוי גודל פונט */}
-          {isEditing && (
-            <div className="font-size-controls absolute top-[-50px] left-1/2 transform -translate-x-1/2">
-              <div className="text-center mb-2 text-sm text-gray-600">
-                {lang === 'he' ? 'שינוי גודל פונט' : 'Font Size'}
-              </div>
-              <div className="flex gap-2 justify-center">
-                <button 
-                  className="font-size-button"
-                  onClick={() => handleFontSizeChange('decrease')}
-                  aria-label={lang === 'he' ? 'הקטן גודל פונט' : 'Decrease font size'}
-                >
-                  <span className="sr-only">{lang === 'he' ? 'הקטן גודל פונט' : 'Decrease font size'}</span>
-                  <Minus className="h-4 w-4" />
-                </button>
-                <button 
-                  className="font-size-button"
-                  onClick={() => handleFontSizeChange('increase')}
-                  aria-label={lang === 'he' ? 'הגדל גודל פונט' : 'Increase font size'}
-                >
-                  <span className="sr-only">{lang === 'he' ? 'הגדל גודל פונט' : 'Increase font size'}</span>
-                  <Plus className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          )}
         </motion.div>
-
         <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
           {isEditing 
             ? (lang === 'he' ? 'סיום עריכה' : 'Finish Editing')
@@ -1321,20 +1236,6 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         </span>
       </div>
     );
-  };
-
-  // נוסיף פונקציה לטיפול בשינוי גודל הפונט
-  const handleFontSizeChange = (action: 'increase' | 'decrease') => {
-    const cvContent = document.getElementById('cv-content');
-    if (!cvContent) return;
-
-    const currentSize = parseFloat(getComputedStyle(cvContent).getPropertyValue('--base-font-size'));
-    const newSize = action === 'increase' ? currentSize + 1 : currentSize - 1;
-
-    // הגבלת הגודל המינימלי והמקסימלי
-    if (newSize >= 12 && newSize <= 16) {
-      cvContent.style.setProperty('--base-font-size', `${newSize}px`);
-    }
   };
 
   const handleContinueWithoutDownload = () => {
@@ -1376,7 +1277,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     handleSave(newData);
   };
 
-  const onDelete = (section: string, index: number) => {
+  const onDelete = (section: EditableField, index: number) => {
     const newData = { ...cvData! } as ResumeDataWithIndex;
     if (section.includes('.')) {
       const [mainSection, subSection] = section.split('.');
@@ -1386,6 +1287,116 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       newData[section] = (newData[section] as any[]).filter((_: any, i: number) => i !== index);
     }
     handleSave(newData);
+  };
+
+  const renderEditDialog = () => {
+    if (!cvData || !editingItem) return null;
+
+    switch (editingItem.type) {
+      case 'personalInfo':
+        return (
+          <PersonalInfoEdit
+            isOpen={true}
+            onClose={handleClose}
+            data={cvData.personalInfo}
+            onSave={(data) => handleEditSave('personalInfo', undefined, data)}
+            isRTL={isRTL}
+            template={template}
+          />
+        );
+      case 'professionalSummary':
+        return (
+          <ProfessionalSummaryEdit
+            isOpen={true}
+            onClose={handleClose}
+            data={cvData.personalInfo.summary}
+            onSave={(data) => handleEditSave('professionalSummary', undefined, data)}
+            isRTL={isRTL}
+            template={template}
+            cvData={cvData}
+          />
+        );
+      case 'skills':
+        return (
+          <SkillsEdit
+            isOpen={true}
+            onClose={handleClose}
+            data={cvData.skills}
+            onSave={(data) => handleEditSave('skills', undefined, data)}
+            isRTL={isRTL}
+            template={template}
+          />
+        );
+      case 'languages':
+        return (
+          <LanguagesEdit
+            isOpen={true}
+            onClose={handleClose}
+            data={cvData.skills.languages}
+            onSave={(data) => handleEditSave('languages', undefined, data)}
+            isRTL={isRTL}
+            template={template}
+          />
+        );
+      case 'military':
+        return (
+          <MilitaryEdit
+            isOpen={true}
+            onClose={handleClose}
+            data={cvData.military || {
+              role: '',
+              unit: '',
+              startDate: '',
+              endDate: '',
+              description: []
+            }}
+            onSave={(data) => handleEditSave('military', undefined, data)}
+            isRTL={isRTL}
+            template={template}
+          />
+        );
+      case 'experience':
+        return (
+          <ExperienceEdit
+            isOpen={true}
+            onClose={handleClose}
+            data={cvData.experience}
+            onSave={(data) => handleEditSave('experience', undefined, data)}
+            isRTL={isRTL}
+            template={template}
+          />
+        );
+      case 'education':
+        const educationData = cvData.education.degrees.map(deg => ({
+          position: deg.type,
+          company: deg.institution,
+          startDate: deg.startDate,
+          endDate: deg.endDate,
+          description: [deg.field, deg.specialization].filter((val): val is string => Boolean(val))
+        }));
+        return (
+          <ExperienceEdit
+            isOpen={true}
+            onClose={handleClose}
+            data={educationData}
+            onSave={(data) => {
+              const newDegrees = data.map(exp => ({
+                type: exp.position,
+                institution: exp.company,
+                startDate: exp.startDate,
+                endDate: exp.endDate,
+                field: exp.description[0] || '',
+                specialization: exp.description[1] || ''
+              }));
+              handleEditSave('education', undefined, newDegrees);
+            }}
+            isRTL={isRTL}
+            template={template}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   if (isLoading) {
@@ -1404,7 +1415,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     );
   }
 
-  const TemplateComponent = templateComponents[selectedTemplate];
+  const TemplateComponent = templateComponents[selectedTemplate] as React.FC<TemplateProps>;
 
   const processedData: ResumeData = {
     ...cvData,
@@ -1515,72 +1526,23 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
               <div className="relative mx-auto flex justify-center">
                 <div 
                   id="cv-content" 
-                  className="mx-auto relative overflow-visible"
+                  className="bg-white"
                   style={{
                     width: '210mm',
-                    minHeight: '297mm',
-                    height: 'fit-content',
+                    height: '297mm',
                     margin: 0,
                     padding: 0,
                     position: 'relative',
                     background: 'white',
-                    border: isEditing ? '1px solid rgba(72, 86, 205, 0.1)' : 'none'
+                    boxSizing: 'border-box'
                   }}
                 >
-                  {isEditing && selectedTemplate === 'professional' && (
-                    <>
-                      {/* כפתורי עריכה לכל חלק */}
-                      <div className="section-container">
-                        <div className="section-edit-button">
-                          <button onClick={() => handleEdit('personalInfo', 0)}>
-                            <Edit2 />
-                            <span className="tooltip">
-                              {lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="section-container">
-                        <div className="section-edit-button">
-                          <button onClick={() => handleEdit('experience', 0)}>
-                            <Edit2 />
-                            <span className="tooltip">
-                              {lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Experience'}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="section-container">
-                        <div className="section-edit-button">
-                          <button onClick={() => handleEdit('education', 0)}>
-                            <Edit2 />
-                            <span className="tooltip">
-                              {lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="section-container">
-                        <div className="section-edit-button">
-                          <button onClick={() => handleEdit('skills', 0)}>
-                            <Edit2 />
-                            <span className="tooltip">
-                              {lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    </>
-                  )}
                   <TemplateComponent
                     data={cvData!}
                     lang={cvData?.lang || 'he'}
                     isEditing={isEditing}
                     onUpdate={handleEdit}
-                    onDelete={(section, index) => handleEdit(section, index)}
+                    onDelete={handleEdit}
                     onEdit={handleEdit}
                   />
                 </div>
@@ -1743,75 +1705,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         </Dialog>
 
         {/* פופאפים קיימים */}
-        {editingItem && editingItem.type === 'personalInfo' ? (
-          <PersonalInfoEdit
-            isOpen={true}
-            onClose={() => setEditingItem(null)}
-            data={editingItem.data}
-            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
-            isRTL={isRTL}
-            template={editingItem.template}
-          />
-        ) : editingItem && editingItem.type === 'skills' ? (
-          <SkillsEdit
-            isOpen={true}
-            onClose={() => setEditingItem(null)}
-            data={editingItem.data}
-            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
-            isRTL={isRTL}
-            template={editingItem.template}
-          />
-        ) : editingItem && editingItem.type === 'languages' ? (
-          <LanguagesEdit
-            isOpen={true}
-            onClose={() => setEditingItem(null)}
-            data={editingItem.data}
-            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
-            isRTL={isRTL}
-            template={editingItem.template}
-          />
-        ) : editingItem && editingItem.type === 'military' ? (
-          <MilitaryEdit
-            isOpen={true}
-            onClose={() => setEditingItem(null)}
-            data={editingItem.data}
-            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
-            isRTL={isRTL}
-            template={editingItem.template}
-          />
-        ) : editingItem && editingItem.type === 'summary' ? (
-          <ProfessionalSummaryEdit
-            isOpen={true}
-            onClose={() => setEditingItem(null)}
-            data={editingItem.data as string}
-            onSave={(newData) => handleEditSave('summary', editingItem.index, newData)}
-            isRTL={isRTL}
-            template={editingItem.template}
-            cvData={cvData}
-          />
-        ) : editingItem && editingItem.type === 'experience' ? (
-          <ExperienceEdit
-            isOpen={true}
-            onClose={() => setEditingItem(null)}
-            data={editingItem.data}
-            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
-            isRTL={isRTL}
-            template={editingItem.template}
-          />
-        ) : editingItem && (
-          <EditPopup
-            isOpen={true}
-            onClose={() => setEditingItem(null)}
-            data={editingItem.data}
-            onSave={(newData) => handleEditSave(editingItem.type, editingItem.index, newData)}
-            section={editingItem.type}
-            className={cn(
-              "fixed inset-0 z-50 flex items-center justify-center p-4 md:p-0",
-              isRTL ? "rtl" : "ltr"
-            )}
-            isRTL={isRTL}
-          />
-        )}
+        {renderEditDialog()}
         {isAddingItem && (
           <AddItemPopup
             isOpen={true}

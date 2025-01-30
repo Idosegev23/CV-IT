@@ -53,16 +53,16 @@ export const LanguagesEdit: React.FC<LanguagesEditProps> = ({
 
   useEffect(() => {
     if (isOpen && data) {
-      setLanguages(data);
+      setLanguages(Array.isArray(data) ? data : []);
     }
   }, [data, isOpen]);
 
   const handleAddLanguage = () => {
-    if (!newLanguage.language.trim()) return;
+    if (!newLanguage.language.trim() || !newLanguage.level) return;
 
     setLanguages(prev => [...prev, {
       language: newLanguage.language.trim(),
-      level: newLanguage.level || languageLevels[isRTL ? 'he' : 'en'][2] // ברירת מחדל: רמה גבוהה
+      level: newLanguage.level
     }]);
 
     setNewLanguage({
@@ -83,7 +83,8 @@ export const LanguagesEdit: React.FC<LanguagesEditProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(languages);
+    const updatedLanguages = languages.filter(lang => lang.language.trim() && lang.level);
+    onSave(updatedLanguages);
     onClose();
   };
 

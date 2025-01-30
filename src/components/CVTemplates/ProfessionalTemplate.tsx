@@ -1,20 +1,18 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { ResumeData, Language, Degree, MilitaryService } from '../../types/resume';
+import { ResumeData, Language, Degree, MilitaryService, PersonalInfo, Experience, Skills } from '../../types/resume';
 import '../../styles/templates/professional.css';
 import { Assistant } from 'next/font/google';
-import { EditableText } from '../EditableFields/EditableText';
-import { EditableList } from '../EditableFields/EditableList';
-import { EditButton } from '../EditableFields/EditButton';
-import { EditPopup } from '../EditableFields/EditPopup';
-import { AddItemPopup } from '../EditableFields/AddItemPopup';
 import { formatDescription, formatDate } from './utils';
 import { Edit2, Plus } from 'lucide-react';
 import { PersonalInfoEdit } from '../EditableFields/PersonalInfoEdit';
-import { cn } from '../../lib/utils';
 import { SkillsEdit } from '../EditableFields/SkillsEdit';
 import { EducationEdit } from '../EditableFields/EducationEdit';
 import { MilitaryEdit } from '../EditableFields/MilitaryEdit';
+import { ExperienceEdit } from '../EditableFields/ExperienceEdit';
+import { ProfessionalSummaryEdit } from '../EditableFields/ProfessionalSummaryEdit';
+import { LanguagesEdit } from '../EditableFields/LanguagesEdit';
+import { cn } from '@/lib/utils';
 
 interface ProfessionalTemplateProps {
   data: ResumeData;
@@ -344,11 +342,32 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
     setIsAddingItem(null);
   };
 
-  const handlePersonalInfoSave = (newData: any) => {
-    onUpdate('personalInfo', {
-      ...personalInfo,
-      ...newData
-    });
+  const handlePersonalInfoSave = (newData: PersonalInfo) => {
+    onUpdate('personalInfo', newData);
+  };
+
+  const handleExperienceSave = (newData: Experience[]) => {
+    onUpdate('experience', newData);
+  };
+
+  const handleEducationSave = (newData: Degree[]) => {
+    onUpdate('education', { ...education, degrees: newData });
+  };
+
+  const handleMilitaryServiceSave = (newData: MilitaryService) => {
+    onUpdate('military', newData);
+  };
+
+  const handleSkillsSave = (newData: Skills) => {
+    onUpdate('skills', newData);
+  };
+
+  const handleLanguagesSave = (newData: Language[]) => {
+    onUpdate('skills', { ...skills, languages: newData });
+  };
+
+  const handleSummarySave = (newData: string) => {
+    onUpdate('personalInfo', { ...personalInfo, summary: newData });
   };
 
   // Convert old education format to new format
@@ -361,14 +380,6 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
       endDate: degree.endDate || (degree.years ? degree.years.split('-')[1].trim() : ''),
       specialization: degree.specialization
     }));
-  };
-
-  const handleEducationSave = (newDegrees: Degree[]) => {
-    onUpdate('education', { ...education, degrees: newDegrees });
-  };
-
-  const handleMilitaryServiceSave = (newData: MilitaryService) => {
-    onUpdate('military', newData);
   };
 
   return (
@@ -496,7 +507,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
         <section className="professional-summary relative">
           {isEditing && (
             <button 
-              onClick={() => onEdit('summary', 0)}
+              onClick={() => onEdit('professionalSummary', 0)}
               className="edit-button"
               title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
             >
@@ -654,45 +665,108 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
         )}
       </div>
       
-      {editingSection && (
-        <EditPopup
+      {editingSection && editingSection.type === 'personalInfo' ? (
+        <PersonalInfoEdit
           isOpen={true}
           onClose={() => setEditingSection(null)}
-          data={editingSection.data}
-          onSave={handleSave}
-          section={editingSection.type}
+          data={{
+            name: personalInfo.name,
+            title: personalInfo.title,
+            email: personalInfo.email,
+            phone: personalInfo.phone,
+            address: personalInfo.address,
+            linkedin: personalInfo.linkedin,
+            summary: personalInfo.summary
+          }}
+          onSave={handlePersonalInfoSave}
+          isRTL={isRTL}
+          template="professional"
         />
-      )}
-      {isAddingItem && (
-        <AddItemPopup
+      ) : editingSection && editingSection.type === 'professionalSummary' ? (
+        <ProfessionalSummaryEdit
           isOpen={true}
-          onClose={() => setIsAddingItem(null)}
-          onAdd={handleAddItem}
-          section={isAddingItem.type}
+          onClose={() => setEditingSection(null)}
+          data={personalInfo.summary}
+          onSave={handleSummarySave}
+          isRTL={isRTL}
+          template="professional"
+          cvData={data}
         />
-      )}
-
-      {isEducationEditOpen && (
+      ) : editingSection && editingSection.type === 'skills' ? (
+        <SkillsEdit
+          isOpen={true}
+          onClose={() => setEditingSection(null)}
+          data={skills}
+          onSave={handleSkillsSave}
+          isRTL={isRTL}
+          template="professional"
+        />
+      ) : editingSection && editingSection.type === 'education' ? (
         <EducationEdit
-          isOpen={isEducationEditOpen}
-          onClose={() => setIsEducationEditOpen(false)}
-          data={convertEducationData(education?.degrees || [])}
+          isOpen={true}
+          onClose={() => setEditingSection(null)}
+          data={education?.degrees || []}
           onSave={handleEducationSave}
           isRTL={isRTL}
-          template={data.template}
+          template="professional"
         />
-      )}
-
-      {isMilitaryEditOpen && (
+      ) : editingSection && editingSection.type === 'military' ? (
         <MilitaryEdit
-          isOpen={isMilitaryEditOpen}
-          onClose={() => setIsMilitaryEditOpen(false)}
+          isOpen={true}
+          onClose={() => setEditingSection(null)}
           data={military || null}
           onSave={handleMilitaryServiceSave}
           isRTL={isRTL}
-          template={data.template}
+          template="professional"
         />
-      )}
+      ) : editingSection && editingSection.type === 'experience' ? (
+        <ExperienceEdit
+          isOpen={true}
+          onClose={() => setEditingSection(null)}
+          data={experience || []}
+          onSave={handleExperienceSave}
+          isRTL={isRTL}
+          template="professional"
+        />
+      ) : editingSection && editingSection.type === 'languages' ? (
+        <LanguagesEdit
+          isOpen={true}
+          onClose={() => setEditingSection(null)}
+          data={skills.languages || []}
+          onSave={handleLanguagesSave}
+          isRTL={isRTL}
+          template="professional"
+        />
+      ) : null}
+      
+      {isAddingItem && isAddingItem.type === 'experience' ? (
+        <ExperienceEdit
+          isOpen={true}
+          onClose={() => setIsAddingItem(null)}
+          data={[]}
+          onSave={handleExperienceSave}
+          isRTL={isRTL}
+          template="professional"
+        />
+      ) : isAddingItem && isAddingItem.type === 'education' ? (
+        <EducationEdit
+          isOpen={true}
+          onClose={() => setIsAddingItem(null)}
+          data={[]}
+          onSave={handleEducationSave}
+          isRTL={isRTL}
+          template="professional"
+        />
+      ) : isAddingItem && isAddingItem.type === 'language' ? (
+        <LanguagesEdit
+          isOpen={true}
+          onClose={() => setIsAddingItem(null)}
+          data={[]}
+          onSave={handleLanguagesSave}
+          isRTL={isRTL}
+          template="professional"
+        />
+      ) : null}
     </div>
   );
 };

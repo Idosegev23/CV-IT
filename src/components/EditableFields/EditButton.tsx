@@ -1,34 +1,29 @@
 import React from 'react';
-import { Pencil } from 'lucide-react';
-import { Button } from '@/components/theme/ui/button';
+import { Edit2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface EditButtonProps {
   onClick: () => void;
-  title?: string;
-  className?: string;
-  variant?: 'dark' | 'light';
+  title: string;
+  variant?: 'light' | 'dark';
 }
 
-export const EditButton: React.FC<EditButtonProps> = ({
-  onClick,
-  title,
-  className = '',
-  variant = 'dark'
-}) => {
+export const EditButton: React.FC<EditButtonProps> = ({ onClick, title, variant = 'light' }) => {
   return (
-    <Button
+    <button
       onClick={onClick}
       className={cn(
-        'p-0 h-auto hover:opacity-70 transition-opacity',
-        variant === 'dark' ? 'text-gray-900' : 'text-white',
-        className
+        "edit-button",
+        "absolute right-full ml-2",
+        "flex items-center justify-center",
+        "rounded-full",
+        "transition-all duration-200",
+        "hover:bg-gray-100",
+        variant === 'light' ? 'text-white' : 'text-gray-600'
       )}
       title={title}
-      variant="ghost"
-      size="icon"
     >
-      <Pencil className="h-3.5 w-3.5" />
-    </Button>
+      <Edit2 className="w-4 h-4" />
+    </button>
   );
 }; 

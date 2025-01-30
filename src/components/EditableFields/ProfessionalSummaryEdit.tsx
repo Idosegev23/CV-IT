@@ -38,7 +38,7 @@ export const ProfessionalSummaryEdit: React.FC<ProfessionalSummaryEditProps> = (
 
   useEffect(() => {
     if (isOpen && data) {
-      setSummary(data.slice(0, MAX_CHARS));
+      setSummary(data);
     }
   }, [data, isOpen]);
 

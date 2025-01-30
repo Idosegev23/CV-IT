@@ -4,12 +4,12 @@ export const createSafeData = (data: any): ResumeData => {
   return {
     personalInfo: {
       name: data?.personal_details?.name || '',
-      title: data?.professional_summary?.split('.')[0] || '',
+      title: data?.personal_details?.title || data?.title || (data?.professional_summary?.split('.')[0] || ''),
       email: data?.personal_details?.email || '',
       phone: data?.personal_details?.phone || '',
       address: data?.personal_details?.address || '',
-      linkedin: data?.personalInfo?.linkedin || '',
-      summary: data?.professional_summary || ''
+      linkedin: data?.personalInfo?.linkedin || data?.personal_details?.linkedin || '',
+      summary: data?.personal_details?.summary || data?.professional_summary || ''
     },
     experience: Array.isArray(data?.experience) ? data.experience.map((exp: any) => ({
       position: exp.title || '',
