@@ -1515,14 +1515,11 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
               <div className="relative mx-auto flex justify-center">
                 <div 
                   id="cv-content" 
-                  className={`shadow-2xl rounded-2xl mx-auto relative ${isEditing ? 'overflow-y-visible min-h-full' : 'overflow-hidden'}`}
+                  className="mx-auto relative overflow-visible"
                   style={{
                     width: '210mm',
-                    height: isEditing ? 'fit-content' : '297mm',
-                    minHeight: isEditing ? 'fit-content' : '297mm',
-                    maxHeight: isEditing ? 'none' : '297mm',
-                    transform: isEditing ? 'none' : 'scale(0.99)',
-                    transformOrigin: 'top center',
+                    minHeight: '297mm',
+                    height: 'fit-content',
                     margin: 0,
                     padding: 0,
                     position: 'relative',
