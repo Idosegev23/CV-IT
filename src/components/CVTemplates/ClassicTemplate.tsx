@@ -360,39 +360,60 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
               )}
             </h2>
             <div className="skills-items">
-              {skills.technical?.map((skill, index) => (
-                <span key={`tech-${index}`} className="skill-item relative">
-                  <span className="skill-name">{skill.name}</span>
-                  {" - "}
-                  <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
-                  {index < skills.technical.length - 1 && <span className="skill-separator"> | </span>}
-                </span>
-              ))}
+              {/* כישורים טכניים */}
+              {skills.technical && skills.technical.length > 0 && (
+                <>
+                  <h3 className="skills-subtitle">{t.technicalSkills}</h3>
+                  {skills.technical.map((skill, index) => (
+                    <span key={`tech-${index}`} className="skill-item relative">
+                      <span className="skill-name">{skill.name}</span>
+                      {" - "}
+                      <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
+                      {index < skills.technical.length - 1 && " | "}
+                    </span>
+                  ))}
+                </>
+              )}
+              
+              {/* כישורים רכים */}
+              {skills.soft && skills.soft.length > 0 && (
+                <>
+                  <h3 className="skills-subtitle">{t.softSkills}</h3>
+                  {skills.soft.map((skill, index) => (
+                    <span key={`soft-${index}`} className="skill-item relative">
+                      <span className="skill-name">{skill.name}</span>
+                      {index < skills.soft.length - 1 && " | "}
+                    </span>
+                  ))}
+                </>
+              )}
             </div>
           </section>
         )}
 
         {/* שפות */}
-        {data.skills?.languages && data.skills.languages.length > 0 && (
+        {skills.languages && skills.languages.length > 0 && (
           <section className="languages-section">
             <h2 className="section-title section-container relative">
               {t.languages}
               {isEditing && (
                 <button
-                  onClick={() => onEdit('language', 0)}
+                  onClick={() => onEdit('languages', 0)}
                   className="edit-button"
-                  title={lang === 'he' ? 'הוסף שפה' : 'Add Language'}
+                  title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
               )}
             </h2>
             <div className="languages-items">
-              {data.skills.languages.map((langSkill, index) => (
-                <div key={index} className="language-item relative">
-                  <span className="language-tag">
-                    {langSkill.language} - {langSkill.level}
-                  </span>
+              {skills.languages.map((langItem, index) => (
+                <div key={index} className="language-item">
+                  <div className="language-content">
+                    <span className="language-name">{langItem.language}</span>
+                    <span className="language-separator">|</span>
+                    <span className="language-level">{langItem.level}</span>
+                  </div>
                   {isEditing && (
                     <button
                       onClick={() => onEdit('language', index)}

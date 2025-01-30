@@ -249,7 +249,21 @@
   font-weight: 200;
 }
 
-/* כישורים ושפות */
+/* כותרות משנה לכישולים */
+.skills-subtitle {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #1F1B2F;
+  margin: 0.5rem 1.5rem 0.3rem;
+  opacity: 0.85;
+  position: relative;
+}
+
+.skills-subtitle:not(:first-child) {
+  margin-top: 0.8rem;
+}
+
+/* כישולים ושפות */
 .skills-section,
 .languages-section {
   width: 100%;
@@ -263,11 +277,11 @@
   padding: 0 1.5rem;
   line-height: 1.3;
   text-align: right;
-  margin-top: var(--item-spacing);
+  margin-top: 0.3rem;
   width: 100%;
 }
 
-/* כישורים */
+/* כישולים */
 .skills-items .skill-item {
   display: inline;
   font-size: 0.9rem;
@@ -276,37 +290,65 @@
 }
 
 /* שפות */
-.languages-items .language-item {
-  display: inline;
+.languages-section {
+  width: 100%;
+  margin: var(--section-spacing) 0;
+  position: relative;
+}
+
+.languages-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.language-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-size: 0.9rem;
   color: #333;
   font-weight: 300;
+  width: 100%;
+  margin-bottom: 0.3rem;
 }
 
-.skill-name,
+.language-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
 .language-name {
   font-weight: 600;
   color: #1F1B2F;
+  margin-left: 0.5rem;
 }
 
-.skill-level,
 .language-level {
   font-weight: 300;
   color: #666;
-  margin-right: 0.3rem;
 }
 
-/* מפרידים */
-.skills-items .skill-item:not(:last-child)::after,
-.languages-items .language-item:not(:last-child)::after {
-  content: '|';
-  margin: 0 0.8rem;
+.language-separator {
   color: #666;
   opacity: 0.4;
   font-weight: 200;
+  margin: 0 0.5rem;
 }
 
-/* הוספת מרווח בין סוגי הכישורים */
+/* ביטול כל המפרידים הישנים */
+.languages-items .language-item:not(:last-child)::after,
+.languages-items .language-item::after,
+.languages-items .language-item::before {
+  display: none;
+  content: none;
+}
+
+/* הוספת מרווח בין סוגי הכישולים */
 .skills-type-separator {
   margin: 0 1rem;
   color: #666;
@@ -508,4 +550,11 @@
   padding-right: 2rem;
   padding-left: 12rem;
   width: 100%;
+}
+
+.language-separator {
+  margin: 0 0.8rem;
+  color: #666;
+  opacity: 0.4;
+  font-weight: 200;
 }
