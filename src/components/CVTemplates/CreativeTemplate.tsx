@@ -1,18 +1,12 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { ResumeData } from '../../types/resume';
 import '../../styles/templates/creative.css';
 import Image from 'next/image';
 import { Assistant } from 'next/font/google';
-import { formatDescription, formatDate } from './utils';
+import { formatDescription, formatDate, splitName } from './utils';
 import { Edit2 } from 'lucide-react';
-import { PersonalInfoEdit } from '../EditableFields/PersonalInfoEdit';
-import { SkillsEdit } from '../EditableFields/SkillsEdit';
-import { EducationEdit } from '../EditableFields/EducationEdit';
-import { MilitaryEdit } from '../EditableFields/MilitaryEdit';
-import { ExperienceEdit } from '../EditableFields/ExperienceEdit';
-import { ProfessionalSummaryEdit } from '../EditableFields/ProfessionalSummaryEdit';
-import { LanguagesEdit } from '../EditableFields/LanguagesEdit';
+import { cn } from '@/lib/utils';
 
 const assistant = Assistant({ 
   subsets: ['hebrew', 'latin'],
@@ -84,23 +78,16 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
   onDelete = () => {},
   onEdit = () => {}
 }) => {
-  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(false);
-  const [isSkillsOpen, setIsSkillsOpen] = useState(false);
-  const [isEducationOpen, setIsEducationOpen] = useState(false);
-  const [isMilitaryOpen, setIsMilitaryOpen] = useState(false);
-  const [isExperienceOpen, setIsExperienceOpen] = useState(false);
-  const [isProfessionalSummaryOpen, setIsProfessionalSummaryOpen] = useState(false);
-  const [isLanguagesOpen, setIsLanguagesOpen] = useState(false);
-
-  // שימוש בשפת התוכן המקורית של קורות החיים
   const cvLang = data.lang;
-  
-  // משתמשים בשפת התוכן המקורית לכותרות
   const t = translations[cvLang as keyof typeof translations];
-
   const { personalInfo, experience, education, skills, military } = data;
-  // שימוש בשפת הממשק רק לכיוון הטקסט
   const isRTL = cvLang === 'he';
+
+  const handleEdit = (type: string, index: number = 0) => {
+    if (onEdit) {
+      onEdit(type, index);
+    }
+  };
 
   useEffect(() => {
     const adjustSize = () => {
@@ -127,24 +114,6 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
     if (name.length > 25) return 'creative-skill-name smaller';
     if (name.length > 20) return 'creative-skill-name small';
     return 'creative-skill-name';
-  };
-
-  const splitName = (fullName: string) => {
-    const nameParts = fullName.trim().split(/\s+/);
-    if (nameParts.length === 1) return { firstName: nameParts[0], lastName: '' };
-    const lastName = nameParts.pop() || '';
-    const firstName = nameParts.join(' ');
-    return { firstName, lastName };
-  };
-
-  const formatDate = (startDate: string, endDate: string) => {
-    const formattedEnd = endDate === 'כיום' || endDate === 'היום' ? 
-      t.present : 
-      endDate;
-    
-    return isRTL ? 
-      `${startDate} - ${formattedEnd}` : 
-      `${startDate} ${t.to} ${formattedEnd}`;
   };
 
   return (
@@ -174,7 +143,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               })()}
               {isEditing && (
                 <button
-                  onClick={() => setIsPersonalInfoOpen(true)}
+                  onClick={() => handleEdit('personalInfo', 0)}
                   className="edit-button mr-2 -mt-1"
                   title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
                 >
@@ -201,7 +170,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {t.skills}
               {isEditing && (
                 <button
-                  onClick={() => setIsSkillsOpen(true)}
+                  onClick={() => handleEdit('skills', 0)}
                   className="edit-button absolute right-full ml-2"
                   title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                 >
@@ -250,7 +219,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {t.languages}
               {isEditing && (
                 <button
-                  onClick={() => setIsLanguagesOpen(true)}
+                  onClick={() => handleEdit('languages', 0)}
                   className="edit-button absolute right-full ml-2"
                   title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >
@@ -306,8 +275,8 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
             <h2 className="creative-summary-title relative">
               {t.professionalSummary}
               {isEditing && (
-                <button
-                  onClick={() => setIsProfessionalSummaryOpen(true)}
+                <button 
+                  onClick={() => handleEdit('professionalSummary', 0)}
                   className="edit-button absolute right-full ml-2"
                   title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
                 >
@@ -328,7 +297,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {t.workExperience}
               {isEditing && (
                 <button
-                  onClick={() => setIsExperienceOpen(true)}
+                  onClick={() => handleEdit('experience', 0)}
                   className="edit-button absolute right-full ml-2"
                   title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                 >
@@ -349,7 +318,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                       )}
                     </h3>
                     <span className="creative-experience-date">
-                      {formatDate(exp.startDate, exp.endDate)}
+                      {formatDate(exp.startDate, exp.endDate, cvLang)}
                     </span>
                   </div>
                   {exp.description && exp.description.length > 0 && (
@@ -372,7 +341,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {t.education}
               {isEditing && (
                 <button
-                  onClick={() => setIsEducationOpen(true)}
+                  onClick={() => handleEdit('education', 0)}
                   className="edit-button absolute right-full ml-2"
                   title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                 >
@@ -389,7 +358,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                       <span className="creative-experience-company">{degree.institution}</span>
                     </div>
                     <div className="creative-experience-date">
-                      {formatDate(degree.startDate, degree.endDate)}
+                      {formatDate(degree.startDate, degree.endDate, cvLang)}
                     </div>
                   </div>
                   {degree.specialization && (
@@ -410,7 +379,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {t.militaryService}
               {isEditing && (
                 <button
-                  onClick={() => setIsMilitaryOpen(true)}
+                  onClick={() => handleEdit('military', 0)}
                   className="edit-button absolute right-full ml-2"
                   title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                 >
@@ -426,7 +395,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     <span className="creative-experience-company">{military?.unit}</span>
                   </div>
                   <div className="creative-experience-date">
-                    {formatDate(data.military.startDate, data.military.endDate)}
+                    {formatDate(data.military.startDate, data.military.endDate, cvLang)}
                   </div>
                 </div>
                 {data.military.description && data.military.description.length > 0 && (
@@ -441,92 +410,6 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
           </div>
         )}
       </div>
-      
-      {/* Edit Popups */}
-      <PersonalInfoEdit
-        isOpen={isPersonalInfoOpen}
-        onClose={() => setIsPersonalInfoOpen(false)}
-        data={data.personalInfo}
-        onSave={(newData) => {
-          onUpdate('personalInfo', newData);
-          setIsPersonalInfoOpen(false);
-        }}
-        isRTL={isRTL}
-        template="creative"
-      />
-
-      <SkillsEdit
-        isOpen={isSkillsOpen}
-        onClose={() => setIsSkillsOpen(false)}
-        data={data.skills}
-        onSave={(newData) => {
-          onUpdate('skills', newData);
-          setIsSkillsOpen(false);
-        }}
-        isRTL={isRTL}
-        template="creative"
-      />
-
-      <EducationEdit
-        isOpen={isEducationOpen}
-        onClose={() => setIsEducationOpen(false)}
-        data={data.education?.degrees || []}
-        onSave={(newData) => {
-          onUpdate('education', { degrees: newData });
-          setIsEducationOpen(false);
-        }}
-        isRTL={isRTL}
-        template="creative"
-      />
-
-      <MilitaryEdit
-        isOpen={isMilitaryOpen}
-        onClose={() => setIsMilitaryOpen(false)}
-        data={data.military || null}
-        onSave={(newData) => {
-          onUpdate('military', newData);
-          setIsMilitaryOpen(false);
-        }}
-        isRTL={isRTL}
-        template="creative"
-      />
-
-      <ExperienceEdit
-        isOpen={isExperienceOpen}
-        onClose={() => setIsExperienceOpen(false)}
-        data={data.experience}
-        onSave={(newData) => {
-          onUpdate('experience', newData);
-          setIsExperienceOpen(false);
-        }}
-        isRTL={isRTL}
-        template="creative"
-      />
-
-      <ProfessionalSummaryEdit
-        isOpen={isProfessionalSummaryOpen}
-        onClose={() => setIsProfessionalSummaryOpen(false)}
-        data={data.personalInfo.summary || ''}
-        onSave={(newData) => {
-          onUpdate('personalInfo', { ...data.personalInfo, summary: newData });
-          setIsProfessionalSummaryOpen(false);
-        }}
-        isRTL={isRTL}
-        template="creative"
-        cvData={data}
-      />
-
-      <LanguagesEdit
-        isOpen={isLanguagesOpen}
-        onClose={() => setIsLanguagesOpen(false)}
-        data={data.skills.languages || []}
-        onSave={(newData) => {
-          onUpdate('skills', { ...data.skills, languages: newData });
-          setIsLanguagesOpen(false);
-        }}
-        isRTL={isRTL}
-        template="creative"
-      />
     </div>
   );
 };

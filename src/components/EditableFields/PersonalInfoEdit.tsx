@@ -252,171 +252,124 @@ export const PersonalInfoEdit: React.FC<PersonalInfoEditProps> = ({
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={onClose}>
           <DialogContent className={cn(
-            "sm:max-w-[600px] p-0 gap-0",
-            "bg-gradient-to-b from-white to-gray-50",
-            "rounded-2xl shadow-xl border-0",
-            isRTL ? "rtl" : "ltr",
-            template === 'professional' && "font-rubik",
-            template === 'creative' && "font-heebo",
-            template === 'general' && "font-opensans",
-            template === 'classic' && "font-assistant",
-          )}>
-            <div className="p-6 border-b border-[#4856CD]/10">
+            "!fixed !top-[50%] !left-[50%] !transform !-translate-x-1/2 !-translate-y-1/2",
+            "!w-[460px] !max-w-[92vw]",
+            "!p-0 !m-0 !gap-0 !overflow-hidden",
+            "!bg-gradient-to-br !from-white !via-white !to-gray-50/80",
+            "!rounded-2xl !shadow-[0_20px_70px_-10px_rgba(0,0,0,0.15)] !border !border-gray-100",
+            isRTL ? "!rtl" : "!ltr",
+            template === 'professional' && "!font-rubik",
+            template === 'creative' && "!font-heebo",
+            template === 'general' && "!font-opensans",
+            template === 'classic' && "!font-assistant",
+            "!block"
+          )}
+          style={{
+            width: '460px',
+            maxWidth: '92vw'
+          }}>
+            <div className="px-6 py-5 border-b border-[#4856CD]/5 bg-gradient-to-r from-[#4856CD]/[0.03] to-transparent">
               <DialogHeader>
                 <DialogTitle className={cn(
-                  "text-center text-2xl font-bold",
-                  "bg-gradient-to-r from-[#4856CD] to-[#4856CD]/80 text-transparent bg-clip-text"
+                  "text-center text-[22px] font-bold",
+                  "bg-gradient-to-r from-[#4856CD] to-[#4856CD]/90 text-transparent bg-clip-text"
                 )}>
                   {isRTL ? 'פרטים אישיים' : 'Personal Details'}
                 </DialogTitle>
               </DialogHeader>
             </div>
 
-            <div className="p-6 space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                    {isRTL ? 'שם מלא' : 'Full Name'}
-                  </label>
-                  <div className="relative">
-                    <Input
-                      value={formData.name}
-                      onChange={(e) => handleChange('name', e.target.value)}
-                      onBlur={(e) => handleBlur('name')}
-                      className={cn(
-                        "bg-white text-gray-900",
-                        "rounded-xl border-gray-200",
-                        "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                        "pl-10",
-                        errors['name'] && touched['name'] ? "border-red-500 focus:border-red-500" : ""
+            <div className="px-8 py-6 space-y-6">
+              <div className="space-y-[22px] max-w-[400px] mx-auto">
+                {fields.map((field) => (
+                  <div key={field.key} className="group w-full">
+                    <label className={cn(
+                      "block text-[13px] font-medium mb-2",
+                      "text-gray-700 group-hover:text-[#4856CD]",
+                      "transition-colors duration-200"
+                    )}>
+                      {field.label}
+                    </label>
+                    <div className="relative w-full">
+                      <Input
+                        value={formData[field.key]}
+                        onChange={(e) => handleChange(field.key, e.target.value)}
+                        onBlur={(e) => handleBlur(field.key)}
+                        className={cn(
+                          "w-full h-11 bg-white text-[14px] text-gray-900",
+                          "rounded-lg border border-gray-200/80",
+                          "shadow-sm shadow-gray-100/50",
+                          "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                          "focus:ring-2 focus:ring-[#4856CD]/10",
+                          "transition duration-200",
+                          isRTL ? "pr-11" : "pl-11",
+                          errors[field.key] && touched[field.key] 
+                            ? "!border-red-500/50 focus:!border-red-500 !ring-red-500/10" 
+                            : ""
+                        )}
+                        placeholder={field.placeholder}
+                        dir={field.dir}
+                      />
+                      {field.icon === 'user' && (
+                        <User className={cn(
+                          "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                          "text-gray-400 group-hover:text-[#4856CD]/70",
+                          "transition-colors duration-200",
+                          isRTL ? "right-4" : "left-4"
+                        )} />
                       )}
-                      placeholder={isRTL ? 'הכנס שם מלא' : 'Enter full name'}
-                      dir="auto"
-                    />
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  </div>
-                  {errors['name'] && touched['name'] && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors['name']}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                    {isRTL ? 'אימייל' : 'Email'}
-                  </label>
-                  <div className="relative">
-                    <Input
-                      value={formData.email}
-                      onChange={(e) => handleChange('email', e.target.value)}
-                      onBlur={(e) => handleBlur('email')}
-                      className={cn(
-                        "bg-white text-gray-900",
-                        "rounded-xl border-gray-200",
-                        "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                        "pl-10",
-                        errors['email'] && touched['email'] ? "border-red-500 focus:border-red-500" : ""
+                      {field.icon === 'mail' && (
+                        <Mail className={cn(
+                          "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                          "text-gray-400 group-hover:text-[#4856CD]/70",
+                          "transition-colors duration-200",
+                          isRTL ? "right-4" : "left-4"
+                        )} />
                       )}
-                      placeholder={isRTL ? 'הכנס אימייל' : 'Enter email'}
-                      dir="ltr"
-                    />
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  </div>
-                  {errors['email'] && touched['email'] && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors['email']}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                    {isRTL ? 'טלפון' : 'Phone'}
-                  </label>
-                  <div className="relative">
-                    <Input
-                      value={formData.phone}
-                      onChange={(e) => handleChange('phone', e.target.value)}
-                      onBlur={(e) => handleBlur('phone')}
-                      className={cn(
-                        "bg-white text-gray-900",
-                        "rounded-xl border-gray-200",
-                        "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                        "pl-10",
-                        errors['phone'] && touched['phone'] ? "border-red-500 focus:border-red-500" : ""
+                      {field.icon === 'phone' && (
+                        <Phone className={cn(
+                          "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                          "text-gray-400 group-hover:text-[#4856CD]/70",
+                          "transition-colors duration-200",
+                          isRTL ? "right-4" : "left-4"
+                        )} />
                       )}
-                      placeholder={isRTL ? 'הכנס טלפון' : 'Enter phone'}
-                      dir="ltr"
-                    />
-                    <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  </div>
-                  {errors['phone'] && touched['phone'] && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors['phone']}
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                    {isRTL ? 'עיר מגורים' : 'City'}
-                  </label>
-                  <div className="relative">
-                    <Input
-                      value={formData.address}
-                      onChange={(e) => handleChange('address', e.target.value)}
-                      onBlur={(e) => handleBlur('address')}
-                      className={cn(
-                        "bg-white text-gray-900",
-                        "rounded-xl border-gray-200",
-                        "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                        "pl-10"
+                      {field.icon === 'map-pin' && (
+                        <MapPin className={cn(
+                          "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                          "text-gray-400 group-hover:text-[#4856CD]/70",
+                          "transition-colors duration-200",
+                          isRTL ? "right-4" : "left-4"
+                        )} />
                       )}
-                      placeholder={isRTL ? 'הכנס עיר מגורים' : 'Enter city'}
-                      dir="auto"
-                    />
-                    <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1.5 text-gray-700">
-                    LinkedIn
-                  </label>
-                  <div className="relative">
-                    <Input
-                      value={formData.linkedin}
-                      onChange={(e) => handleChange('linkedin', e.target.value)}
-                      onBlur={(e) => handleBlur('linkedin')}
-                      className={cn(
-                        "bg-white text-gray-900",
-                        "rounded-xl border-gray-200",
-                        "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                        "pl-10",
-                        errors['linkedin'] && touched['linkedin'] ? "border-red-500 focus:border-red-500" : ""
+                      {field.icon === 'linkedin' && (
+                        <Linkedin className={cn(
+                          "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                          "text-gray-400 group-hover:text-[#4856CD]/70",
+                          "transition-colors duration-200",
+                          isRTL ? "right-4" : "left-4"
+                        )} />
                       )}
-                      placeholder="linkedin.com/in/username"
-                      dir="ltr"
-                    />
-                    <Linkedin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                    </div>
+                    {errors[field.key] && touched[field.key] && (
+                      <p className="text-red-500/90 text-[12px] mt-2 flex items-center gap-1.5">
+                        <span className="inline-block w-1 h-1 rounded-full bg-red-500/90" />
+                        {errors[field.key]}
+                      </p>
+                    )}
                   </div>
-                  {errors['linkedin'] && touched['linkedin'] && (
-                    <p className="text-red-500 text-sm mt-1">
-                      {errors['linkedin']}
-                    </p>
-                  )}
-                </div>
+                ))}
               </div>
 
-              <div className="flex gap-3 mt-6">
+              <div className="flex gap-3 pt-2 max-w-[400px] mx-auto">
                 <button
                   onClick={onClose}
                   className={cn(
-                    "flex-1 px-4 py-2.5",
-                    "rounded-full border-2 border-[#4856CD]",
-                    "text-[#4856CD] hover:bg-[#4856CD]/5",
-                    "transition-colors font-medium"
+                    "flex-1 h-11",
+                    "rounded-lg border-2 border-[#4856CD]",
+                    "text-[#4856CD] text-[14px] hover:bg-[#4856CD]/[0.02]",
+                    "active:scale-[0.98]",
+                    "transition-all duration-200 font-medium"
                   )}
                 >
                   {isRTL ? 'ביטול' : 'Cancel'}
@@ -424,10 +377,12 @@ export const PersonalInfoEdit: React.FC<PersonalInfoEditProps> = ({
                 <button
                   onClick={handleSubmit}
                   className={cn(
-                    "flex-1 px-4 py-2.5",
-                    "rounded-full bg-[#4856CD]",
-                    "text-white hover:bg-[#4856CD]/90",
-                    "transition-colors font-medium"
+                    "flex-1 h-11",
+                    "rounded-lg bg-[#4856CD]",
+                    "text-white text-[14px] hover:bg-[#4856CD]/95",
+                    "active:scale-[0.98]",
+                    "transition-all duration-200 font-medium",
+                    "shadow-md shadow-[#4856CD]/10"
                   )}
                 >
                   {isRTL ? 'שמירה' : 'Save'}

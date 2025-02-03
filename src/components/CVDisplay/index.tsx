@@ -7,7 +7,7 @@ import ProfessionalTemplate from '../CVTemplates/ProfessionalTemplate';
 import GeneralTemplate from '../CVTemplates/GeneralTemplate';
 import CreativeTemplate from '../CVTemplates/CreativeTemplate';
 import { TextEditor } from '@/components/TextEditor/page';
-import { ResumeData } from '@/types/resume';
+import { Degree, ResumeData } from '@/types/resume';
 import { getDictionary } from '@/dictionaries';
 import { Button } from '@/components/theme/ui/button';
 import { Edit2, Eye, Download, FileText, Loader2, Menu, X, Globe, LayoutTemplate, Plus, Briefcase, GraduationCap, Languages, Wrench, Star, CheckCircle2, HelpCircle } from 'lucide-react';
@@ -33,7 +33,6 @@ import { cn } from "@/lib/utils";
 import ReactDOM from 'react-dom/client';
 import ReactDOMServer from 'react-dom/server';
 import { useRouter } from 'next/navigation';
-import { EditPopup } from '../EditableFields/EditPopup';
 import { AddItemPopup } from '../EditableFields/AddItemPopup';
 import { UpgradePaymentModal } from '@/components/PaymentModal/UpgradePaymentModal';
 import { PACKAGE_PRICES } from '@/lib/constants';
@@ -45,136 +44,7 @@ import { LanguagesEdit } from '../EditableFields/LanguagesEdit';
 import { ProfessionalSummaryEdit } from '../EditableFields/ProfessionalSummaryEdit';
 import { ExperienceEdit } from '../EditableFields/ExperienceEdit';
 import { MilitaryEdit } from '../EditableFields/MilitaryEdit';
-
-// סגנונות חדשים למובייל
-const mobileStyles = `
-  .mobile-preview {
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    overflow: hidden;
-    transform: scale(0.98);
-    transform-origin: top center;
-  }
-
-  .mobile-preview-content {
-    width: 100%;
-    height: auto;
-    aspect-ratio: 210/297;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 16px;
-  }
-
-  .mobile-preview-content::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .mobile-preview-content::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  .mobile-preview-content::-webkit-scrollbar-thumb {
-    background: rgba(72, 86, 205, 0.3);
-    border-radius: 3px;
-    transition: background 0.2s ease;
-  }
-
-  .mobile-preview-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(72, 86, 205, 0.5);
-  }
-`;
-
-// הוספת סגנונות חדשים לכפתורי עריכה
-const editingStyles = `
-  .section-edit-button {
-    position: absolute;
-    right: -12px;
-    top: 50%;
-    transform: translateY(-50%);
-    opacity: 0;
-    transition: all 0.2s ease;
-    z-index: 10;
-  }
-
-  .section-add-button {
-    position: absolute;
-    right: -12px;
-    bottom: -12px;
-    opacity: 0;
-    transition: all 0.2s ease;
-    z-index: 10;
-  }
-
-  .section-container {
-    position: relative;
-  }
-
-  .section-container:hover .section-edit-button,
-  .section-container:hover .section-add-button {
-    opacity: 1;
-  }
-
-  .tooltip {
-    position: absolute;
-    right: calc(100% + 8px);
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(72, 86, 205, 0.9);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 12px;
-    white-space: nowrap;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-    pointer-events: none;
-  }
-
-  .section-edit-button:hover .tooltip,
-  .section-add-button:hover .tooltip {
-    opacity: 1;
-  }
-
-  .section-edit-button button,
-  .section-add-button button {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: white;
-    border: 1px solid rgba(72, 86, 205, 0.2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-
-  .section-edit-button button:hover,
-  .section-add-button button:hover {
-    background: rgba(72, 86, 205, 0.1);
-    transform: scale(1.1);
-  }
-
-  .section-edit-button svg,
-  .section-add-button svg {
-    width: 14px;
-    height: 14px;
-    color: #4856CD;
-  }
-`;
-
-// הוספת הסגנונות לראש המסמך
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = mobileStyles + editingStyles;
-  document.head.appendChild(style);
-}
+import EducationEdit from '../EditableFields/EducationEdit';
 
 interface CVDisplayProps {
   sessionId: string;
@@ -192,56 +62,58 @@ const templateComponents = {
 const transformResumeData = (rawData: any): ResumeData => {
   return {
     personalInfo: {
-      name: rawData.personal_details?.name || '',
-      title: rawData.personal_details?.title || '',
-      email: rawData.personal_details?.email || '',
-      phone: rawData.personal_details?.phone || '',
-      address: rawData.personal_details?.address || '',
-      linkedin: rawData.personal_details?.linkedin || '',
-      summary: rawData.professional_summary || ''
+      name: rawData?.personal_details?.name || '',
+      title: rawData?.personal_details?.title || rawData?.title || (rawData?.professional_summary?.split('.')[0] || ''),
+      email: rawData?.personal_details?.email || '',
+      phone: rawData?.personal_details?.phone || '',
+      address: rawData?.personal_details?.address || '',
+      linkedin: rawData?.personalInfo?.linkedin || rawData?.personal_details?.linkedin || '',
+      summary: rawData?.personal_details?.summary || rawData?.professional_summary || ''
     },
-    experience: (rawData.experience || []).map((exp: any) => ({
+    experience: Array.isArray(rawData?.experience) ? rawData.experience.map((exp: any) => ({
       position: exp.title || '',
       company: exp.company || '',
-      startDate: exp.years?.split('-')[0] || '',
-      endDate: exp.years?.split('-')[1] || '',
+      location: '',
+      startDate: exp.years?.split('-')[0]?.trim() || '',
+      endDate: exp.years?.split('-')[1]?.trim() || '',
       description: exp.achievements || []
-    })),
+    })) : [],
     education: {
-      degrees: (rawData.education?.degrees || []).map((deg: any) => ({
+      degrees: Array.isArray(rawData?.education?.degrees) ? rawData.education.degrees.map((deg: any) => ({
         type: deg.type || '',
+        degreeType: deg.degreeType || 'academic',
         field: deg.field || '',
         institution: deg.institution || '',
-        startDate: deg.years?.split('-')[0] || '',
-        endDate: deg.years?.split('-')[1] || '',
-        specialization: deg.specialization || ''
-      }))
+        startDate: deg.years?.split('-')[0]?.trim() || deg.startDate || '',
+        endDate: deg.years?.split('-')[1]?.trim() || deg.endDate || '',
+        specialization: deg.specialization || '',
+        years: deg.years || `${deg.startDate || ''} - ${deg.endDate || ''}`
+      })) : []
     },
     skills: {
-      technical: (rawData.skills?.technical || []).map((skill: any) => ({
+      technical: Array.isArray(rawData?.skills?.technical) ? rawData.skills.technical.map((skill: any) => ({
         name: skill.name || '',
         level: skill.level
-      })),
-      soft: (rawData.skills?.soft || []).map((skill: any) => ({
+      })) : [],
+      soft: Array.isArray(rawData?.skills?.soft) ? rawData.skills.soft.map((skill: any) => ({
         name: skill.name || '',
         level: skill.level
-      })),
-      languages: Object.entries(rawData.languages || {}).map(([language, level]) => ({
+      })) : [],
+      languages: typeof rawData?.languages === 'object' ? Object.entries(rawData.languages || {}).map(([language, level]) => ({
         language,
         level: level as string
-      }))
+      })) : []
     },
-    template: rawData.template_id || 'modern',
+    military: rawData?.military_service ? {
+      role: rawData?.military_service?.role || '',
+      unit: rawData?.military_service?.unit || 'צה"ל',
+      startDate: rawData?.military_service?.years?.split('-')[0]?.trim() || '',
+      endDate: rawData?.military_service?.years?.split('-')[1]?.trim() || '',
+      description: rawData?.military_service?.achievements || []
+    } : undefined,
+    template: rawData?.template_id || 'classic',
     references: [],
-    lang: rawData.lang || 'he',
-    interfaceLang: rawData.interfaceLang || 'he',
-    military: rawData.military_service ? {
-      role: rawData.military_service.role,
-      unit: rawData.military_service.unit || 'צה"ל',
-      startDate: rawData.military_service.years.split('-')[0],
-      endDate: rawData.military_service.years.split('-')[1],
-      description: rawData.military_service.achievements
-    } : undefined
+    lang: rawData?.lang || 'he'
   };
 };
 
@@ -329,7 +201,7 @@ interface ResumeDataWithIndex extends ResumeData {
   [key: string]: any;
 }
 
-// הוספת סגנונות חדשים לאנימציות
+// הוספת הסגנונות לאנימציות
 const pulseAnimation = {
   scale: [1, 1.2, 1],
   transition: {
@@ -414,6 +286,8 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   const [highlightedElement, setHighlightedElement] = useState<'edit' | 'preview' | 'download' | null>(null);
   const [showScrollPopup, setShowScrollPopup] = useState(false);
   const [hasShownPopup, setHasShownPopup] = useState(false);
+  const [hasInteractedWithEdit, setHasInteractedWithEdit] = useState(false);
+  const [shouldShowPopupAfterTutorial, setShouldShowPopupAfterTutorial] = useState(true);
 
   useEffect(() => {
     mounted.current = true;
@@ -425,17 +299,26 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     };
   }, []);
 
-  // מחליף את האפקט הקודם של הגלילה באפקט חדש שמתבסס על סגירת ההדרכה
+  // אפקט חדש שיפתח את הפופאפ מיד לאחר סגירת ההדרכה
   useEffect(() => {
-    if (!showTutorial && !hasShownPopup) {
+    if (!showTutorial && shouldShowPopupAfterTutorial && !hasShownPopup && !hasInteractedWithEdit) {
+      setShowScrollPopup(true);
+      setHasShownPopup(true);
+      setShouldShowPopupAfterTutorial(false);
+    }
+  }, [showTutorial, shouldShowPopupAfterTutorial, hasShownPopup, hasInteractedWithEdit]);
+
+  // אפקט קיים שיפתח את הפופאפ לאחר 15 שניות
+  useEffect(() => {
+    if (!showTutorial && !hasShownPopup && !hasInteractedWithEdit && !shouldShowPopupAfterTutorial) {
       const timer = setTimeout(() => {
         setShowScrollPopup(true);
         setHasShownPopup(true);
-      }, 5000); // 5 seconds
+      }, 15000); // 15 seconds
 
       return () => clearTimeout(timer);
     }
-  }, [showTutorial, hasShownPopup]);
+  }, [showTutorial, hasShownPopup, hasInteractedWithEdit, shouldShowPopupAfterTutorial]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -541,22 +424,30 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           years: `${exp.startDate} - ${exp.endDate}`,
           achievements: exp.description
         })),
-        education: editedData.education.degrees.map(degree => ({
-          degree: degree.type + (degree.field ? `, ${degree.field}` : ''),
-          institution: degree.institution,
-          specialization: degree.specialization,
-          years: `${degree.startDate} - ${degree.endDate}`
-        })),
+        education: {
+          degrees: editedData.education.degrees.map(degree => ({
+            type: degree.type,
+            field: degree.field,
+            institution: degree.institution,
+            specialization: degree.specialization,
+            years: `${degree.startDate} - ${degree.endDate}`,
+            degreeType: degree.degreeType || 'academic'
+          }))
+        },
         military_service: editedData.military && {
           role: editedData.military.role,
           unit: editedData.military.unit,
           years: `${editedData.military.startDate} - ${editedData.military.endDate}`,
           achievements: editedData.military.description || []
         },
-        skills: [
-          ...editedData.skills.technical,
-          ...editedData.skills.soft
-        ],
+        technical_skills: editedData.skills.technical.map(skill => ({
+          name: skill.name,
+          level: skill.level
+        })),
+        soft_skills: editedData.skills.soft.map(skill => ({
+          name: skill.name,
+          level: skill.level
+        })),
         languages: editedData.skills.languages.reduce((acc, curr) => ({
           ...acc,
           [curr.language]: curr.level
@@ -1043,25 +934,27 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         }
         break;
       case 'education':
-        if (index !== undefined) {
-          const newEducation = { ...updatedData.education };
-          newEducation.degrees[index] = newData;
-          updatedData.education = newEducation;
-        } else {
-          updatedData.education.degrees = newData;
-        }
+        updatedData.education = newData;
         break;
       case 'skills':
         updatedData.skills = newData;
         break;
       case 'languages':
-        updatedData.skills.languages = newData;
+        console.log('Saving languages:', newData);
+        updatedData = {
+          ...updatedData,
+          skills: {
+            ...updatedData.skills,
+            languages: Array.isArray(newData) ? newData : []
+          }
+        };
         break;
       case 'military':
         updatedData.military = newData;
         break;
     }
 
+    console.log('Updated Data:', updatedData);
     setCvData(updatedData);
     handleSave(updatedData);
     setEditingItem(null);
@@ -1209,14 +1102,16 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   };
 
   const renderEditButton = () => {
-    // הסרת הבדיקה שחוסמת את כפתור העריכה בתבנית הקלאסית
     return (
       <div className="flex items-center gap-2">
         <motion.div
           animate={highlightedElement === 'edit' ? pulseAnimation : {}}
         >
           <Button
-            onClick={() => setIsEditing(!isEditing)}
+            onClick={() => {
+              setIsEditing(!isEditing);
+              setHasInteractedWithEdit(true);
+            }}
             disabled={isDownloadingPdf}
             className={cn(
               "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
@@ -1228,12 +1123,12 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
             {isEditing ? <X className="h-6 w-6" /> : <Edit2 className="h-6 w-6" />}
           </Button>
         </motion.div>
-        <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+        <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
           {isEditing 
             ? (lang === 'he' ? 'סיום עריכה' : 'Finish Editing')
             : (lang === 'he' ? 'עריכת קורות החיים' : 'Edit CV')
           }
-        </span>
+        </div>
       </div>
     );
   };
@@ -1367,31 +1262,14 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           />
         );
       case 'education':
-        const educationData = cvData.education.degrees.map(deg => ({
-          position: deg.type,
-          company: deg.institution,
-          startDate: deg.startDate,
-          endDate: deg.endDate,
-          description: [deg.field, deg.specialization].filter((val): val is string => Boolean(val))
-        }));
         return (
-          <ExperienceEdit
-            isOpen={true}
+          <EducationEdit
+            isOpen={editingItem?.type === 'education'}
             onClose={handleClose}
-            data={educationData}
-            onSave={(data) => {
-              const newDegrees = data.map(exp => ({
-                type: exp.position,
-                institution: exp.company,
-                startDate: exp.startDate,
-                endDate: exp.endDate,
-                field: exp.description[0] || '',
-                specialization: exp.description[1] || ''
-              }));
-              handleEditSave('education', undefined, newDegrees);
-            }}
-            isRTL={isRTL}
-            template={template}
+            data={cvData?.education?.degrees || []}
+            onSave={(data) => handleEditSave('education', undefined, { degrees: data })}
+            isRTL={lang === 'he'}
+            template={selectedTemplate}
           />
         );
       default:
@@ -1577,9 +1455,9 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                   )}
                 </Button>
               </motion.div>
-              <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+              <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
                 {lang === 'he' ? 'צפייה' : 'View'}
-              </span>
+              </div>
             </div>
           )}
 
@@ -1606,9 +1484,9 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                   )}
                 </Button>
               </motion.div>
-              <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+              <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
                 {lang === 'he' ? 'סיימתי, בואו נוריד את זה ' : 'Download CV and Continue to Benefits Screen'}
-              </span>
+              </div>
             </div>
           ) : (
             <>
@@ -1630,9 +1508,9 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                       <Download className="h-6 w-6" />
                     )}
                   </Button>
-                  <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                  <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
                     {lang === 'he' ? 'הורדת הקורות חיים' : 'Download CV'}
-                  </span>
+                  </div>
                 </div>
               )}
               {/* כפתור המשך */}
@@ -1644,9 +1522,9 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                 >
                   <FileText className="h-6 w-6" />
                 </Button>
-                <span className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
                   {lang === 'he' ? 'המשך למסך ההטבות' : 'Continue to Benefits'}
-                </span>
+                </div>
               </div>
             </>
           )}

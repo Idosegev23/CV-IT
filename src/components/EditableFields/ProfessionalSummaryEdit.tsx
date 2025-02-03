@@ -272,31 +272,38 @@ Please return only the new summary, without additional explanations.`;
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={onClose}>
           <DialogContent className={cn(
-            "sm:max-w-[600px] p-0 gap-0",
-            "bg-gradient-to-b from-white to-gray-50",
-            "rounded-2xl shadow-xl border-0",
-            isRTL ? "rtl" : "ltr",
-            template === 'professional' && "font-rubik",
-            template === 'creative' && "font-heebo",
-            template === 'general' && "font-opensans",
-            template === 'classic' && "font-assistant",
-          )}>
-            <div className="p-6 border-b border-[#4856CD]/10">
+            "!fixed !top-[50%] !left-[50%] !transform !-translate-x-1/2 !-translate-y-1/2",
+            "!w-[600px] !max-w-[92vw]",
+            "!p-0 !m-0 !gap-0 !overflow-hidden",
+            "!bg-gradient-to-br !from-white !via-white !to-gray-50/80",
+            "!rounded-2xl !shadow-[0_20px_70px_-10px_rgba(0,0,0,0.15)] !border !border-gray-100",
+            isRTL ? "!rtl" : "!ltr",
+            template === 'professional' && "!font-rubik",
+            template === 'creative' && "!font-heebo",
+            template === 'general' && "!font-opensans",
+            template === 'classic' && "!font-assistant",
+            "!block"
+          )}
+          style={{
+            width: '600px',
+            maxWidth: '92vw'
+          }}>
+            <div className="!px-6 !py-5 !border-b !border-[#4856CD]/5 !bg-gradient-to-r !from-[#4856CD]/[0.03] !to-transparent">
               <DialogHeader>
                 <DialogTitle className={cn(
-                  "text-center text-2xl font-bold",
-                  "bg-gradient-to-r from-[#4856CD] to-[#4856CD]/80 text-transparent bg-clip-text"
+                  "!text-center !text-[22px] !font-bold",
+                  "!bg-gradient-to-r !from-[#4856CD] !to-[#4856CD]/90 !text-transparent !bg-clip-text"
                 )}>
                   {isRTL ? 'תקציר מקצועי' : 'Professional Summary'}
                 </DialogTitle>
               </DialogHeader>
             </div>
 
-            <div className="p-6 space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 mb-4">
-                  <FileText className="w-5 h-5" />
-                  <h3 className="text-lg font-medium">
+            <div className="!px-8 !py-6 !space-y-6">
+              <div className="!space-y-4">
+                <div className="!flex !items-center !gap-2 !mb-4">
+                  <FileText className="!w-5 !h-5" />
+                  <h3 className="!text-lg !font-medium">
                     {isRTL ? 'ספר על עצמך ועל הניסיון המקצועי שלך' : 'Tell about yourself and your professional experience'}
                   </h3>
                 </div>
@@ -307,13 +314,13 @@ Please return only the new summary, without additional explanations.`;
                   onChange={(e) => setSummary(e.target.value.slice(0, MAX_CHARS))}
                   placeholder={isRTL ? 'הכנס תקציר מקצועי...' : 'Enter professional summary...'}
                   className={cn(
-                    "p-4 overflow-hidden",
-                    "bg-white text-gray-900",
-                    "rounded-xl border-gray-200",
-                    "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                    "resize-none",
-                    "min-h-[100px]",
-                    isLoading && "opacity-50"
+                    "!p-4 !overflow-hidden",
+                    "!bg-white !text-gray-900",
+                    "!rounded-xl !border-gray-200",
+                    "focus:!border-[#4856CD] focus:!ring-[#4856CD]/10",
+                    "!resize-none",
+                    "!min-h-[100px]",
+                    isLoading && "!opacity-50"
                   )}
                   dir="auto"
                   style={{
@@ -324,31 +331,31 @@ Please return only the new summary, without additional explanations.`;
                   maxLength={MAX_CHARS}
                 />
 
-                <div className="flex justify-between items-center text-sm text-gray-500 mt-2">
+                <div className="!flex !justify-between !items-center !text-sm !text-gray-500 !mt-2">
                   <div>
                     {isRTL ? 'טיפ: כתוב תקציר קצר וממוקד שמתאר את הניסיון והכישורים העיקריים שלך' : 'Tip: Write a short and focused summary that describes your main experience and skills'}
                   </div>
                   <div className={cn(
-                    "text-right",
-                    summary.length >= MAX_CHARS && "text-red-500"
+                    "!text-right",
+                    summary.length >= MAX_CHARS && "!text-red-500"
                   )}>
                     {summary.length}/{MAX_CHARS}
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2 mt-4">
+                <div className="!flex !flex-wrap !gap-2 !mt-4">
                   <button
                     onClick={() => generateSummary('longer')}
                     disabled={isLoading}
                     className={cn(
-                      "flex items-center gap-2 px-3 py-1.5",
-                      "rounded-full bg-[#4856CD]/5 text-[#4856CD]",
-                      "hover:bg-[#4856CD]/10 transition-colors text-sm",
-                      "border border-[#4856CD]/10",
-                      isLoading && "opacity-50 cursor-not-allowed"
+                      "!flex !items-center !gap-2 !px-3 !py-1.5",
+                      "!rounded-lg !bg-[#4856CD]/5 !text-[#4856CD]",
+                      "hover:!bg-[#4856CD]/10 !transition-colors !text-sm",
+                      "!border !border-[#4856CD]/10",
+                      isLoading && "!opacity-50 !cursor-not-allowed"
                     )}
                   >
-                    <ArrowUpWideNarrow className="w-4 h-4" />
+                    <ArrowUpWideNarrow className="!w-4 !h-4" />
                     {isRTL ? 'הארך את התקציר' : 'Make it longer'}
                   </button>
                   
@@ -356,14 +363,14 @@ Please return only the new summary, without additional explanations.`;
                     onClick={() => generateSummary('regenerate')}
                     disabled={isLoading}
                     className={cn(
-                      "flex items-center gap-2 px-3 py-1.5",
-                      "rounded-full bg-[#4856CD]/5 text-[#4856CD]",
-                      "hover:bg-[#4856CD]/10 transition-colors text-sm",
-                      "border border-[#4856CD]/10",
-                      isLoading && "opacity-50 cursor-not-allowed"
+                      "!flex !items-center !gap-2 !px-3 !py-1.5",
+                      "!rounded-lg !bg-[#4856CD]/5 !text-[#4856CD]",
+                      "hover:!bg-[#4856CD]/10 !transition-colors !text-sm",
+                      "!border !border-[#4856CD]/10",
+                      isLoading && "!opacity-50 !cursor-not-allowed"
                     )}
                   >
-                    <Wand2 className="w-4 h-4" />
+                    <Wand2 className="!w-4 !h-4" />
                     {isRTL ? 'צור מחדש' : 'Regenerate'}
                   </button>
 
@@ -371,29 +378,29 @@ Please return only the new summary, without additional explanations.`;
                     onClick={() => generateSummary('shorter')}
                     disabled={isLoading}
                     className={cn(
-                      "flex items-center gap-2 px-3 py-1.5",
-                      "rounded-full bg-[#4856CD]/5 text-[#4856CD]",
-                      "hover:bg-[#4856CD]/10 transition-colors text-sm",
-                      "border border-[#4856CD]/10",
-                      isLoading && "opacity-50 cursor-not-allowed"
+                      "!flex !items-center !gap-2 !px-3 !py-1.5",
+                      "!rounded-lg !bg-[#4856CD]/5 !text-[#4856CD]",
+                      "hover:!bg-[#4856CD]/10 !transition-colors !text-sm",
+                      "!border !border-[#4856CD]/10",
+                      isLoading && "!opacity-50 !cursor-not-allowed"
                     )}
                   >
-                    <ArrowDownWideNarrow className="w-4 h-4" />
+                    <ArrowDownWideNarrow className="!w-4 !h-4" />
                     {isRTL ? 'קצר את התקציר' : 'Make it shorter'}
                   </button>
                 </div>
               </div>
 
-              <div className="flex gap-3 mt-6">
+              <div className="!flex !gap-3 !mt-6">
                 <button
                   onClick={onClose}
                   disabled={isLoading}
                   className={cn(
-                    "flex-1 px-4 py-2.5",
-                    "rounded-full border-2 border-[#4856CD]",
-                    "text-[#4856CD] hover:bg-[#4856CD]/5",
-                    "transition-colors font-medium",
-                    isLoading && "opacity-50 cursor-not-allowed"
+                    "!flex-1 !px-4 !py-2.5",
+                    "!rounded-lg !border-2 !border-[#4856CD]",
+                    "!text-[#4856CD] hover:!bg-[#4856CD]/5",
+                    "!transition-colors !font-medium",
+                    isLoading && "!opacity-50 !cursor-not-allowed"
                   )}
                 >
                   {isRTL ? 'ביטול' : 'Cancel'}
@@ -402,11 +409,11 @@ Please return only the new summary, without additional explanations.`;
                   onClick={handleSubmit}
                   disabled={isLoading}
                   className={cn(
-                    "flex-1 px-4 py-2.5",
-                    "rounded-full bg-[#4856CD]",
-                    "text-white hover:bg-[#4856CD]/90",
-                    "transition-colors font-medium",
-                    isLoading && "opacity-50 cursor-not-allowed"
+                    "!flex-1 !px-4 !py-2.5",
+                    "!rounded-lg !bg-[#4856CD]",
+                    "!text-white hover:!bg-[#4856CD]/90",
+                    "!transition-colors !font-medium",
+                    isLoading && "!opacity-50 !cursor-not-allowed"
                   )}
                 >
                   {isLoading 

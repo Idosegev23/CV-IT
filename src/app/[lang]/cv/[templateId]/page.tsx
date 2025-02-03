@@ -27,6 +27,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "@/components/theme/ui/input";
 import { Textarea } from "@/components/theme/ui/textarea";
 import { BackButton } from '@/components/BackButton';
+import { transformResumeData } from '@/utils/dataTransformer';
 
 interface PageProps {
   params: Promise<{
@@ -184,64 +185,12 @@ export default function CVPage({ params }: PageProps) {
           throw new Error('No CV data found');
         }
 
-        const formattedData: ResumeData = {
-          personalInfo: {
-            name: relevantData.personal_details?.name || '',
-            title: '',
-            email: relevantData.personal_details?.email || '',
-            phone: relevantData.personal_details?.phone || '',
-            address: relevantData.personal_details?.address || '',
-            summary: relevantData.professional_summary || ''
-          },
-          experience: (relevantData.experience || []).map((exp: Experience) => ({
-            position: exp.title || '',
-            company: exp.company || '',
-            startDate: (exp.years || '').split('-')[0] || '',
-            endDate: (exp.years || '').split('-')[1] || '',
-            description: exp.achievements || []
-          })),
-          education: {
-            degrees: ((relevantData.education || {}).degrees || []).map((edu: Education) => ({
-              type: edu.type || '',
-              field: edu.field || '',
-              institution: edu.institution || '',
-              years: edu.years || '',
-              specialization: edu.specialization || ''
-            }))
-          },
-          skills: {
-            technical: ((relevantData.skills || {}).technical || []).map((skill: Skill) => ({
-              name: skill.name || '',
-              level: skill.level === 'Expert' ? 5 : skill.level === 'High' ? 4 : 3
-            })),
-            soft: ((relevantData.skills || {}).soft || []).map((skill: Skill) => ({
-              name: skill.name || '',
-              level: skill.level === 'Expert' ? 5 : skill.level === 'High' ? 4 : 3
-            })),
-            languages: ((relevantData.skills || {}).languages || []).map((lang: any) => ({
-              language: lang.language || '',
-              level: lang.level || ''
-            }))
-          },
-          military: relevantData.military_service ? {
-            role: relevantData.military_service.role || '',
-            unit: relevantData.military_service.unit || 'IDF',
-            startDate: (relevantData.military_service.years || '').split('-')[0] || '',
-            endDate: (relevantData.military_service.years || '').split('-')[1] || '',
-            description: relevantData.military_service.achievements || []
-          } : undefined,
-          template: templateId,
-          references: [],
-          lang: 'en',
-          interfaceLang: interfaceLang
-        };
-
-        console.log('Formatted data:', formattedData);
+        const formattedData = transformResumeData(relevantData);
         setCvData(formattedData);
+        setIsLoading(false);
       } catch (error) {
         console.error('Error loading CV data:', error);
         toast.error(interfaceLang === 'he' ? 'שגיאה בטעינת נתונים' : 'Error loading CV data');
-      } finally {
         setIsLoading(false);
       }
     };

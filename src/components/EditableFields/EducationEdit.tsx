@@ -6,17 +6,28 @@ import {
   DialogTitle,
 } from '@/components/theme/ui/dialog';
 import { Input } from '@/components/theme/ui/input';
+import { Button } from '@/components/theme/ui/button';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/theme/ui/accordion";
-import { AnimatePresence, motion } from 'framer-motion';
+} from '@/components/theme/ui/accordion';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { format } from 'date-fns';
+import { he, enUS } from 'date-fns/locale';
+import { GraduationCap, BookOpen, Building2, Calendar, Plus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { GraduationCap, Calendar, Building2, GripVertical, Plus, Trash2, BookOpen, AlertCircle } from 'lucide-react';
-import { Education, Degree } from '@/types/resume';
-import { Button } from '@/components/theme/ui/button';
+import { Degree, DegreeType } from '@/types/resume';
+import { AnimatePresence } from 'framer-motion';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/theme/ui/select";
 
 interface EducationEditProps {
   isOpen: boolean;
@@ -27,210 +38,127 @@ interface EducationEditProps {
   template?: string;
 }
 
-// Helper function to convert date string to timestamp for sorting
-const getDateTimestamp = (dateStr: string): number => {
-  if (!dateStr) return 0;
-  
-  // Handle special cases for "present" or "today"
-  const presentValues = ['present', 'היום', 'כיום', 'עד היום', 'current'];
-  if (presentValues.includes(dateStr.toLowerCase())) {
-    return new Date().getTime();
-  }
-
-  // Check if the date is in MM/YYYY format
-  const mmYYYYRegex = /^(0[1-9]|1[0-2])\/\d{4}$/;
-  if (mmYYYYRegex.test(dateStr)) {
-    const [month, year] = dateStr.split('/').map(Number);
-    return new Date(year, month - 1).getTime();
-  }
-
-  // Check if the date is just a year
-  const yearRegex = /^\d{4}$/;
-  if (yearRegex.test(dateStr)) {
-    return new Date(parseInt(dateStr), 0).getTime();
-  }
-
-  return 0;
-};
-
-// Helper function to validate date format (YYYY or MM/YYYY)
-const isValidDateFormat = (dateStr: string): boolean => {
-  if (!dateStr) return true; // Allow empty dates
-  
-  // Handle special cases for "present" or "today"
-  const presentValues = ['present', 'היום', 'כיום', 'עד היום', 'current'];
-  if (presentValues.includes(dateStr.toLowerCase())) {
-    return true;
-  }
-
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
-
-  // Check if the date is in MM/YYYY format
-  const mmYYYYRegex = /^(0[1-9]|1[0-2])\/\d{4}$/;
-  if (mmYYYYRegex.test(dateStr)) {
-    const [month, year] = dateStr.split('/').map(Number);
-    
-    // Check if date is in the future
-    if (year > currentYear || (year === currentYear && month > currentMonth)) {
-      return false;
-    }
-    
-    return year >= 1900 && year <= currentYear;
-  }
-
-  // Check if the date is just a year
-  const yearRegex = /^\d{4}$/;
-  if (yearRegex.test(dateStr)) {
-    const year = parseInt(dateStr);
-    return year >= 1900 && year <= currentYear;
-  }
-
-  return false;
-};
-
-// Helper function to check if end date is after start date
-const isValidDateRange = (startDate: string, endDate: string): boolean => {
-  if (!startDate || !endDate) return true; // Allow empty dates
-  
-  // Handle special cases for "present" or "today"
-  const presentValues = ['present', 'היום', 'כיום', 'עד היום', 'current'];
-  if (presentValues.includes(endDate.toLowerCase())) {
-    return true;
-  }
-
-  const startTimestamp = getDateTimestamp(startDate);
-  const endTimestamp = getDateTimestamp(endDate);
-  return startTimestamp <= endTimestamp;
-};
-
-export const EducationEdit: React.FC<EducationEditProps> = ({
+const EducationEdit: React.FC<EducationEditProps> = ({
   isOpen,
   onClose,
   data,
   onSave,
   isRTL = document.documentElement.lang === 'he',
-  template = 'professional'
+  template = 'professional',
 }) => {
   const [degrees, setDegrees] = useState<Degree[]>([]);
   const [expandedItem, setExpandedItem] = useState<string | undefined>(undefined);
-  const [dateErrors, setDateErrors] = useState<{[key: string]: string}>({});
+  const [dateErrors, setDateErrors] = useState<{ [key: string]: string }>({});
+
+  // פונקציה להמרת תאריך מ־MM/yyyy או YYYY לאובייקט Date
+  const parseDateString = (dateStr: string): Date | null => {
+    if (!dateStr) return null;
+    const presentValues = ['present', 'היום', 'כיום', 'עד היום', 'current'];
+    if (presentValues.includes(dateStr.toLowerCase())) {
+      return new Date();
+    }
+    const mmYYYYRegex = /^(0[1-9]|1[0-2])\/\d{4}$/;
+    if (mmYYYYRegex.test(dateStr)) {
+      const [month, year] = dateStr.split('/').map(Number);
+      return new Date(year, month - 1);
+    }
+    const yearRegex = /^\d{4}$/;
+    if (yearRegex.test(dateStr)) {
+      return new Date(parseInt(dateStr), 0);
+    }
+    return null;
+  };
 
   useEffect(() => {
     if (isOpen && data) {
-      // Sort degrees chronologically by start date (most recent first)
-      const sortedDegrees = [...(Array.isArray(data) ? data : [data])].sort((a, b) => {
-        const yearA = parseInt(a.startDate) || 0;
-        const yearB = parseInt(b.startDate) || 0;
-        return yearB - yearA; // החדש ביותר למעלה
+      const sortedDegrees = [...data].sort((a, b) => {
+        const timeA = parseDateString(a.startDate)?.getTime() || 0;
+        const timeB = parseDateString(b.startDate)?.getTime() || 0;
+        return timeB - timeA; // חדש למעלה
       });
       setDegrees(sortedDegrees);
     }
   }, [data, isOpen]);
 
-  const validateAndUpdateDate = (index: number, field: 'startDate' | 'endDate', value: string) => {
-    const errorKey = `${index}-${field}`;
-    const otherField = field === 'startDate' ? 'endDate' : 'startDate';
-    const otherValue = degrees[index][otherField];
-
-    // Clear previous error
-    const newErrors = { ...dateErrors };
-    delete newErrors[errorKey];
-
-    // Auto-format: If user enters two digits that could be a month, add slash before year
-    if (/^\d{2}$/.test(value) && !value.includes('/') && parseInt(value) >= 1 && parseInt(value) <= 12) {
-      value = value + '/';
-    }
-    // If user enters 4 digits and it's a valid year, keep it as is
-    else if (/^\d{4}$/.test(value)) {
-      const year = parseInt(value);
-      const currentYear = new Date().getFullYear();
-      if (year >= 1900 && year <= currentYear) {
-        // Don't modify the value - keep it as a year
-      }
-    }
-
-    // Validate date format
-    if (value && !isValidDateFormat(value)) {
-      if (/^\d{4}$/.test(value)) {
-        newErrors[errorKey] = isRTL 
-          ? 'שנה לא יכולה להיות עתידית' 
-          : 'Year cannot be in the future';
-      } else {
-        newErrors[errorKey] = isRTL 
-          ? 'פורמט לא תקין. השתמש ב-YYYY או MM/YYYY' 
-          : 'Invalid format. Use YYYY or MM/YYYY';
-      }
-    }
-    // Validate date range
-    else if (field === 'endDate' && !isValidDateRange(degrees[index].startDate, value)) {
-      newErrors[errorKey] = isRTL 
-        ? 'תאריך סיום חייב להיות אחרי תאריך התחלה' 
-        : 'End date must be after start date';
-    }
-    else if (field === 'startDate' && !isValidDateRange(value, degrees[index].endDate)) {
-      newErrors[errorKey] = isRTL 
-        ? 'תאריך התחלה חייב להיות לפני תאריך סיום' 
-        : 'Start date must be before end date';
-    }
-
-    setDateErrors(newErrors);
-    handleDegreeChange(index, field, value);
-  };
-
-  const handleDegreeChange = (index: number, field: keyof Degree, value: string) => {
+  // עדכון שדה בפרטי השכלה
+  const handleDegreeChange = (index: number, field: keyof Degree, value: any) => {
     setDegrees(prev => {
-      const updated = prev.map((deg, i) => 
-        i === index ? { ...deg, [field]: value } : deg
-      );
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
       return updated;
     });
   };
 
+  // טיפול בבחירת תאריך
+  const handleDateSelect = (index: number, field: 'startDate' | 'endDate', date: Date | null) => {
+    if (!date) return;
+    const formattedDate = format(date, 'MM/yyyy', { locale: isRTL ? he : enUS });
+    handleDegreeChange(index, field, formattedDate);
+
+    // בדיקת טווח תאריכים
+    const currentDegree = degrees[index];
+    const startDate = field === 'startDate' ? formattedDate : currentDegree.startDate;
+    const endDate = field === 'endDate' ? formattedDate : currentDegree.endDate;
+    const start = parseDateString(startDate);
+    const end = parseDateString(endDate);
+
+    if (start && end && start.getTime() > end.getTime()) {
+      setDateErrors(prev => ({
+        ...prev,
+        [`${index}-date`]: isRTL
+          ? 'תאריך התחלה חייב להיות לפני תאריך סיום'
+          : 'Start date must be before end date',
+      }));
+    } else {
+      setDateErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[`${index}-date`];
+        return newErrors;
+      });
+    }
+  };
+
+  // הוספת השכלה חדשה
   const handleAddNewDegree = () => {
     const newDegree: Degree = {
       type: '',
+      degreeType: 'academic',
       field: '',
       institution: '',
       startDate: '',
       endDate: '',
-      specialization: ''
+      specialization: '',
     };
-    setDegrees(prev => [...prev, newDegree]);
-    setExpandedItem(`item-${degrees.length}`);
+    setDegrees(prev => [newDegree, ...prev]);
+    setExpandedItem('0');
   };
 
+  // הסרת השכלה
   const handleRemoveDegree = (index: number) => {
     setDegrees(prev => prev.filter((_, i) => i !== index));
+    setDateErrors(prev => {
+      const newErrors = { ...prev };
+      delete newErrors[`${index}-date`];
+      return newErrors;
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  // שמירה
+  const handleSave = () => {
+    if (Object.keys(dateErrors).length > 0) return;
     
-    // Check for date validation errors
-    if (Object.keys(dateErrors).length > 0) {
-      return; // Don't submit if there are validation errors
-    }
-
-    const updatedDegrees = degrees
-      .map(deg => ({
-        ...deg,
-        type: deg.type.trim(),
-        field: deg.field.trim(),
-        institution: deg.institution.trim(),
-        startDate: deg.startDate.trim(),
-        endDate: deg.endDate.trim(),
-        specialization: deg.specialization?.trim()
-      }))
-      // Sort by start date (most recent first)
-      .sort((a, b) => {
-        const yearA = parseInt(a.startDate) || 0;
-        const yearB = parseInt(b.startDate) || 0;
-        return yearB - yearA; // החדש ביותר למעלה
-      });
-
-    onSave(updatedDegrees);
+    const validDegrees = degrees.map(degree => ({
+      type: degree.type.trim(),
+      degreeType: degree.degreeType || 'academic',
+      field: degree.field.trim(),
+      institution: degree.institution.trim(),
+      startDate: degree.startDate.trim(),
+      endDate: degree.endDate.trim(),
+      specialization: degree.specialization ? degree.specialization.trim() : '',
+      years: `${degree.startDate.trim()} - ${degree.endDate.trim()}`
+    }));
+    
+    onSave(validDegrees);
     onClose();
   };
 
@@ -239,209 +167,408 @@ export const EducationEdit: React.FC<EducationEditProps> = ({
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={onClose}>
           <DialogContent className={cn(
-            "sm:max-w-[600px] p-0 gap-0",
-            "bg-gradient-to-b from-white to-gray-50",
-            "rounded-2xl shadow-xl border-0",
-            isRTL ? "rtl" : "ltr",
-            template === 'professional' && "font-rubik",
-            template === 'creative' && "font-heebo",
-            template === 'general' && "font-opensans",
-            template === 'classic' && "font-assistant",
-          )}>
-            <div className="p-6 border-b border-[#4856CD]/10">
+            "!fixed !top-[50%] !left-[50%] !transform !-translate-x-1/2 !-translate-y-1/2",
+            "!w-[600px] !max-w-[92vw]",
+            "!p-0 !m-0 !gap-0 !overflow-hidden",
+            "!bg-gradient-to-br !from-white !via-white !to-gray-50/80",
+            "!rounded-2xl !shadow-[0_20px_70px_-10px_rgba(0,0,0,0.15)] !border !border-gray-100",
+            isRTL ? "!rtl" : "!ltr",
+            template === 'professional' && "!font-rubik",
+            template === 'creative' && "!font-heebo",
+            template === 'general' && "!font-opensans",
+            template === 'classic' && "!font-assistant",
+            "!block"
+          )}
+          style={{ width: '600px', maxWidth: '92vw' }}>
+            <div className="px-6 py-5 border-b border-[#4856CD]/5 bg-gradient-to-r from-[#4856CD]/[0.03] to-transparent">
               <DialogHeader>
                 <DialogTitle className={cn(
-                  "text-center text-2xl font-bold",
-                  "bg-gradient-to-r from-[#4856CD] to-[#4856CD]/80 text-transparent bg-clip-text"
+                  "text-center text-[22px] font-bold",
+                  "bg-gradient-to-r from-[#4856CD] to-[#4856CD]/90 text-transparent bg-clip-text"
                 )}>
                   {isRTL ? 'השכלה' : 'Education'}
                 </DialogTitle>
               </DialogHeader>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+            <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="px-8 py-6 space-y-6 max-h-[80vh] overflow-y-auto">
               <Accordion
                 type="single"
                 collapsible
                 value={expandedItem}
                 onValueChange={setExpandedItem}
-                className="space-y-2"
+                className="space-y-4"
               >
-                {degrees.map((deg, index) => (
+                {degrees.map((degree, index) => (
                   <AccordionItem
                     key={index}
-                    value={`item-${index}`}
-                    className="border rounded-xl bg-white p-2"
+                    value={index.toString()}
+                    className={cn(
+                      "border border-gray-200/80 rounded-xl overflow-hidden",
+                      "hover:border-[#4856CD]/30 transition-colors duration-200",
+                      expandedItem === index.toString() && "border-[#4856CD]/30"
+                    )}
                   >
-                    <div className="flex items-center justify-between">
-                      <AccordionTrigger className="hover:no-underline">
-                        <div className="flex items-center gap-2">
-                          <GraduationCap className="w-4 h-4 text-gray-400" />
-                          <span className="font-medium">
-                            {deg.type || (isRTL ? 'תואר חדש' : 'New Degree')}
-                            {deg.institution && ` - ${deg.institution}`}
-                          </span>
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg !bg-[#4856CD]/5 flex items-center justify-center">
+                          <GraduationCap className="w-4 h-4 !text-[#4856CD]" />
                         </div>
-                      </AccordionTrigger>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500"
-                        onClick={() => handleRemoveDegree(index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
+                        <div className="!text-right">
+                          <h3 className="font-medium !text-[15px] !text-gray-900">
+                            {degree.type || (isRTL ? 'השכלה חדשה' : 'New Education')}
+                          </h3>
+                          <p className="!text-[13px] !text-gray-500">
+                            {degree.institution || (isRTL ? 'שם המוסד' : 'Institution Name')}
+                          </p>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
 
-                    <AccordionContent className="pt-4 space-y-4">
+                    <AccordionContent className="px-4 pb-4">
                       <div className="space-y-4">
-                        <div className="relative">
-                          <Input
-                            value={deg.type}
-                            onChange={(e) => handleDegreeChange(index, 'type', e.target.value)}
-                            placeholder={isRTL ? 'סוג תואר' : 'Degree Type'}
-                            className={cn(
-                              "pl-10",
-                              "bg-white text-gray-900",
-                              "rounded-xl border-gray-200",
-                              "focus:border-[#4856CD] focus:ring-[#4856CD]/10"
-                            )}
-                          />
-                          <GraduationCap className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        {/* סוג התואר */}
+                        <div className="group">
+                          <label className={cn(
+                            "block text-[13px] font-medium mb-2",
+                            "text-gray-700 group-hover:text-[#4856CD]",
+                            "transition-colors duration-200"
+                          )}>
+                            {isRTL ? 'סוג התואר' : 'Degree Type'}
+                          </label>
+                          <div className="relative">
+                            <Select
+                              value={degree.degreeType}
+                              onValueChange={(value) => handleDegreeChange(index, 'degreeType', value as DegreeType)}
+                            >
+                              <SelectTrigger className={cn(
+                                "w-full bg-white text-[#4856CD]",
+                                "border-[#4856CD] border-2",
+                                "hover:bg-[#4856CD] hover:text-white",
+                                "transition-colors",
+                                "text-right",
+                                "h-11"
+                              )}>
+                                <SelectValue placeholder={isRTL ? "בחר סוג תואר" : "Select Degree Type"} />
+                              </SelectTrigger>
+                              <SelectContent className="bg-white border-[#4856CD] border-2" dir={isRTL ? "rtl" : "ltr"}>
+                                {[
+                                  { value: 'academic', label: { he: 'תואר אקדמי', en: 'Academic Degree' } },
+                                  { value: 'certification', label: { he: 'תעודת הסמכה', en: 'Certification' } },
+                                  { value: 'course', label: { he: 'קורס', en: 'Course' } },
+                                  { value: 'bootcamp', label: { he: 'מחנה הכשרה', en: 'Bootcamp' } },
+                                  { value: 'training', label: { he: 'הכשרה מקצועית', en: 'Professional Training' } },
+                                  { value: 'other', label: { he: 'אחר', en: 'Other' } },
+                                ].map(option => (
+                                  <SelectItem 
+                                    key={option.value} 
+                                    value={option.value}
+                                    className={cn(
+                                      "text-[#4856CD]",
+                                      "hover:bg-[#4856CD] hover:text-white",
+                                      "focus:bg-[#4856CD] focus:text-white",
+                                      "cursor-pointer transition-colors",
+                                      "text-right w-full flex justify-end"
+                                    )}
+                                  >
+                                    {isRTL ? option.label.he : option.label.en}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <GraduationCap className={cn(
+                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                              "text-gray-400 group-hover:text-[#4856CD]/70",
+                              "transition-colors duration-200",
+                              isRTL ? "right-4" : "left-4"
+                            )} />
+                          </div>
                         </div>
 
-                        <div className="relative">
-                          <Input
-                            value={deg.field}
-                            onChange={(e) => handleDegreeChange(index, 'field', e.target.value)}
-                            placeholder={isRTL ? 'תחום לימודים' : 'Field of Study'}
-                            className={cn(
-                              "pl-10",
-                              "bg-white text-gray-900",
-                              "rounded-xl border-gray-200",
-                              "focus:border-[#4856CD] focus:ring-[#4856CD]/10"
-                            )}
-                          />
-                          <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        {/* שם התואר */}
+                        <div className="group">
+                          <label className={cn(
+                            "block text-[13px] font-medium mb-2",
+                            "text-gray-700 group-hover:text-[#4856CD]",
+                            "transition-colors duration-200"
+                          )}>
+                            {isRTL ? 'שם התואר' : 'Degree Name'}
+                          </label>
+                          <div className="relative">
+                            <Input
+                              value={degree.type}
+                              onChange={(e) => handleDegreeChange(index, 'type', e.target.value)}
+                              className={cn(
+                                "w-full h-11 bg-white text-[14px] text-gray-900",
+                                "rounded-lg border border-gray-200/80",
+                                "shadow-sm shadow-gray-100/50",
+                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                "focus:ring-2 focus:ring-[#4856CD]/10",
+                                "transition duration-200",
+                                isRTL ? "pr-11" : "pl-11"
+                              )}
+                              dir={isRTL ? 'rtl' : 'ltr'}
+                              placeholder={isRTL ? 'לדוגמה: תואר ראשון' : "e.g. Bachelor's Degree"}
+                            />
+                            <GraduationCap className={cn(
+                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                              "text-gray-400 group-hover:text-[#4856CD]/70",
+                              "transition-colors duration-200",
+                              isRTL ? "right-4" : "left-4"
+                            )} />
+                          </div>
                         </div>
 
-                        <div className="relative">
-                          <Input
-                            value={deg.institution}
-                            onChange={(e) => handleDegreeChange(index, 'institution', e.target.value)}
-                            placeholder={isRTL ? 'מוסד לימודים' : 'Institution'}
-                            className={cn(
-                              "pl-10",
-                              "bg-white text-gray-900",
-                              "rounded-xl border-gray-200",
-                              "focus:border-[#4856CD] focus:ring-[#4856CD]/10"
-                            )}
-                          />
-                          <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        {/* תחום לימודים */}
+                        <div className="group">
+                          <label className={cn(
+                            "block text-[13px] font-medium mb-2",
+                            "text-gray-700 group-hover:text-[#4856CD]",
+                            "transition-colors duration-200"
+                          )}>
+                            {isRTL ? 'תחום לימודים' : 'Field of Study'}
+                          </label>
+                          <div className="relative">
+                            <Input
+                              value={degree.field}
+                              onChange={(e) => handleDegreeChange(index, 'field', e.target.value)}
+                              className={cn(
+                                "w-full h-11 bg-white text-[14px] text-gray-900",
+                                "rounded-lg border border-gray-200/80",
+                                "shadow-sm shadow-gray-100/50",
+                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                "focus:ring-2 focus:ring-[#4856CD]/10",
+                                "transition duration-200",
+                                isRTL ? "pr-11" : "pl-11"
+                              )}
+                              dir={isRTL ? 'rtl' : 'ltr'}
+                              placeholder={isRTL ? 'לדוגמה: מדעי המחשב' : 'e.g. Computer Science'}
+                            />
+                            <BookOpen className={cn(
+                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                              "text-gray-400 group-hover:text-[#4856CD]/70",
+                              "transition-colors duration-200",
+                              isRTL ? "right-4" : "left-4"
+                            )} />
+                          </div>
                         </div>
 
+                        {/* מוסד לימודים */}
+                        <div className="group">
+                          <label className={cn(
+                            "block text-[13px] font-medium mb-2",
+                            "text-gray-700 group-hover:text-[#4856CD]",
+                            "transition-colors duration-200"
+                          )}>
+                            {isRTL ? 'מוסד לימודים' : 'Institution'}
+                          </label>
+                          <div className="relative">
+                            <Input
+                              value={degree.institution}
+                              onChange={(e) => handleDegreeChange(index, 'institution', e.target.value)}
+                              className={cn(
+                                "w-full h-11 bg-white text-[14px] text-gray-900",
+                                "rounded-lg border border-gray-200/80",
+                                "shadow-sm shadow-gray-100/50",
+                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                "focus:ring-2 focus:ring-[#4856CD]/10",
+                                "transition duration-200",
+                                isRTL ? "pr-11" : "pl-11"
+                              )}
+                              dir={isRTL ? 'rtl' : 'ltr'}
+                              placeholder={isRTL ? 'לדוגמה: אוניברסיטת תל אביב' : 'e.g. Tel Aviv University'}
+                            />
+                            <Building2 className={cn(
+                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                              "text-gray-400 group-hover:text-[#4856CD]/70",
+                              "transition-colors duration-200",
+                              isRTL ? "right-4" : "left-4"
+                            )} />
+                          </div>
+                        </div>
+
+                        {/* תאריכים */}
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="relative">
-                            <Input
-                              value={deg.startDate}
-                              onChange={(e) => validateAndUpdateDate(index, 'startDate', e.target.value)}
-                              placeholder={isRTL ? 'תאריך התחלה (YYYY או MM/YYYY)' : 'Start Date (YYYY or MM/YYYY)'}
-                              className={cn(
-                                "pl-10",
-                                "bg-white text-gray-900",
-                                "rounded-xl border-gray-200",
-                                "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                                dateErrors[`${index}-startDate`] && "border-red-500"
-                              )}
-                            />
-                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            {dateErrors[`${index}-startDate`] && (
-                              <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                <AlertCircle className="w-4 h-4" />
-                                {dateErrors[`${index}-startDate`]}
-                              </div>
-                            )}
+                          {/* תאריך התחלה */}
+                          <div className="group">
+                            <label className={cn(
+                              "block text-[13px] font-medium mb-2",
+                              "text-gray-700 group-hover:text-[#4856CD]",
+                              "transition-colors duration-200"
+                            )}>
+                              {isRTL ? 'תאריך התחלה' : 'Start Date'}
+                            </label>
+                            <div className="relative">
+                              <DatePicker
+                                selected={degree.startDate ? parseDateString(degree.startDate) : null}
+                                onChange={(date: Date | null) => date && handleDateSelect(index, 'startDate', date)}
+                                dateFormat="MM/yyyy"
+                                showMonthYearPicker
+                                maxDate={degree.endDate ? parseDateString(degree.endDate) ?? undefined : undefined}
+                                className={cn(
+                                  "w-full h-11 bg-white text-[14px] text-gray-900",
+                                  "rounded-lg border border-gray-200/80",
+                                  "shadow-sm shadow-gray-100/50",
+                                  "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                  "focus:ring-2 focus:ring-[#4856CD]/10",
+                                  "transition duration-200",
+                                  isRTL ? "pr-11 text-right" : "pl-11",
+                                  !degree.startDate && "text-gray-400"
+                                )}
+                                placeholderText={isRTL ? 'בחר תאריך' : 'Select date'}
+                                locale={isRTL ? he : enUS}
+                              />
+                              <Calendar className={cn(
+                                "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                "text-gray-400 group-hover:text-[#4856CD]/70",
+                                "transition-colors duration-200",
+                                isRTL ? "right-4" : "left-4"
+                              )} />
+                            </div>
                           </div>
 
-                          <div className="relative">
-                            <Input
-                              value={deg.endDate}
-                              onChange={(e) => validateAndUpdateDate(index, 'endDate', e.target.value)}
-                              placeholder={isRTL ? 'תאריך סיום (YYYY או MM/YYYY או היום)' : 'End Date (YYYY or MM/YYYY or Present)'}
-                              className={cn(
-                                "pl-10",
-                                "bg-white text-gray-900",
-                                "rounded-xl border-gray-200",
-                                "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                                dateErrors[`${index}-endDate`] && "border-red-500"
-                              )}
-                            />
-                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            {dateErrors[`${index}-endDate`] && (
-                              <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                <AlertCircle className="w-4 h-4" />
-                                {dateErrors[`${index}-endDate`]}
-                              </div>
-                            )}
+                          {/* תאריך סיום */}
+                          <div className="group">
+                            <label className={cn(
+                              "block text-[13px] font-medium mb-2",
+                              "text-gray-700 group-hover:text-[#4856CD]",
+                              "transition-colors duration-200"
+                            )}>
+                              {isRTL ? 'תאריך סיום' : 'End Date'}
+                            </label>
+                            <div className="relative">
+                              <DatePicker
+                                selected={degree.endDate ? parseDateString(degree.endDate) : null}
+                                onChange={(date: Date | null) => date && handleDateSelect(index, 'endDate', date)}
+                                dateFormat="MM/yyyy"
+                                showMonthYearPicker
+                                minDate={degree.startDate ? parseDateString(degree.startDate) ?? undefined : undefined}
+                                className={cn(
+                                  "w-full h-11 bg-white text-[14px] text-gray-900",
+                                  "rounded-lg border border-gray-200/80",
+                                  "shadow-sm shadow-gray-100/50",
+                                  "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                  "focus:ring-2 focus:ring-[#4856CD]/10",
+                                  "transition duration-200",
+                                  isRTL ? "pr-11 text-right" : "pl-11",
+                                  !degree.endDate && "text-gray-400"
+                                )}
+                                placeholderText={isRTL ? 'בחר תאריך' : 'Select date'}
+                                locale={isRTL ? he : enUS}
+                              />
+                              <Calendar className={cn(
+                                "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                "text-gray-400 group-hover:text-[#4856CD]/70",
+                                "transition-colors duration-200",
+                                isRTL ? "right-4" : "left-4"
+                              )} />
+                            </div>
                           </div>
                         </div>
 
-                        <div className="relative">
-                          <Input
-                            value={deg.specialization || ''}
-                            onChange={(e) => handleDegreeChange(index, 'specialization', e.target.value)}
-                            placeholder={isRTL ? 'התמחות (אופציונלי)' : 'Specialization (optional)'}
-                            className={cn(
-                              "pl-10",
-                              "bg-white text-gray-900",
-                              "rounded-xl border-gray-200",
-                              "focus:border-[#4856CD] focus:ring-[#4856CD]/10"
-                            )}
-                          />
-                          <BookOpen className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        {/* התמחות */}
+                        <div className="group">
+                          <label className={cn(
+                            "block text-[13px] font-medium mb-2",
+                            "text-gray-700 group-hover:text-[#4856CD]",
+                            "transition-colors duration-200"
+                          )}>
+                            {isRTL ? 'התמחות (אופציונלי)' : 'Specialization (Optional)'}
+                          </label>
+                          <div className="relative">
+                            <Input
+                              value={degree.specialization || ''}
+                              onChange={(e) => handleDegreeChange(index, 'specialization', e.target.value)}
+                              className={cn(
+                                "w-full h-11 bg-white text-[14px] text-gray-900",
+                                "rounded-lg border border-gray-200/80",
+                                "shadow-sm shadow-gray-100/50",
+                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                "focus:ring-2 focus:ring-[#4856CD]/10",
+                                "transition duration-200",
+                                isRTL ? "pr-11" : "pl-11"
+                              )}
+                              dir={isRTL ? 'rtl' : 'ltr'}
+                              placeholder={isRTL ? 'לדוגמה: הנדסת חשמל' : 'e.g. Electrical Engineering'}
+                            />
+                            <BookOpen className={cn(
+                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                              "text-gray-400 group-hover:text-[#4856CD]/70",
+                              "transition-colors duration-200",
+                              isRTL ? "right-4" : "left-4"
+                            )} />
+                          </div>
                         </div>
+
+                        {dateErrors[`${index}-date`] && (
+                          <p className="text-sm text-red-500">{dateErrors[`${index}-date`]}</p>
+                        )}
+
+                        <Button
+                          type="button"
+                          onClick={() => handleRemoveDegree(index)}
+                          variant="ghost"
+                          className="h-11 px-4 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600 w-full"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          {isRTL ? 'מחק השכלה' : 'Delete Education'}
+                        </Button>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
                 ))}
-
-                <Button
-                  type="button"
-                  onClick={handleAddNewDegree}
-                  className={cn(
-                    "w-full p-4 mt-4",
-                    "bg-gray-100 text-gray-700",
-                    "rounded-xl",
-                    "hover:bg-gray-200",
-                    "transition-colors",
-                    "flex items-center justify-center gap-2"
-                  )}
-                >
-                  <Plus className="w-4 h-4" />
-                  {isRTL ? 'הוסף תואר' : 'Add Degree'}
-                </Button>
               </Accordion>
 
-              <button
-                type="submit"
-                disabled={Object.keys(dateErrors).length > 0}
+              <Button
+                type="button"
+                onClick={handleAddNewDegree}
                 className={cn(
-                  "w-full p-4",
-                  "bg-[#4856CD] text-white",
-                  "rounded-xl",
-                  "transition-colors",
-                  Object.keys(dateErrors).length > 0 
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#4856CD]/90"
+                  "!w-full !p-4 !mt-4",
+                  "!bg-white !text-[#4856CD]",
+                  "!rounded-xl !border !border-[#4856CD]/30",
+                  "hover:!bg-[#4856CD] hover:!text-white",
+                  "!transition-all",
+                  "!flex !items-center !justify-center !gap-2"
                 )}
               >
-                {isRTL ? 'שמור' : 'Save'}
-              </button>
+                <Plus className="!w-4 !h-4" />
+                {isRTL ? 'הוסף השכלה' : 'Add Education'}
+              </Button>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className={cn(
+                    "flex-1 h-11",
+                    "rounded-lg border-2 border-[#4856CD]",
+                    "text-[#4856CD] text-[14px] hover:bg-[#4856CD]/[0.02]",
+                    "active:scale-[0.98]",
+                    "transition-all duration-200 font-medium"
+                  )}
+                >
+                  {isRTL ? 'ביטול' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className={cn(
+                    "flex-1 h-11",
+                    "rounded-lg bg-[#4856CD]",
+                    "text-white text-[14px] hover:bg-[#4856CD]/95",
+                    "active:scale-[0.98]",
+                    "transition-all duration-200 font-medium",
+                    "shadow-md shadow-[#4856CD]/10"
+                  )}
+                >
+                  {isRTL ? 'שמירה' : 'Save'}
+                </button>
+              </div>
             </form>
           </DialogContent>
         </Dialog>
       )}
     </AnimatePresence>
   );
-}; 
+};
+
+export default EducationEdit;

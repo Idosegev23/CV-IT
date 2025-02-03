@@ -1,21 +1,12 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { ResumeData, Degree } from '@/types/resume';
 import '../../styles/templates/classic.css';
 import Image from 'next/image';
 import { Assistant } from 'next/font/google';
-import { EditableText } from '../EditableFields/EditableText';
-import { EditableList } from '../EditableFields/EditableList';
 import { adjustTemplateSize, formatDescription, formatDate, getSkillLevel } from './utils';
-import { EditButton } from '../EditableFields/EditButton';
 import { Edit2 } from 'lucide-react';
-import { PersonalInfoEdit } from '../EditableFields/PersonalInfoEdit';
-import { SkillsEdit } from '../EditableFields/SkillsEdit';
-import { EducationEdit } from '../EditableFields/EducationEdit';
-import { MilitaryEdit } from '../EditableFields/MilitaryEdit';
-import { ExperienceEdit } from '../EditableFields/ExperienceEdit';
-import { ProfessionalSummaryEdit } from '../EditableFields/ProfessionalSummaryEdit';
-import { LanguagesEdit } from '../EditableFields/LanguagesEdit';
+import { cn } from '@/lib/utils';
 
 // הגדרת טיפוסים
 interface TechnicalSkill {
@@ -126,6 +117,10 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
   const { personalInfo, experience, education, skills, military } = data;
   const isRTL = cvLang === 'he';
 
+  console.log('ClassicTemplate - Full data:', data);
+  console.log('ClassicTemplate - Skills:', skills);
+  console.log('ClassicTemplate - Languages:', skills?.languages);
+
   const splitName = (fullName: string) => {
     const nameParts = fullName.trim().split(/\s+/);
     if (nameParts.length === 1) return { firstName: nameParts[0], lastName: '' };
@@ -209,55 +204,48 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {/* ניסיון תעסוקתי */}
         {experience && experience.length > 0 && (
           <section className="experience-section">
-            <h2 className="section-title section-container relative">
-              {t.workExperience}
-              {isEditing && (
-                <button
-                  onClick={() => onEdit('experience', 0)}
-                  className="edit-button"
-                  title={lang === 'he' ? 'הוסף ניסיון תעסוקתי' : 'Add Work Experience'}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              )}
-            </h2>
-            <div className="experience-items">
-              {experience.map((exp, index) => (
-                <div key={index} className="experience-item relative">
-                  <div className="experience-header">
-                    <div className="experience-title-wrapper">
-                      <div className="flex items-center gap-1">
-                        <span className="experience-title">{exp.position}</span>
-                        {isEditing && (
-                          <button
-                            onClick={() => onEdit('experience', index)}
-                            className="edit-button"
-                            title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
+            <div className="section-container">
+              <h2 className="section-title relative">
+                {t.workExperience}
+                {isEditing && (
+                  <button
+                    onClick={() => onEdit('experience', 0)}
+                    className="edit-button"
+                    title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+              </h2>
+              <div className="experience-items">
+                {experience.map((exp, index) => (
+                  <div key={index} className="experience-item relative">
+                    <div className="experience-header">
+                      <div className="experience-title-wrapper">
+                        <div className="flex items-center gap-1">
+                          <span className="experience-title">{exp.position}</span>
+                        </div>
+                        {exp.company && (
+                          <>
+                            <span className="experience-separator">|</span>
+                            <span className="experience-company">{exp.company}</span>
+                          </>
                         )}
                       </div>
-                      {exp.company && (
-                        <>
-                          <span className="experience-separator">|</span>
-                          <span className="experience-company">{exp.company}</span>
-                        </>
-                      )}
+                      <div className="experience-date">
+                        {formatDate(exp.startDate, exp.endDate, cvLang)}
+                      </div>
                     </div>
-                    <div className="experience-date">
-                      {formatDate(exp.startDate, exp.endDate, cvLang)}
-                    </div>
+                    {exp.description && exp.description.length > 0 && (
+                      <ul className="experience-description">
+                        {exp.description.map((desc, i) => (
+                          <li key={i}>{desc}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
-                  {exp.description && exp.description.length > 0 && (
-                    <ul className="experience-description">
-                      {formatDescription(exp.description, data.experience.length).map((desc, i) => (
-                        <li key={i}>{desc}</li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </section>
         )}
@@ -265,42 +253,44 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {/* השכלה */}
         {education?.degrees && education.degrees.length > 0 && (
           <section className="education-section">
-            <h2 className="section-title section-container relative">
-              {t.education}
-              {isEditing && (
-                <button
-                  onClick={() => onEdit('education', 0)}
-                  className="edit-button"
-                  title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              )}
-            </h2>
-            <div className="education-items">
-              {education.degrees.map((degree, index) => (
-                <div key={index} className="education-item relative">
-                  <div className="education-header">
-                    <div className="education-title-wrapper">
-                      <div className="flex items-center gap-1">
-                        <span className="education-degree">
-                          {`${degree.type} ${degree.field}`}
-                        </span>
+            <div className="section-container">
+              <h2 className="section-title relative">
+                {t.education}
+                {isEditing && (
+                  <button
+                    onClick={() => onEdit('education', 0)}
+                    className="edit-button"
+                    title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+              </h2>
+              <div className="education-items">
+                {education.degrees.map((degree, index) => (
+                  <div key={index} className="education-item relative">
+                    <div className="education-header">
+                      <div className="education-title-wrapper">
+                        <div className="flex items-center gap-1">
+                          <span className="education-degree">
+                            {`${degree.type} ${degree.field}`}
+                          </span>
+                        </div>
+                        <span className="experience-separator">|</span>
+                        <span className="education-institution">{degree.institution}</span>
                       </div>
-                      <span className="experience-separator">|</span>
-                      <span className="education-institution">{degree.institution}</span>
+                      <div className="education-date">
+                        {formatDate(degree.startDate, degree.endDate, cvLang)}
+                      </div>
                     </div>
-                    <div className="education-date">
-                      {formatDate(degree.startDate, degree.endDate, cvLang)}
-                    </div>
+                    {degree.specialization && (
+                      <div className="education-specialization">
+                        התמחות: {degree.specialization}
+                      </div>
+                    )}
                   </div>
-                  {degree.specialization && (
-                    <div className="education-specialization">
-                      התמחות: {degree.specialization}
-                    </div>
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </section>
         )}
@@ -308,38 +298,40 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {/* שירות צבאי/לאומי */}
         {military && (
           <section className="military-section">
-            <h2 className="section-title section-container relative">
-              {military.role?.toLowerCase().includes('לאומי') ? t.nationalService : t.militaryService}
-              {isEditing && (
-                <button
-                  onClick={() => onEdit('military', 0)}
-                  className="edit-button"
-                  title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              )}
-            </h2>
-            <div className="military-content">
-              <div className="military-header">
-                <div className="military-title-wrapper">
-                  <div className="flex items-center gap-1">
-                    <h3 className="military-title">{military.role}</h3>
-                    <span className="military-separator">|</span>
-                    <span className="military-unit">{military.unit}</span>
+            <div className="section-container">
+              <h2 className="section-title relative">
+                {military.role?.toLowerCase().includes('לאומי') ? t.nationalService : t.militaryService}
+                {isEditing && (
+                  <button
+                    onClick={() => onEdit('military', 0)}
+                    className="edit-button"
+                    title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+              </h2>
+              <div className="military-content">
+                <div className="military-header">
+                  <div className="military-title-wrapper">
+                    <div className="flex items-center gap-1">
+                      <h3 className="military-title">{military.role}</h3>
+                      <span className="military-separator">|</span>
+                      <span className="military-unit">{military.unit}</span>
+                    </div>
+                  </div>
+                  <div className="military-date">
+                    {formatDate(military.startDate, military.endDate, lang)}
                   </div>
                 </div>
-                <div className="military-date">
-                  {formatDate(military.startDate, military.endDate, lang)}
-                </div>
+                {military.description && military.description.length > 0 && (
+                  <ul className="military-description">
+                    {formatDescription(military.description, 3).map((desc, i) => (
+                      <li key={i}>{desc}</li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              {military.description && military.description.length > 0 && (
-                <ul className="military-description">
-                  {formatDescription(military.description, 3).map((desc, i) => (
-                    <li key={i}>{desc}</li>
-                  ))}
-                </ul>
-              )}
             </div>
           </section>
         )}
@@ -347,54 +339,58 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {/* כישורים */}
         {skills && (
           <section className="skills-section">
-            <h2 className="section-title section-container relative">
-              {t.skills}
-              {isEditing && (
-                <button
-                  onClick={() => onEdit('skills', 0)}
-                  className="edit-button"
-                  title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              )}
-            </h2>
-            <div className="skills-items">
-              {/* כישורים טכניים */}
-              {skills.technical && skills.technical.length > 0 && (
-                <>
-                  <h3 className="skills-subtitle">{t.technicalSkills}</h3>
-                  {skills.technical.map((skill, index) => (
-                    <span key={`tech-${index}`} className="skill-item relative">
-                      <span className="skill-name">{skill.name}</span>
-                      {" - "}
-                      <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
-                      {index < skills.technical.length - 1 && " | "}
-                    </span>
-                  ))}
-                </>
-              )}
-              
-              {/* כישורים רכים */}
-              {skills.soft && skills.soft.length > 0 && (
-                <>
-                  <h3 className="skills-subtitle">{t.softSkills}</h3>
-                  {skills.soft.map((skill, index) => (
-                    <span key={`soft-${index}`} className="skill-item relative">
-                      <span className="skill-name">{skill.name}</span>
-                      {index < skills.soft.length - 1 && " | "}
-                    </span>
-                  ))}
-                </>
-              )}
+            <div className="section-container">
+              <h2 className="section-title relative">
+                {t.skills}
+                {isEditing && (
+                  <button
+                    onClick={() => onEdit('skills', 0)}
+                    className="edit-button"
+                    title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                )}
+              </h2>
+              <div className="skills-items">
+                {/* כישורים טכניים */}
+                {skills.technical && skills.technical.length > 0 && (
+                  <>
+                    <h3 className="skills-subtitle">{t.technicalSkills}</h3>
+                    {skills.technical.map((skill, index) => (
+                      <span key={`tech-${index}`} className="skill-item relative">
+                        <span className="skill-name">{skill.name}</span>
+                        {" - "}
+                        <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
+                        {index < skills.technical.length - 1 && " | "}
+                      </span>
+                    ))}
+                  </>
+                )}
+                
+                {/* כישורים רכים */}
+                {skills.soft && skills.soft.length > 0 && (
+                  <>
+                    <h3 className="skills-subtitle">{t.softSkills}</h3>
+                    {skills.soft.map((skill, index) => (
+                      <span key={`soft-${index}`} className="skill-item relative">
+                        <span className="skill-name">{skill.name}</span>
+                        {" - "}
+                        <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
+                        {index < skills.soft.length - 1 && " | "}
+                      </span>
+                    ))}
+                  </>
+                )}
+              </div>
             </div>
           </section>
         )}
 
         {/* שפות */}
         {skills.languages && skills.languages.length > 0 && (
-          <section className="languages-section">
-            <h2 className="section-title section-container relative">
+          <section className="languages-section section-container">
+            <h2 className="section-title">
               {t.languages}
               {isEditing && (
                 <button
@@ -408,22 +404,12 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
             </h2>
             <div className="languages-items">
               {skills.languages.map((langItem, index) => (
-                <div key={index} className="language-item">
-                  <div className="language-content">
-                    <span className="language-name">{langItem.language}</span>
-                    <span className="language-separator">|</span>
-                    <span className="language-level">{langItem.level}</span>
-                  </div>
-                  {isEditing && (
-                    <button
-                      onClick={() => onEdit('language', index)}
-                      className="edit-button"
-                      title={cvLang === 'he' ? 'ערוך שפה' : 'Edit Language'}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
+                <>
+                  <span key={`lang-${index}`} className="languages-items">
+                    <span className="skill-name">{langItem.language}</span> - <span>{langItem.level}</span>
+                  </span>
+                  {index < skills.languages.length - 1 && <span> | </span>}
+                </>
               ))}
             </div>
           </section>

@@ -1,17 +1,10 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { ResumeData, Language, Degree, MilitaryService, PersonalInfo, Experience, Skills } from '../../types/resume';
 import '../../styles/templates/professional.css';
-import { Assistant } from 'next/font/google';
-import { formatDescription, formatDate } from './utils';
+import { Assistant, Rubik } from 'next/font/google';
+import { formatDate } from './utils';
 import { Edit2, Plus } from 'lucide-react';
-import { PersonalInfoEdit } from '../EditableFields/PersonalInfoEdit';
-import { SkillsEdit } from '../EditableFields/SkillsEdit';
-import { EducationEdit } from '../EditableFields/EducationEdit';
-import { MilitaryEdit } from '../EditableFields/MilitaryEdit';
-import { ExperienceEdit } from '../EditableFields/ExperienceEdit';
-import { ProfessionalSummaryEdit } from '../EditableFields/ProfessionalSummaryEdit';
-import { LanguagesEdit } from '../EditableFields/LanguagesEdit';
 import { cn } from '@/lib/utils';
 
 interface ProfessionalTemplateProps {
@@ -98,20 +91,6 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
   const military = data.military as MilitaryService | undefined;
   const isRTL = cvLang === 'he';
 
-  const [editingSection, setEditingSection] = useState<{
-    type: string;
-    index?: number;
-    data: any;
-  } | null>(null);
-
-  const [isAddingItem, setIsAddingItem] = useState<{
-    type: string;
-    fields: any[];
-  } | null>(null);
-
-  const [isEducationEditOpen, setIsEducationEditOpen] = useState(false);
-  const [isMilitaryEditOpen, setIsMilitaryEditOpen] = useState(false);
-
   useEffect(() => {
     const adjustSize = () => {
       const content = document.querySelector('.professional-template') as HTMLElement;
@@ -154,232 +133,10 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
     return levels[level] || 'רמה טובה';
   };
 
-  // Add handleUpdate functions
-  const handlePersonalInfoUpdate = (field: keyof typeof personalInfo, value: string) => {
-    onUpdate('personalInfo', { ...personalInfo, [field]: value });
-  };
-
-  const handleExperienceUpdate = (index: number, field: string, value: any) => {
-    const newExperience = [...experience];
-    newExperience[index] = { ...newExperience[index], [field]: value };
-    onUpdate('experience', newExperience);
-  };
-
-  const handleEducationUpdate = (index: number, field: string, value: any) => {
-    const newEducation = { ...education };
-    newEducation.degrees[index] = { ...newEducation.degrees[index], [field]: value };
-    onUpdate('education', newEducation);
-  };
-
-  const handleMilitaryUpdate = (field: string, value: any) => {
-    const newMilitary = { ...military, [field]: value };
-    onUpdate('military', newMilitary);
-  };
-
-  const handleSkillsUpdate = (type: 'technical' | 'soft' | 'languages', index: number, field: string, value: any) => {
-    const newSkills = { ...skills };
-    if (type === 'languages') {
-      newSkills.languages[index] = { ...newSkills.languages[index], [field]: value };
-    } else if (type === 'technical') {
-      newSkills.technical[index] = { ...newSkills.technical[index], [field]: value };
-    } else {
-      newSkills.soft[index] = { ...newSkills.soft[index], [field]: value };
+  const handleEdit = (type: string, index: number = 0) => {
+    if (onEdit) {
+      onEdit(type, index);
     }
-    onUpdate('skills', newSkills);
-  };
-
-  const handleEdit = (type: string, index?: number, data?: any) => {
-    let fields: Field[] = [];
-    switch (type) {
-      case 'personalInfo':
-        fields = [
-          { name: 'name', label: isRTL ? 'שם מלא' : 'Full Name', type: 'text', value: data.name },
-          { name: 'email', label: isRTL ? 'דוא"ל' : 'Email', type: 'text', value: data.email },
-          { name: 'phone', label: isRTL ? 'טלפון' : 'Phone', type: 'text', value: data.phone },
-          { name: 'address', label: isRTL ? 'כתובת' : 'Address', type: 'text', value: data.address },
-          { name: 'summary', label: isRTL ? 'תקציר מקצועי' : 'Professional Summary', type: 'textarea', value: data.summary }
-        ];
-        break;
-      case 'military':
-        fields = [
-          { name: 'role', label: isRTL ? 'תפקיד' : 'Role', type: 'text', value: data.role },
-          { name: 'unit', label: isRTL ? 'יחידה' : 'Unit', type: 'text', value: data.unit },
-          { name: 'startDate', label: isRTL ? 'תאריך התחלה' : 'Start Date', type: 'text', value: data.startDate },
-          { name: 'endDate', label: isRTL ? 'תאריך סיום' : 'End Date', type: 'text', value: data.endDate },
-          { name: 'description', label: isRTL ? 'תיאור השירות' : 'Service Description', type: 'list', value: data.description }
-        ];
-        break;
-      case 'experience':
-        fields = [
-          { name: 'position', label: isRTL ? 'תפקיד' : 'Position', type: 'text', value: data.position },
-          { name: 'company', label: isRTL ? 'חברה' : 'Company', type: 'text', value: data.company },
-          { name: 'startDate', label: isRTL ? 'תאריך התחלה' : 'Start Date', type: 'text', value: data.startDate },
-          { name: 'endDate', label: isRTL ? 'תאריך סיום' : 'End Date', type: 'text', value: data.endDate },
-          { name: 'description', label: isRTL ? 'תיאור התפקיד' : 'Job Description', type: 'list', value: data.description }
-        ];
-        break;
-      case 'education':
-        fields = [
-          { name: 'type', label: isRTL ? 'סוג תואר' : 'Degree Type', type: 'text', value: data.type },
-          { name: 'field', label: isRTL ? 'תחום' : 'Field', type: 'text', value: data.field },
-          { name: 'institution', label: isRTL ? 'מוסד' : 'Institution', type: 'text', value: data.institution },
-          { name: 'years', label: isRTL ? 'שנים' : 'Years', type: 'text', value: data.years },
-          { name: 'specialization', label: isRTL ? 'התמחות' : 'Specialization', type: 'text', value: data.specialization }
-        ];
-        break;
-      case 'technicalSkill':
-        fields = [
-          { name: 'name', label: isRTL ? 'שם הכישור' : 'Skill Name', type: 'text', value: data.name },
-          { name: 'level', label: isRTL ? 'רמת מיומנות' : 'Skill Level', type: 'text', value: data.level }
-        ];
-        break;
-      case 'softSkill':
-        fields = [
-          { name: 'name', label: isRTL ? 'שם הכישור' : 'Skill Name', type: 'text', value: data.name },
-          { name: 'level', label: isRTL ? 'רמת מיומנות' : 'Skill Level', type: 'text', value: data.level }
-        ];
-        break;
-      case 'language':
-        fields = [
-          { name: 'language', label: isRTL ? 'שפה' : 'Language', type: 'text', value: data.language },
-          { name: 'level', label: isRTL ? 'רמת שליטה' : 'Proficiency Level', type: 'text', value: data.level }
-        ];
-        break;
-    }
-    setEditingSection({ type, index, data: fields });
-  };
-
-  const handleAdd = (type: string) => {
-    let fields: Field[] = [];
-    switch (type) {
-      case 'experience':
-        fields = [
-          { name: 'position', label: isRTL ? 'תפקיד' : 'Position', type: 'text' },
-          { name: 'company', label: isRTL ? 'חברה' : 'Company', type: 'text' },
-          { name: 'startDate', label: isRTL ? 'תאריך התחלה' : 'Start Date', type: 'text' },
-          { name: 'endDate', label: isRTL ? 'תאריך סיום' : 'End Date', type: 'text' },
-          { name: 'description', label: isRTL ? 'תיאור התפקיד' : 'Job Description', type: 'list' }
-        ];
-        break;
-      case 'education':
-        fields = [
-          { name: 'type', label: isRTL ? 'סוג תואר' : 'Degree Type', type: 'text' },
-          { name: 'field', label: isRTL ? 'תחום' : 'Field', type: 'text' },
-          { name: 'institution', label: isRTL ? 'מוסד' : 'Institution', type: 'text' },
-          { name: 'years', label: isRTL ? 'שנים' : 'Years', type: 'text' },
-          { name: 'specialization', label: isRTL ? 'התמחות' : 'Specialization', type: 'text' }
-        ];
-        break;
-    }
-    setIsAddingItem({ type, fields });
-  };
-
-  const handleSave = (values: any) => {
-    if (!editingSection) return;
-
-    switch (editingSection.type) {
-      case 'personalInfo':
-        onUpdate('personalInfo', { ...personalInfo, ...values });
-        break;
-      case 'experience':
-        if (typeof editingSection.index === 'number') {
-          const newExperience = [...experience];
-          newExperience[editingSection.index] = { ...newExperience[editingSection.index], ...values };
-          onUpdate('experience', newExperience);
-        }
-        break;
-      case 'education':
-        if (typeof editingSection.index === 'number') {
-          const newEducation = { ...education };
-          newEducation.degrees[editingSection.index] = { ...newEducation.degrees[editingSection.index], ...values };
-          onUpdate('education', newEducation);
-        }
-        break;
-      case 'military':
-        if (military) {
-          onUpdate('military', { ...military, ...values });
-        }
-        break;
-      case 'technicalSkill':
-        if (typeof editingSection.index === 'number') {
-          const newSkills = { ...skills };
-          newSkills.technical[editingSection.index] = { ...newSkills.technical[editingSection.index], ...values };
-          onUpdate('skills', newSkills);
-        }
-        break;
-      case 'softSkill':
-        if (typeof editingSection.index === 'number') {
-          const newSkills = { ...skills };
-          newSkills.soft[editingSection.index] = { ...newSkills.soft[editingSection.index], ...values };
-          onUpdate('skills', newSkills);
-        }
-        break;
-      case 'language':
-        if (typeof editingSection.index === 'number') {
-          const newSkills = { ...skills };
-          newSkills.languages[editingSection.index] = { ...newSkills.languages[editingSection.index], ...values };
-          onUpdate('skills', newSkills);
-        }
-        break;
-    }
-    setEditingSection(null);
-  };
-
-  const handleAddItem = (values: any) => {
-    if (!isAddingItem) return;
-
-    switch (isAddingItem.type) {
-      case 'experience':
-        const newExperience = [...experience, values];
-        onUpdate('experience', newExperience);
-        break;
-      case 'education':
-        const newEducation = { ...education };
-        newEducation.degrees = [...(newEducation.degrees || []), values];
-        onUpdate('education', newEducation);
-        break;
-    }
-    setIsAddingItem(null);
-  };
-
-  const handlePersonalInfoSave = (newData: PersonalInfo) => {
-    onUpdate('personalInfo', newData);
-  };
-
-  const handleExperienceSave = (newData: Experience[]) => {
-    onUpdate('experience', newData);
-  };
-
-  const handleEducationSave = (newData: Degree[]) => {
-    onUpdate('education', { ...education, degrees: newData });
-  };
-
-  const handleMilitaryServiceSave = (newData: MilitaryService) => {
-    onUpdate('military', newData);
-  };
-
-  const handleSkillsSave = (newData: Skills) => {
-    onUpdate('skills', newData);
-  };
-
-  const handleLanguagesSave = (newData: Language[]) => {
-    onUpdate('skills', { ...skills, languages: newData });
-  };
-
-  const handleSummarySave = (newData: string) => {
-    onUpdate('personalInfo', { ...personalInfo, summary: newData });
-  };
-
-  // Convert old education format to new format
-  const convertEducationData = (degrees: any[]): Degree[] => {
-    return degrees.map(degree => ({
-      type: degree.type || '',
-      field: degree.field || '',
-      institution: degree.institution || '',
-      startDate: degree.startDate || (degree.years ? degree.years.split('-')[0].trim() : ''),
-      endDate: degree.endDate || (degree.years ? degree.years.split('-')[1].trim() : ''),
-      specialization: degree.specialization
-    }));
   };
 
   return (
@@ -395,7 +152,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
             <div className="professional-name-last">{splitName(personalInfo.name).lastName}</div>
             {isEditing && (
               <button
-                onClick={() => onEdit('personalInfo', 0)}
+                onClick={() => handleEdit('personalInfo', 0)}
                 className="edit-button"
                 title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
               >
@@ -434,7 +191,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {t.skills}
               {isEditing && (
                 <button 
-                  onClick={() => onEdit('skills', 0)}
+                  onClick={() => handleEdit('skills', 0)}
                   className="edit-button"
                   title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                 >
@@ -472,7 +229,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {t.languages}
               {isEditing && (
                 <button 
-                  onClick={() => onEdit('languages', 0)}
+                  onClick={() => handleEdit('languages', 0)}
                   className="edit-button"
                   title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >
@@ -507,7 +264,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
         <section className="professional-summary relative">
           {isEditing && (
             <button 
-              onClick={() => onEdit('professionalSummary', 0)}
+              onClick={() => handleEdit('professionalSummary', 0)}
               className="edit-button"
               title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
             >
@@ -534,7 +291,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {t.workExperience}
               {isEditing && (
                 <button 
-                  onClick={() => onEdit('experience', 0)}
+                  onClick={() => handleEdit('experience', 0)}
                   className="edit-button"
                   title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                 >
@@ -583,7 +340,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {t.education}
               {isEditing && (
                 <button 
-                  onClick={() => setIsEducationEditOpen(true)}
+                  onClick={() => handleEdit('education', 0)}
                   className="edit-button"
                   title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                 >
@@ -628,7 +385,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {t.militaryService}
               {isEditing && (
                 <button 
-                  onClick={() => setIsMilitaryEditOpen(true)}
+                  onClick={() => handleEdit('military', 0)}
                   className="edit-button"
                   title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                 >
@@ -664,109 +421,6 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
           </section>
         )}
       </div>
-      
-      {editingSection && editingSection.type === 'personalInfo' ? (
-        <PersonalInfoEdit
-          isOpen={true}
-          onClose={() => setEditingSection(null)}
-          data={{
-            name: personalInfo.name,
-            title: personalInfo.title,
-            email: personalInfo.email,
-            phone: personalInfo.phone,
-            address: personalInfo.address,
-            linkedin: personalInfo.linkedin,
-            summary: personalInfo.summary
-          }}
-          onSave={handlePersonalInfoSave}
-          isRTL={isRTL}
-          template="professional"
-        />
-      ) : editingSection && editingSection.type === 'professionalSummary' ? (
-        <ProfessionalSummaryEdit
-          isOpen={true}
-          onClose={() => setEditingSection(null)}
-          data={personalInfo.summary}
-          onSave={handleSummarySave}
-          isRTL={isRTL}
-          template="professional"
-          cvData={data}
-        />
-      ) : editingSection && editingSection.type === 'skills' ? (
-        <SkillsEdit
-          isOpen={true}
-          onClose={() => setEditingSection(null)}
-          data={skills}
-          onSave={handleSkillsSave}
-          isRTL={isRTL}
-          template="professional"
-        />
-      ) : editingSection && editingSection.type === 'education' ? (
-        <EducationEdit
-          isOpen={true}
-          onClose={() => setEditingSection(null)}
-          data={education?.degrees || []}
-          onSave={handleEducationSave}
-          isRTL={isRTL}
-          template="professional"
-        />
-      ) : editingSection && editingSection.type === 'military' ? (
-        <MilitaryEdit
-          isOpen={true}
-          onClose={() => setEditingSection(null)}
-          data={military || null}
-          onSave={handleMilitaryServiceSave}
-          isRTL={isRTL}
-          template="professional"
-        />
-      ) : editingSection && editingSection.type === 'experience' ? (
-        <ExperienceEdit
-          isOpen={true}
-          onClose={() => setEditingSection(null)}
-          data={experience || []}
-          onSave={handleExperienceSave}
-          isRTL={isRTL}
-          template="professional"
-        />
-      ) : editingSection && editingSection.type === 'languages' ? (
-        <LanguagesEdit
-          isOpen={true}
-          onClose={() => setEditingSection(null)}
-          data={skills.languages || []}
-          onSave={handleLanguagesSave}
-          isRTL={isRTL}
-          template="professional"
-        />
-      ) : null}
-      
-      {isAddingItem && isAddingItem.type === 'experience' ? (
-        <ExperienceEdit
-          isOpen={true}
-          onClose={() => setIsAddingItem(null)}
-          data={[]}
-          onSave={handleExperienceSave}
-          isRTL={isRTL}
-          template="professional"
-        />
-      ) : isAddingItem && isAddingItem.type === 'education' ? (
-        <EducationEdit
-          isOpen={true}
-          onClose={() => setIsAddingItem(null)}
-          data={[]}
-          onSave={handleEducationSave}
-          isRTL={isRTL}
-          template="professional"
-        />
-      ) : isAddingItem && isAddingItem.type === 'language' ? (
-        <LanguagesEdit
-          isOpen={true}
-          onClose={() => setIsAddingItem(null)}
-          data={[]}
-          onSave={handleLanguagesSave}
-          isRTL={isRTL}
-          template="professional"
-        />
-      ) : null}
     </div>
   );
 };

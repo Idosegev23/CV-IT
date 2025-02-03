@@ -20,7 +20,16 @@ export const createSafeData = (data: any): ResumeData => {
       description: exp.achievements || []
     })) : [],
     education: {
-      degrees: data?.education?.degrees || []
+      degrees: Array.isArray(data?.education?.degrees) ? data.education.degrees.map((deg: any) => ({
+        type: deg.type || '',
+        degreeType: deg.degreeType || 'academic',
+        field: deg.field || '',
+        institution: deg.institution || '',
+        startDate: deg.years?.split('-')[0]?.trim() || deg.startDate || '',
+        endDate: deg.years?.split('-')[1]?.trim() || deg.endDate || '',
+        specialization: deg.specialization || '',
+        years: deg.years || `${deg.startDate || ''} - ${deg.endDate || ''}`
+      })) : []
     },
     skills: {
       technical: data?.skills?.technical || [],

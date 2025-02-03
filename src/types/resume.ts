@@ -17,6 +17,10 @@ export interface Skills {
   languages: Language[];
 }
 
+export interface Languages {
+  [key: string]: string;
+}
+
 export interface RawMilitaryService {
   role: string;
   years: string;
@@ -31,17 +35,47 @@ export interface MilitaryService {
   description: string[];
 }
 
+export type DegreeType = 
+  | 'academic' // תואר אקדמי
+  | 'certification' // תעודת הסמכה
+  | 'course' // קורס
+  | 'bootcamp' // מחנה הכשרה
+  | 'training' // הכשרה מקצועית
+  | 'highschool' // תיכון
+  | 'other'; // אחר
+
+export interface RawDegree {
+  type: string;
+  field: string;
+  years: string;
+  institution: string;
+  specialization?: string;
+}
+
 export interface Degree {
   type: string;
+  degreeType: DegreeType;
   field: string;
   institution: string;
   startDate: string;
   endDate: string;
   specialization?: string;
+  years?: string;
+  certificateNumber?: string;
+  certificateUrl?: string;
+  grade?: string;
+  description?: string;
 }
 
 export interface Education {
-  degrees: Degree[];
+  degrees: RawDegree[];
+}
+
+export interface RawExperience {
+  title: string;
+  years: string;
+  company: string;
+  achievements: string[];
 }
 
 export interface Experience {
@@ -49,9 +83,17 @@ export interface Experience {
   company: string;
   startDate: string;
   endDate: string;
-  description: string[];
+  description: string | string[];
   achievements?: string[];
   location?: string;
+}
+
+export interface PersonalDetails {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  birth_date: string;
 }
 
 export interface PersonalInfo {
@@ -80,6 +122,24 @@ export interface Reference {
 
 export interface Metadata {
   showReferences: boolean;
+}
+
+export interface AdditionalInfo {
+  certifications: any[];
+}
+
+export interface RawResumeData {
+  skills: {
+    soft: Skill[];
+    technical: Skill[];
+  };
+  languages: Languages;
+  education: Education;
+  experience: RawExperience[];
+  additional_info: AdditionalInfo;
+  military_service: RawMilitaryService;
+  personal_details: PersonalDetails;
+  professional_summary: string;
 }
 
 export interface ResumeData {

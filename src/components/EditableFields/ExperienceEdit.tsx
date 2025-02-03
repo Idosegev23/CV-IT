@@ -12,17 +12,35 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/theme/ui/accordion";
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Building2, Calendar, Briefcase, GripVertical, Plus, Trash2, MapPin, AlertCircle } from 'lucide-react';
 import { Experience } from '@/types/resume';
 import { Button } from '@/components/theme/ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/theme/ui/popover';
+import { format } from 'date-fns';
+import { he, enUS } from 'date-fns/locale';
+import { FileText } from 'lucide-react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
+import { Calendar as CalendarComponent } from '@/components/theme/ui/calendar';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-interface ExperienceEditProps {
+export interface ExperienceData {
+  position: string;
+  company: string;
+  startDate: string;
+  endDate: string;
+  description: string | string[];
+  location?: string;
+  achievements?: string[];
+}
+
+export interface ExperienceEditProps {
   isOpen: boolean;
   onClose: () => void;
-  data: Experience[];
-  onSave: (newData: Experience[]) => void;
+  data: ExperienceData[];
+  onSave: (newData: ExperienceData[]) => void;
   isRTL?: boolean;
   template?: string;
 }
@@ -107,6 +125,32 @@ const isValidDateRange = (startDate: string, endDate: string): boolean => {
   return startTimestamp <= endTimestamp;
 };
 
+// Helper function to safely parse date string to Date object
+const parseDateString = (dateStr: string): Date | null => {
+  if (!dateStr) return null;
+
+  // Handle special cases
+  const presentValues = ['present', 'היום', 'כיום', 'עד היום', 'current'];
+  if (presentValues.includes(dateStr.toLowerCase())) {
+    return new Date();
+  }
+
+  // Try parsing MM/YYYY format
+  const mmYYYYRegex = /^(0[1-9]|1[0-2])\/\d{4}$/;
+  if (mmYYYYRegex.test(dateStr)) {
+    const [month, year] = dateStr.split('/').map(Number);
+    return new Date(year, month - 1);
+  }
+
+  // Try parsing YYYY format
+  const yearRegex = /^\d{4}$/;
+  if (yearRegex.test(dateStr)) {
+    return new Date(parseInt(dateStr), 0);
+  }
+
+  return null;
+};
+
 export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
   isOpen,
   onClose,
@@ -115,139 +159,71 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
   isRTL = document.documentElement.lang === 'he',
   template = 'professional'
 }) => {
-  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [experiences, setExperiences] = useState<ExperienceData[]>([]);
   const [expandedItem, setExpandedItem] = useState<string | undefined>(undefined);
-  const [newDescription, setNewDescription] = useState('');
   const [dateErrors, setDateErrors] = useState<{[key: string]: string}>({});
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (isOpen && data) {
-      // Sort experiences chronologically by start date (most recent first)
       const sortedExperiences = [...(Array.isArray(data) ? data : [data])].sort((a, b) => {
-        const yearA = parseInt(a.startDate) || 0;
-        const yearB = parseInt(b.startDate) || 0;
-        return yearB - yearA; // החדש ביותר למעלה
+        const timestampA = getDateTimestamp(a.startDate);
+        const timestampB = getDateTimestamp(b.startDate);
+        return timestampB - timestampA;
       });
       setExperiences(sortedExperiences);
     }
   }, [data, isOpen]);
 
-  const validateAndUpdateDate = (index: number, field: 'startDate' | 'endDate', value: string) => {
-    const errorKey = `${index}-${field}`;
-    const otherField = field === 'startDate' ? 'endDate' : 'startDate';
-    const otherValue = experiences[index][otherField];
-
-    // Clear previous error
-    const newErrors = { ...dateErrors };
-    delete newErrors[errorKey];
-
-    // Auto-format: If user enters two digits that could be a month, add slash before year
-    if (/^\d{2}$/.test(value) && !value.includes('/') && parseInt(value) >= 1 && parseInt(value) <= 12) {
-      value = value + '/';
-    }
-    // If user enters 4 digits and it's a valid year, keep it as is
-    else if (/^\d{4}$/.test(value)) {
-      const year = parseInt(value);
-      const currentYear = new Date().getFullYear();
-      if (year >= 1900 && year <= currentYear) {
-        // Don't modify the value - keep it as a year
-      }
-    }
-
-    // Validate date format
-    if (value && !isValidDateFormat(value)) {
-      if (/^\d{4}$/.test(value)) {
-        newErrors[errorKey] = isRTL 
-          ? 'שנה לא יכולה להיות עתידית' 
-          : 'Year cannot be in the future';
-      } else {
-        newErrors[errorKey] = isRTL 
-          ? 'פורמט לא תקין. השתמש ב-YYYY או MM/YYYY' 
-          : 'Invalid format. Use YYYY or MM/YYYY';
-      }
-    }
-    // Validate date range
-    else if (field === 'endDate' && !isValidDateRange(experiences[index].startDate, value)) {
-      newErrors[errorKey] = isRTL 
-        ? 'תאריך סיום חייב להיות אחרי תאריך התחלה' 
-        : 'End date must be after start date';
-    }
-    else if (field === 'startDate' && !isValidDateRange(value, experiences[index].endDate)) {
-      newErrors[errorKey] = isRTL 
-        ? 'תאריך התחלה חייב להיות לפני תאריך סיום' 
-        : 'Start date must be before end date';
-    }
-
-    setDateErrors(newErrors);
-    handleExperienceChange(index, field, value);
-  };
-
-  const handleExperienceChange = (index: number, field: keyof Experience, value: string | string[]) => {
+  const handleExperienceChange = (index: number, field: keyof ExperienceData, value: any) => {
     setExperiences(prev => {
-      const updated = prev.map((exp, i) => 
-        i === index ? { ...exp, [field]: value } : exp
-      );
+      const updated = [...prev];
+      if (field === 'description' && typeof value === 'string') {
+        updated[index] = {
+          ...updated[index],
+          [field]: value.split('\n')
+        };
+      } else {
+        updated[index] = {
+          ...updated[index],
+          [field]: value
+        };
+      }
       return updated;
     });
   };
 
-  const handleAddDescription = (index: number) => {
-    if (newDescription.trim()) {
-      setExperiences(prev => prev.map((exp, i) => 
-        i === index ? {
-          ...exp,
-          description: [...exp.description, newDescription.trim().slice(0, MAX_DESCRIPTION_LENGTH)]
-        } : exp
-      ));
-      setNewDescription('');
-    }
-  };
-
-  const handleRemoveDescription = (expIndex: number, descIndex: number) => {
-    setExperiences(prev => prev.map((exp, i) => 
-      i === expIndex ? {
-        ...exp,
-        description: exp.description.filter((_, j) => j !== descIndex)
-      } : exp
-    ));
-  };
-
-  const handleEditDescription = (expIndex: number, descIndex: number, value: string) => {
-    setExperiences(prev => prev.map((exp, i) => 
-      i === expIndex ? {
-        ...exp,
-        description: exp.description.map((desc, j) => 
-          j === descIndex ? value.slice(0, MAX_DESCRIPTION_LENGTH) : desc
-        )
-      } : exp
-    ));
-  };
-
   const handleAddNewExperience = () => {
-    const newExperience: Experience = {
+    const newExperience: ExperienceData = {
       position: '',
       company: '',
       startDate: '',
       endDate: '',
       description: [],
-      achievements: [],
-      location: ''
+      location: '',
+      achievements: []
     };
     setExperiences(prev => [...prev, newExperience]);
-    setExpandedItem(`item-${experiences.length}`);
+    setExpandedItem(String(experiences.length));
   };
 
   const handleRemoveExperience = (index: number) => {
     setExperiences(prev => prev.filter((_, i) => i !== index));
+    setExpandedItem(undefined);
+  };
+
+  const handleDateSelect = (index: number, field: 'startDate' | 'endDate', date?: Date) => {
+    if (date) {
+      const formattedDate = format(date, 'MM/yyyy', { locale: isRTL ? he : enUS });
+      handleExperienceChange(index, field, formattedDate);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Check for date validation errors
     if (Object.keys(dateErrors).length > 0) {
-      return; // Don't submit if there are validation errors
+      return;
     }
 
     const updatedExperiences = experiences
@@ -258,14 +234,15 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
         startDate: exp.startDate.trim(),
         endDate: exp.endDate.trim(),
         location: exp.location?.trim(),
-        description: exp.description.filter(d => d.trim() !== ''),
-        achievements: exp.achievements?.filter(a => a.trim() !== '') || []
+        description: Array.isArray(exp.description) 
+          ? exp.description.map(line => line.trim()).filter(line => line !== '')
+          : exp.description.trim(),
+        achievements: exp.achievements?.filter((a: string) => a.trim() !== '') || []
       }))
-      // Sort by start date (most recent first)
       .sort((a, b) => {
         const yearA = parseInt(a.startDate) || 0;
         const yearB = parseInt(b.startDate) || 0;
-        return yearB - yearA; // החדש ביותר למעלה
+        return yearB - yearA;
       });
 
     onSave(updatedExperiences);
@@ -277,288 +254,383 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
       {isOpen && (
         <Dialog open={isOpen} onOpenChange={onClose}>
           <DialogContent className={cn(
-            "sm:max-w-[600px] p-0 gap-0",
-            "bg-gradient-to-b from-white to-gray-50",
-            "rounded-2xl shadow-xl border-0",
-            isRTL ? "rtl" : "ltr",
-            template === 'professional' && "font-rubik",
-            template === 'creative' && "font-heebo",
-            template === 'general' && "font-opensans",
-            template === 'classic' && "font-assistant",
-          )}>
-            <div className="p-6 border-b border-[#4856CD]/10">
+            "!fixed !top-[50%] !left-[50%] !transform !-translate-x-1/2 !-translate-y-1/2",
+            "!w-[600px] !max-w-[92vw]",
+            "!p-0 !m-0 !gap-0 !overflow-hidden",
+            "!bg-gradient-to-br !from-white !via-white !to-gray-50/80",
+            "!rounded-2xl !shadow-[0_20px_70px_-10px_rgba(0,0,0,0.15)] !border !border-gray-100",
+            isRTL ? "!rtl" : "!ltr",
+            template === 'professional' && "!font-rubik",
+            template === 'creative' && "!font-heebo",
+            template === 'general' && "!font-opensans",
+            template === 'classic' && "!font-assistant",
+            "!block"
+          )}
+          style={{
+            width: '600px',
+            maxWidth: '92vw'
+          }}>
+            <div className="px-6 py-5 border-b border-[#4856CD]/5 bg-gradient-to-r from-[#4856CD]/[0.03] to-transparent">
               <DialogHeader>
                 <DialogTitle className={cn(
-                  "text-center text-2xl font-bold",
-                  "bg-gradient-to-r from-[#4856CD] to-[#4856CD]/80 text-transparent bg-clip-text"
+                  "text-center text-[22px] font-bold",
+                  "bg-gradient-to-r from-[#4856CD] to-[#4856CD]/90 text-transparent bg-clip-text"
                 )}>
                   {isRTL ? 'ניסיון תעסוקתי' : 'Work Experience'}
                 </DialogTitle>
               </DialogHeader>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+            <form onSubmit={handleSubmit} className="px-8 py-6 space-y-6 max-h-[80vh] overflow-y-auto">
               <Accordion
                 type="single"
                 collapsible
                 value={expandedItem}
                 onValueChange={setExpandedItem}
-                className="space-y-2"
+                className="space-y-4"
               >
-                {experiences.map((exp, index) => (
+                {experiences.map((item, index) => (
                   <AccordionItem
                     key={index}
-                    value={`item-${index}`}
-                    className="border rounded-xl bg-white p-2"
+                    value={index.toString()}
+                    className={cn(
+                      "border border-gray-200/80 rounded-xl overflow-hidden",
+                      "hover:border-[#4856CD]/30 transition-colors duration-200",
+                      expandedItem === index.toString() && "border-[#4856CD]/30"
+                    )}
                   >
-                    <div className="flex items-center justify-between">
-                      <AccordionTrigger className="hover:no-underline">
-                        <div className="flex items-center gap-2">
-                          <Briefcase className="w-4 h-4 text-gray-400" />
-                          <span className="font-medium">
-                            {exp.position || (isRTL ? 'תפקיד חדש' : 'New Position')}
-                            {exp.company && ` - ${exp.company}`}
-                          </span>
+                    <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg !bg-[#4856CD]/5 flex items-center justify-center">
+                          <Briefcase className="w-4 h-4 !text-[#4856CD]" />
                         </div>
-                      </AccordionTrigger>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-500"
-                        onClick={() => handleRemoveExperience(index)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-
-                    <AccordionContent className="pt-4 space-y-4">
+                        <div className="!text-right">
+                          <h3 className="font-medium !text-[15px] !text-gray-900">
+                            {item.position || (isRTL ? 'תפקיד חדש' : 'New Position')}
+                          </h3>
+                          <p className="!text-[13px] !text-gray-500">
+                            {item.company || (isRTL ? 'שם החברה' : 'Company Name')}
+                          </p>
+                        </div>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="px-4 pb-4">
                       <div className="space-y-4">
-                        <div className="relative">
-                          <Input
-                            value={exp.position}
-                            onChange={(e) => handleExperienceChange(index, 'position', e.target.value)}
-                            placeholder={isRTL ? 'תפקיד' : 'Position'}
-                            className={cn(
-                              "pl-10",
-                              "bg-white text-gray-900",
-                              "rounded-xl border-gray-200",
-                              "focus:border-[#4856CD] focus:ring-[#4856CD]/10"
-                            )}
-                          />
-                          <Briefcase className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <div className="group">
+                          <label className={cn(
+                            "block text-[13px] font-medium mb-2",
+                            "text-gray-700 group-hover:text-[#4856CD]",
+                            "transition-colors duration-200"
+                          )}>
+                            {isRTL ? 'תפקיד' : 'Position'}
+                          </label>
+                          <div className="relative w-full">
+                            <Input
+                              value={item.position}
+                              onChange={(e) => handleExperienceChange(index, 'position', e.target.value)}
+                              className={cn(
+                                "w-full h-11 bg-white text-[14px] text-gray-900",
+                                "rounded-lg border border-gray-200/80",
+                                "shadow-sm shadow-gray-100/50",
+                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                "focus:ring-2 focus:ring-[#4856CD]/10",
+                                "transition duration-200",
+                                isRTL ? "pr-11" : "pl-11"
+                              )}
+                              placeholder={isRTL ? 'הכנס תפקיד' : 'Enter position'}
+                              dir="auto"
+                            />
+                            <Briefcase className={cn(
+                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                              "text-gray-400 group-hover:text-[#4856CD]/70",
+                              "transition-colors duration-200",
+                              isRTL ? "right-4" : "left-4"
+                            )} />
+                          </div>
                         </div>
 
-                        <div className="relative">
-                          <Input
-                            value={exp.company}
-                            onChange={(e) => handleExperienceChange(index, 'company', e.target.value)}
-                            placeholder={isRTL ? 'חברה' : 'Company'}
-                            className={cn(
-                              "pl-10",
-                              "bg-white text-gray-900",
-                              "rounded-xl border-gray-200",
-                              "focus:border-[#4856CD] focus:ring-[#4856CD]/10"
-                            )}
-                          />
-                          <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <div className="group">
+                          <label className={cn(
+                            "block text-[13px] font-medium mb-2",
+                            "text-gray-700 group-hover:text-[#4856CD]",
+                            "transition-colors duration-200"
+                          )}>
+                            {isRTL ? 'חברה' : 'Company'}
+                          </label>
+                          <div className="relative w-full">
+                            <Input
+                              value={item.company}
+                              onChange={(e) => handleExperienceChange(index, 'company', e.target.value)}
+                              className={cn(
+                                "w-full h-11 bg-white text-[14px] text-gray-900",
+                                "rounded-lg border border-gray-200/80",
+                                "shadow-sm shadow-gray-100/50",
+                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                "focus:ring-2 focus:ring-[#4856CD]/10",
+                                "transition duration-200",
+                                isRTL ? "pr-11" : "pl-11"
+                              )}
+                              placeholder={isRTL ? 'הכנס שם חברה' : 'Enter company name'}
+                              dir="auto"
+                            />
+                            <Building2 className={cn(
+                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                              "text-gray-400 group-hover:text-[#4856CD]/70",
+                              "transition-colors duration-200",
+                              isRTL ? "right-4" : "left-4"
+                            )} />
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                          <div className="relative">
-                            <Input
-                              value={exp.startDate}
-                              onChange={(e) => validateAndUpdateDate(index, 'startDate', e.target.value)}
-                              placeholder={isRTL ? 'תאריך התחלה (YYYY או MM/YYYY)' : 'Start Date (YYYY or MM/YYYY)'}
-                              className={cn(
-                                "pl-10",
-                                "bg-white text-gray-900",
-                                "rounded-xl border-gray-200",
-                                "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                                dateErrors[`${index}-startDate`] && "border-red-500"
-                              )}
-                            />
-                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            {dateErrors[`${index}-startDate`] && (
-                              <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                <AlertCircle className="w-4 h-4" />
-                                {dateErrors[`${index}-startDate`]}
-                              </div>
-                            )}
+                          <div className="group">
+                            <label className={cn(
+                              "block text-[13px] font-medium mb-2",
+                              "text-gray-700 group-hover:text-[#4856CD]",
+                              "transition-colors duration-200"
+                            )}>
+                              {isRTL ? 'תאריך התחלה' : 'Start Date'}
+                            </label>
+                            <div className="relative w-full">
+                              <DatePicker
+                                selected={item.startDate ? parseDateString(item.startDate) : null}
+                                onChange={(date: Date | null) => date && handleDateSelect(index, 'startDate', date)}
+                                dateFormat="MM/yyyy"
+                                showMonthYearPicker
+                                maxDate={item.endDate ? parseDateString(item.endDate) ?? undefined : undefined}
+                                className={cn(
+                                  "w-full h-11 bg-white text-[14px] text-gray-900",
+                                  "rounded-lg border border-gray-200/80",
+                                  "shadow-sm shadow-gray-100/50",
+                                  "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                  "focus:ring-2 focus:ring-[#4856CD]/10",
+                                  "transition duration-200",
+                                  isRTL ? "pr-11 text-right" : "pl-11",
+                                  !item.startDate && "text-gray-400"
+                                )}
+                                placeholderText={isRTL ? 'בחר תאריך' : 'Select date'}
+                                locale={isRTL ? he : enUS}
+                              />
+                              <Calendar className={cn(
+                                "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                "text-gray-400 group-hover:text-[#4856CD]/70",
+                                "transition-colors duration-200",
+                                isRTL ? "right-4" : "left-4"
+                              )} />
+                            </div>
                           </div>
 
-                          <div className="relative">
-                            <Input
-                              value={exp.endDate}
-                              onChange={(e) => validateAndUpdateDate(index, 'endDate', e.target.value)}
-                              placeholder={isRTL ? 'תאריך סיום (YYYY או MM/YYYY או היום)' : 'End Date (YYYY or MM/YYYY or Present)'}
-                              className={cn(
-                                "pl-10",
-                                "bg-white text-gray-900",
-                                "rounded-xl border-gray-200",
-                                "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                                dateErrors[`${index}-endDate`] && "border-red-500"
-                              )}
-                            />
-                            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                            {dateErrors[`${index}-endDate`] && (
-                              <div className="text-red-500 text-sm mt-1 flex items-center gap-1">
-                                <AlertCircle className="w-4 h-4" />
-                                {dateErrors[`${index}-endDate`]}
-                              </div>
-                            )}
+                          <div className="group">
+                            <label className={cn(
+                              "block text-[13px] font-medium mb-2",
+                              "text-gray-700 group-hover:text-[#4856CD]",
+                              "transition-colors duration-200"
+                            )}>
+                              {isRTL ? 'תאריך סיום' : 'End Date'}
+                            </label>
+                            <div className="relative w-full">
+                              <DatePicker
+                                selected={item.endDate ? parseDateString(item.endDate) : null}
+                                onChange={(date: Date | null) => date && handleDateSelect(index, 'endDate', date)}
+                                dateFormat="MM/yyyy"
+                                showMonthYearPicker
+                                minDate={item.startDate ? parseDateString(item.startDate) ?? undefined : undefined}
+                                className={cn(
+                                  "w-full h-11 bg-white text-[14px] text-gray-900",
+                                  "rounded-lg border border-gray-200/80",
+                                  "shadow-sm shadow-gray-100/50",
+                                  "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                  "focus:ring-2 focus:ring-[#4856CD]/10",
+                                  "transition duration-200",
+                                  isRTL ? "pr-11 text-right" : "pl-11",
+                                  !item.endDate && "text-gray-400"
+                                )}
+                                placeholderText={isRTL ? 'בחר תאריך' : 'Select date'}
+                                locale={isRTL ? he : enUS}
+                              />
+                              <Calendar className={cn(
+                                "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                "text-gray-400 group-hover:text-[#4856CD]/70",
+                                "transition-colors duration-200",
+                                isRTL ? "right-4" : "left-4"
+                              )} />
+                            </div>
                           </div>
                         </div>
 
-                        <div className="relative">
-                          <Input
-                            value={exp.location || ''}
-                            onChange={(e) => handleExperienceChange(index, 'location', e.target.value)}
-                            placeholder={isRTL ? 'מיקום (אופציונלי)' : 'Location (optional)'}
-                            className={cn(
-                              "pl-10",
-                              "bg-white text-gray-900",
-                              "rounded-xl border-gray-200",
-                              "focus:border-[#4856CD] focus:ring-[#4856CD]/10"
-                            )}
-                          />
-                          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        </div>
-
-                        <div className="space-y-4">
-                          <div className="flex flex-col gap-2">
-                            <textarea
-                              value={newDescription}
-                              onChange={(e) => setNewDescription(e.target.value)}
-                              placeholder={isRTL ? 'תאר את תפקידך והישגיך המקצועיים...' : 'Describe your role and professional achievements...'}
-                              className={cn(
-                                "w-full min-h-[120px] p-3",
-                                "bg-white text-gray-900",
-                                "rounded-xl border-gray-200",
-                                "focus:border-[#4856CD] focus:ring-[#4856CD]/10",
-                                "resize-none"
-                              )}
-                            />
+                        <div className="group">
+                          <label className={cn(
+                            "block text-[13px] font-medium mb-2",
+                            "text-gray-700 group-hover:text-[#4856CD]",
+                            "transition-colors duration-200"
+                          )}>
+                            {isRTL ? 'תיאור התפקיד' : 'Job Description'}
+                          </label>
+                          <div className="space-y-2">
+                            {Array.isArray(item.description) ? item.description.map((line: string, lineIndex: number) => (
+                              <div key={lineIndex} className="relative w-full flex items-center gap-2">
+                                <Input
+                                  value={line}
+                                  onChange={(e) => {
+                                    const newLines = [...item.description];
+                                    newLines[lineIndex] = e.target.value;
+                                    handleExperienceChange(index, 'description', newLines);
+                                  }}
+                                  className={cn(
+                                    "w-full h-11 bg-white text-[14px] text-gray-900",
+                                    "rounded-lg border border-gray-200/80",
+                                    "shadow-sm shadow-gray-100/50",
+                                    "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                    "focus:ring-2 focus:ring-[#4856CD]/10",
+                                    "transition duration-200",
+                                    isRTL ? "pr-11" : "pl-11"
+                                  )}
+                                  placeholder={isRTL ? 'הכנס תיאור' : 'Enter description'}
+                                  dir="auto"
+                                />
+                                <FileText className={cn(
+                                  "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                  "text-gray-400 group-hover:text-[#4856CD]/70",
+                                  "transition-colors duration-200",
+                                  isRTL ? "right-4" : "left-4"
+                                )} />
+                                <div className="flex gap-1">
+                                  {lineIndex > 0 && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-11 w-11 rounded-lg hover:bg-[#4856CD]/5"
+                                      onClick={() => {
+                                        const newLines = [...item.description];
+                                        const temp = newLines[lineIndex];
+                                        newLines[lineIndex] = newLines[lineIndex - 1];
+                                        newLines[lineIndex - 1] = temp;
+                                        handleExperienceChange(index, 'description', newLines);
+                                      }}
+                                    >
+                                      <ArrowUp className="w-4 h-4 text-gray-500" />
+                                    </Button>
+                                  )}
+                                  {lineIndex < item.description.length - 1 && (
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-11 w-11 rounded-lg hover:bg-[#4856CD]/5"
+                                      onClick={() => {
+                                        const newLines = [...item.description];
+                                        const temp = newLines[lineIndex];
+                                        newLines[lineIndex] = newLines[lineIndex + 1];
+                                        newLines[lineIndex + 1] = temp;
+                                        handleExperienceChange(index, 'description', newLines);
+                                      }}
+                                    >
+                                      <ArrowDown className="w-4 h-4 text-gray-500" />
+                                    </Button>
+                                  )}
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-11 w-11 rounded-lg hover:bg-red-50"
+                                    onClick={() => {
+                                      const newLines = [...item.description];
+                                      newLines.splice(lineIndex, 1);
+                                      handleExperienceChange(index, 'description', newLines);
+                                    }}
+                                  >
+                                    <Trash2 className="w-4 h-4 text-red-500" />
+                                  </Button>
+                                </div>
+                              </div>
+                            )) : null}
                             <Button
                               type="button"
-                              onClick={async () => {
-                                if (!newDescription.trim() || isProcessing) return;
-                                
-                                setIsProcessing(true);
-                                try {
-                                  const response = await fetch('/api/process-job-description', {
-                                    method: 'POST',
-                                    headers: {
-                                      'Content-Type': 'application/json',
-                                    },
-                                    body: JSON.stringify({
-                                      description: newDescription,
-                                      lang: isRTL ? 'he' : 'en'
-                                    }),
-                                  });
-
-                                  if (!response.ok) throw new Error('Failed to process description');
-
-                                  const { bulletPoints } = await response.json();
-                                  
-                                  // הוספת כל נקודה כתיאור נפרד
-                                  bulletPoints.forEach((point: string) => {
-                                    handleExperienceChange(index, 'description', [
-                                      ...exp.description,
-                                      point.trim()
-                                    ]);
-                                  });
-
-                                  // ניקוי השדה
-                                  setNewDescription('');
-                                  
-                                } catch (error) {
-                                  console.error('Error processing description:', error);
-                                  // כאן אפשר להוסיף הודעת שגיאה למשתמש
-                                } finally {
-                                  setIsProcessing(false);
-                                }
-                              }}
-                              className="bg-[#4856CD] text-white rounded-xl hover:bg-[#4856CD]/90 px-4 py-2 w-full"
-                              disabled={isProcessing}
-                            >
-                              {isProcessing ? (
-                                <div className="flex items-center justify-center gap-2">
-                                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                                  {isRTL ? 'מעבד...' : 'Processing...'}
-                                </div>
-                              ) : (
-                                isRTL ? 'עבד תיאור מקצועי' : 'Process Professional Description'
+                              variant="outline"
+                              className={cn(
+                                "w-full h-11",
+                                "rounded-lg border border-dashed border-gray-200",
+                                "text-[14px] text-gray-500",
+                                "hover:border-[#4856CD]/30 hover:text-[#4856CD]",
+                                "transition-colors duration-200"
                               )}
+                              onClick={() => {
+                                const currentDescription = Array.isArray(item.description) ? item.description : [];
+                                handleExperienceChange(
+                                  index,
+                                  'description',
+                                  [...currentDescription, '']
+                                );
+                              }}
+                            >
+                              <Plus className="w-4 h-4 mr-2" />
+                              {isRTL ? 'הוסף שורה' : 'Add Line'}
                             </Button>
                           </div>
+                        </div>
 
-                          <div className="space-y-2">
-                            {exp.description.map((desc, descIndex) => (
-                              <motion.div
-                                key={descIndex}
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 10 }}
-                                className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg group"
-                              >
-                                <GripVertical className="w-4 h-4 text-gray-400" />
-                                <Input
-                                  value={desc}
-                                  onChange={(e) => handleEditDescription(index, descIndex, e.target.value)}
-                                  maxLength={MAX_DESCRIPTION_LENGTH}
-                                  className="flex-1 border-0 bg-transparent focus:ring-0"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                                  onClick={() => handleRemoveDescription(index, descIndex)}
-                                >
-                                  <Trash2 className="w-4 h-4 text-red-500" />
-                                </Button>
-                              </motion.div>
-                            ))}
-                          </div>
+                        <div className="flex justify-end pt-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="h-11 px-4 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600"
+                            onClick={() => handleRemoveExperience(index)}
+                          >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            {isRTL ? 'מחק משרה' : 'Delete Position'}
+                          </Button>
                         </div>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
                 ))}
-
-                <Button
-                  type="button"
-                  onClick={handleAddNewExperience}
-                  className={cn(
-                    "w-full p-4 mt-4",
-                    "bg-gray-100 text-gray-700",
-                    "rounded-xl",
-                    "hover:bg-gray-200",
-                    "transition-colors",
-                    "flex items-center justify-center gap-2"
-                  )}
-                >
-                  <Plus className="w-4 h-4" />
-                  {isRTL ? 'הוסף ניסיון תעסוקתי' : 'Add Work Experience'}
-                </Button>
               </Accordion>
 
-              <button
-                type="submit"
-                disabled={Object.keys(dateErrors).length > 0}
+              <Button
+                type="button"
+                onClick={handleAddNewExperience}
                 className={cn(
-                  "w-full p-4",
-                  "bg-[#4856CD] text-white",
-                  "rounded-xl",
-                  "transition-colors",
-                  Object.keys(dateErrors).length > 0 
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#4856CD]/90"
+                  "!w-full !p-4 !mt-4",
+                  "!bg-white !text-[#4856CD]",
+                  "!rounded-xl !border !border-[#4856CD]/30",
+                  "hover:!bg-[#4856CD] hover:!text-white",
+                  "!transition-all",
+                  "!flex !items-center !justify-center !gap-2"
                 )}
               >
-                {isRTL ? 'שמור' : 'Save'}
-              </button>
+                <Plus className="!w-4 !h-4" />
+                {isRTL ? 'הוסף עיסוק' : 'Add Position'}
+              </Button>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className={cn(
+                    "flex-1 h-11",
+                    "rounded-lg border-2 border-[#4856CD]",
+                    "text-[#4856CD] text-[14px] hover:bg-[#4856CD]/[0.02]",
+                    "active:scale-[0.98]",
+                    "transition-all duration-200 font-medium"
+                  )}
+                >
+                  {isRTL ? 'ביטול' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className={cn(
+                    "flex-1 h-11",
+                    "rounded-lg bg-[#4856CD]",
+                    "text-white text-[14px] hover:bg-[#4856CD]/95",
+                    "active:scale-[0.98]",
+                    "transition-all duration-200 font-medium",
+                    "shadow-md shadow-[#4856CD]/10"
+                  )}
+                >
+                  {isRTL ? 'שמירה' : 'Save'}
+                </button>
+              </div>
             </form>
           </DialogContent>
         </Dialog>
