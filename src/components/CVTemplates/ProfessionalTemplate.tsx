@@ -174,6 +174,11 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
                 {t.email}: {personalInfo.email}
               </div>
             )}
+            {personalInfo.address && (
+              <div className="professional-contact-item">
+                {t.address}: {personalInfo.address}
+              </div>
+            )}
             {personalInfo.linkedin && (
               <div className="professional-contact-item">
                 LinkedIn: {personalInfo.linkedin}
@@ -201,23 +206,33 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
             </h2>
             <div className="professional-separator" />
             <div className="professional-skills">
-              {skills.technical.map((skill, index) => (
-                <div key={`tech-${index}`} className="professional-skill-item">
-                  <div className="professional-skill-content">
-                    <span className="professional-skill-name">{skill.name}</span>
-                    <span className="professional-skill-separator">|</span>
-                    <span className="professional-skill-level">{getSkillLevel(skill.level)}</span>
-                  </div>
-                </div>
-              ))}
+              {skills.technical.length > 0 && (
+                <>
+                  <h3 className="professional-subsection-title">{t.technicalSkills}</h3>
+                  {skills.technical.map((skill, index) => (
+                    <div key={`tech-${index}`} className="professional-skill-item">
+                      <div className="professional-skill-content">
+                        <span className="professional-skill-name">{skill.name}</span>
+                        <span className="professional-skill-separator">|</span>
+                        <span className="professional-skill-level">{getSkillLevel(skill.level)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
               
-              {skills.soft.map((skill, index) => (
-                <div key={`soft-${index}`} className="professional-skill-item">
-                  <div className="professional-skill-content">
-                    <span className="professional-skill-name">{skill.name}</span>
-                  </div>
-                </div>
-              ))}
+              {skills.soft.length > 0 && (
+                <>
+                  <h3 className="professional-subsection-title">{t.softSkills}</h3>
+                  {skills.soft.map((skill, index) => (
+                    <div key={`soft-${index}`} className="professional-skill-item">
+                      <div className="professional-skill-content">
+                        <span className="professional-skill-name">{skill.name}</span>
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           </section>
         )}

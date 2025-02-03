@@ -178,6 +178,15 @@
   padding-right: 0.3rem;
 }
 
+.professional-subsection-title {
+  font-weight: 500 !important;
+  font-size: 0.9rem;
+  color: #F3F4F1;
+  margin-top: 0.8rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
 .professional-skill-item {
   display: flex;
   align-items: flex-start;
