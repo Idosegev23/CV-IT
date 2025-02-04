@@ -97,7 +97,7 @@ export default function GalleryPage() {
         </div>
 
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-8 sm:mb-12 md:mb-16 font-rubik text-[#4856CD]">
-          {isRTL ? 'הטמפלייטים שלנו' : 'Our Templates'}
+          {isRTL ? 'התבניות שלנו' : 'Our Templates'}
         </h1>
 
         <div className="relative max-w-[350px] sm:max-w-2xl md:max-w-4xl mx-auto">

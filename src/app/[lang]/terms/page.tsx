@@ -33,24 +33,23 @@ const content = {
         content: `האתר מציע שלוש חבילות שירות עיקריות, המותאמות לצרכים שונים של מחפשי עבודה:
 
         1. חבילת Basic (75 ₪):
-           - יצירת קורות חיים בעברית
+           - קורות חיים בעברית
            - עיצוב קורות חיים מותאם אישית
+           - עריכת קורות חיים
            - הפצה לחברות השמה
-           - הכנה לריאיון עבודה
            - מחשבון שכר מותאם אישית
            - קובץ PDF להורדה
 
         2. חבילת Advanced (85 ₪):
            כוללת את כל המאפיינים של חבילת Basic ובנוסף:
-           - יצירת קורות חיים באנגלית
-           - עריכת קורות חיים
-           - בניית פרופיל LinkedIn אוטומטי
+           - קורות חיים באנגלית
+           - בניית פרופיל LinkedIn מונחית
 
         3. חבילת Pro (95 ₪):
            כוללת את כל המאפיינים של חבילת Advanced ובנוסף:
            - הכנה אישית לריאיון עבודה
            - ליווי אישי מול מעסיקים
-           - שובר לריאיון עבודה עם מונית GetCVit`
+           - שובר לריאיון עבודה עם מונית GetCVit (בבנייה)`
       },
       {
         title: 'תנאי שימוש',
@@ -136,7 +135,7 @@ const content = {
         content: `1. אופן האספקה:
            - קורות החיים והמסמכים הנלווים יישלחו לכתובת המייל שסופקה בעת ההרשמה.
            - המשלוח הינו מיידי ואוטומטי לאחר השלמת התהליך והתשלום.
-           - ביתן להוריד את קורות החיים באופן מיידי מהמערכת.
+           - ניתן להוריד את קורות החיים באופן מיידי מהמערכת.
            - במקרה של תקלה טכנית, החברה מתחייבת לטפל בבעיה תוך 24 שעות לכל היותר.
 
         2. פורמט הקבצים:
@@ -144,7 +143,7 @@ const content = {
 
         3. גישה למערכת:
            - לאחר הרכישה, תינתן גישה מיידית למערכת הניהול האישית.
-           - אפשרות העריכה של קורות החיים זמינה רק בחבילות Advanced ו-Pro.`
+           - אפשרות העריכה של קורות החיים זמינה בכל החבילות.`
       }
     ]
   },
@@ -166,22 +165,21 @@ const content = {
         1. Basic Package (75 NIS):
            - Hebrew CV creation
            - Personalized CV design
+           - CV editing
            - Distribution to recruitment agencies
-           - Job interview preparation
            - Personalized salary calculator
            - PDF file download
 
         2. Advanced Package (85 NIS):
            Includes all Basic package features plus:
            - English CV creation
-           - CV editing
-           - Automatic LinkedIn profile creation
+           - Guided LinkedIn profile creation
 
         3. Pro Package (95 NIS):
            Includes all Advanced package features plus:
            - Personal job interview preparation
            - Personal guidance with employers
-           - GetCVit taxi voucher for job interview`
+           - GetCVit taxi voucher for job interview (Coming Soon)`
       },
       {
         title: 'Terms of Use',
@@ -275,7 +273,7 @@ const content = {
 
         3. System Access:
            - After purchase, immediate access will be granted to the personal management system.
-           - CV editing capability is available only in Advanced and Pro packages.`
+           - CV editing capability is available in all packages.`
       }
     ]
   }

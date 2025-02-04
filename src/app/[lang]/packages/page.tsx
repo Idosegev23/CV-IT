@@ -54,7 +54,6 @@ const content = {
           { text: 'כל מה שבחבילת Advanced ובנוסף:', included: true } as Feature,
           { text: 'הכנה לריאיון העבודה', included: true } as Feature,
           { text: 'ליווי אישי מול המעסיקים', included: true } as Feature,
-          { text: 'שובר לריאיון העבודה עם מוניות GetCVit', included: true, tag: 'בבנייה' } as Feature,
         ] as Feature[]
       }
     },
@@ -96,7 +95,6 @@ const content = {
           { text: 'Everything in Advanced package plus:', included: true } as Feature,
           { text: 'Job Interview Preparation', included: true } as Feature,
           { text: 'Personal Guidance with Employers', included: true } as Feature,
-          { text: 'GetCVit - Job Interview Taxi Voucher', included: true, tag: 'Coming Soon' } as Feature,
         ] as Feature[]
       }
     },
