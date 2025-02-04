@@ -24,6 +24,8 @@ interface SalaryAnalysis {
   marketDemand: 'high' | 'medium' | 'low';
   recommendations: string[];
   personalNote?: string;
+  confidenceLevel: 'high' | 'medium' | 'low';
+  salaryRangeNote: string;
 }
 
 const CoinLoader = () => {
@@ -341,8 +343,11 @@ export default function SalaryAnalysisPage() {
   if (!dictionary) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#FAFAFA] to-[#F5F5F5]">
-      <div className="container mx-auto px-4 py-6 md:py-12">
+    <div className={cn(
+      "min-h-screen bg-gradient-to-b from-[#FAFAFA] to-[#F5F5F5]",
+      isRTL && "text-right dir-rtl"
+    )}>
+      <div className="container mx-auto px-4 py-6 md:py-12" role="main" aria-label={isRTL ? "ניתוח שכר" : "Salary Analysis"}>
         <motion.div 
           initial="hidden"
           animate="visible"
@@ -356,7 +361,7 @@ export default function SalaryAnalysisPage() {
           >
             <Image
               src="/Wlogo.svg"
-              alt="CVIT Logo"
+              alt={isRTL ? "לוגו CVIT" : "CVIT Logo"}
               width={120}
               height={40}
               className="h-auto"
@@ -367,6 +372,8 @@ export default function SalaryAnalysisPage() {
             <motion.div 
               className="flex flex-col items-center justify-center min-h-[60vh] space-y-8"
               variants={variants}
+              role="status"
+              aria-label={isRTL ? "טוען..." : "Loading..."}
             >
               <CoinLoader />
               <motion.div className="text-center space-y-2">
@@ -397,11 +404,13 @@ export default function SalaryAnalysisPage() {
                 ref={resultRef}
                 variants={variants}
                 whileHover="hover"
-                className="bg-white rounded-3xl shadow-lg p-6 md:p-12 text-center relative overflow-hidden"
+                className="bg-white rounded-3xl shadow-lg p-6 md:p-12 relative overflow-hidden"
+                role="region"
+                aria-label={isRTL ? "תוצאות ניתוח השכר" : "Salary Analysis Results"}
               >
                 <motion.div
-                  className="absolute top-0 left-0 w-full h-2"
-                  initial={{ background: "linear-gradient(to right, #4856CD, #22C55E, #4856CD)", backgroundSize: "200% 100%" }}
+                  className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-[#4856CD] via-[#22C55E] to-[#4856CD]"
+                  initial={{ backgroundSize: "200% 100%" }}
                   animate={{
                     backgroundPosition: ["0% 50%", "100% 50%"],
                   }}
@@ -415,16 +424,26 @@ export default function SalaryAnalysisPage() {
                 <motion.div
                   variants={variants}
                   transition={{ duration: 0.5 }}
+                  className={cn("text-center", isRTL && "rtl")}
                 >
-                  <h1 className="text-3xl font-bold text-gray-800 mb-4">
+                  <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
                     {isRTL 
-                      ? `${userName}, הנה הערך שלך בשוק העבודה` 
-                      : `${userName}, Here's Your Market Value`}
+                      ? `${userName}, הנה הערכת השווי שלך בשוק העבודה` 
+                      : `${userName}, Here's Your Market Value Estimation`}
                   </h1>
-                  <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
+
+                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 max-w-2xl mx-auto">
+                    <p className="text-blue-800 text-sm">
+                      {isRTL 
+                        ? 'חשוב לציין: הערכה זו מבוססת על נתונים סטטיסטיים ומגמות שוק. השכר בפועל עשוי להשתנות בהתאם לגורמים נוספים כמו תנאי העסקה, מיקום החברה וניסיון ספציפי.' 
+                        : 'Important note: This estimation is based on statistical data and market trends. Actual salary may vary based on additional factors such as employment terms, company location, and specific experience.'}
+                    </p>
+                  </div>
+
+                  <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
                     {isRTL 
-                      ? 'הערכת השכר מבוססת על ניתוח מעמיק של הניסיון, הכישורים והידע שלך' 
-                      : 'Salary estimation based on deep analysis of your experience, skills, and expertise'}
+                      ? 'הערכת השכר מבוססת על ניתוח מעמיק של הניסיון, הכישורים והידע שלך, בהתאם לנתוני השוק העדכניים' 
+                      : 'Salary estimation based on deep analysis of your experience, skills, and expertise, according to current market data'}
                   </p>
 
                   <AnimatePresence>
@@ -433,28 +452,32 @@ export default function SalaryAnalysisPage() {
                         variants={variants}
                         initial="hidden"
                         animate="visible"
-                        className="mb-8"
+                        className="mb-12"
                       >
                         <motion.div 
-                          className="text-6xl font-bold text-[#4856CD] mb-4 tracking-tight"
+                          className="text-6xl md:text-7xl font-bold text-[#4856CD] mb-6 tracking-tight"
                           variants={pulseVariants}
                           initial="initial"
                           animate="pulse"
+                          role="text"
+                          aria-label={isRTL 
+                            ? `שכר ממוצע מוערך: ${formatCurrency(displayedSalary)}`
+                            : `Estimated average salary: ${formatCurrency(displayedSalary)}`}
                         >
                           {formatCurrency(displayedSalary)}
                         </motion.div>
-                        <p className="text-lg text-gray-500 mb-2">
-                          {isRTL ? 'שכר חודשי ממוצע (ברוטו)' : 'Average Monthly Salary (Gross)'}
+                        <p className="text-lg text-gray-500 mb-4">
+                          {isRTL ? 'הערכת שכר חודשי ממוצע (ברוטו)' : 'Estimated Average Monthly Salary (Gross)'}
                         </p>
-                        <div className="flex justify-center items-center gap-2 text-sm text-gray-400">
+                        <div className="flex justify-center items-center gap-4 text-sm text-gray-600 mb-6">
                           <span>{formatCurrency(analysis?.minSalary || 0)}</span>
-                          <div className="w-16 h-1 bg-gray-200 rounded-full" />
+                          <div className="w-24 h-1.5 bg-gradient-to-r from-[#4856CD] to-[#22C55E] rounded-full" />
                           <span>{formatCurrency(analysis?.maxSalary || 0)}</span>
                         </div>
-                        <div className="text-xs text-gray-400 mt-4">
-                          {isRTL 
-                            ? '* ההערכה מבוססת על נתוני שוק העבודה העדכניים ביותר' 
-                            : '* Estimation based on latest market data'}
+                        <div className="mt-6 text-sm text-gray-600 bg-gray-50 p-6 rounded-xl max-w-2xl mx-auto leading-relaxed">
+                          {analysis?.salaryRangeNote || (isRTL 
+                            ? '* ההערכה מבוססת על ניתוח מקיף של נתוני שוק העבודה העדכניים ביותר, כולל מגמות שכר, ביקוש בתעשייה ודרישות התפקיד' 
+                            : '* Estimation based on comprehensive analysis of latest market data, including salary trends, industry demand, and position requirements')}
                         </div>
                       </motion.div>
                     )}
@@ -468,14 +491,16 @@ export default function SalaryAnalysisPage() {
                   initial="hidden"
                   animate="visible"
                 >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                     <motion.div
                       variants={variants}
                       whileHover="hover"
                       className="bg-white rounded-2xl shadow-lg p-8"
+                      role="region"
+                      aria-label={isRTL ? "גורמים משפיעים" : "Impact Factors"}
                     >
-                      <h2 className="text-2xl font-semibold mb-6">
-                        {isRTL ? 'גורמים משפיעים' : 'Impact Factors'}
+                      <h2 className="text-2xl font-semibold mb-8 text-gray-800">
+                        {isRTL ? 'גורמים משפיעים על השכר' : 'Salary Impact Factors'}
                       </h2>
                       <motion.div 
                         className="space-y-6"
@@ -486,10 +511,18 @@ export default function SalaryAnalysisPage() {
                             key={index}
                             variants={itemVariants}
                             whileHover={{ scale: 1.02 }}
-                            className="flex items-start space-x-4 rtl:space-x-reverse"
+                            className={cn(
+                              "flex items-start space-x-4 p-4 rounded-xl transition-colors",
+                              isRTL && "space-x-reverse",
+                              factor.impact === 'positive' && "bg-green-50",
+                              factor.impact === 'negative' && "bg-red-50",
+                              factor.impact === 'neutral' && "bg-gray-50"
+                            )}
+                            role="article"
+                            aria-label={`${factor.title} - ${factor.impact}`}
                           >
                             <div className={cn(
-                              "w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0",
+                              "w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0",
                               factor.impact === 'positive' && "bg-green-100",
                               factor.impact === 'negative' && "bg-red-100",
                               factor.impact === 'neutral' && "bg-gray-100"
@@ -499,13 +532,14 @@ export default function SalaryAnalysisPage() {
                                 alt={factor.impact}
                                 width={24}
                                 height={24}
+                                aria-hidden="true"
                               />
                             </div>
                             <div>
-                              <h3 className="font-medium text-lg text-gray-800">
+                              <h3 className="font-medium text-lg text-gray-800 mb-1">
                                 {factor.title}
                               </h3>
-                              <p className="text-gray-600">
+                              <p className="text-gray-600 leading-relaxed">
                                 {factor.description}
                               </p>
                             </div>
@@ -518,9 +552,11 @@ export default function SalaryAnalysisPage() {
                       variants={variants}
                       whileHover="hover"
                       className="bg-white rounded-2xl shadow-lg p-8"
+                      role="region"
+                      aria-label={isRTL ? "המלצות אישיות" : "Personal Recommendations"}
                     >
-                      <h2 className="text-2xl font-semibold mb-6">
-                        {isRTL ? 'המלצות אישיות' : 'Personal Recommendations'}
+                      <h2 className="text-2xl font-semibold mb-8 text-gray-800">
+                        {isRTL ? 'המלצות לשיפור השכר' : 'Salary Improvement Tips'}
                       </h2>
                       <motion.div 
                         className="space-y-4"
@@ -531,7 +567,8 @@ export default function SalaryAnalysisPage() {
                             key={index}
                             variants={itemVariants}
                             whileHover={{ scale: 1.02 }}
-                            className="flex items-start space-x-3 rtl:space-x-reverse bg-gray-50 rounded-xl p-4"
+                            className="flex items-start space-x-3 rtl:space-x-reverse bg-blue-50 rounded-xl p-6"
+                            role="article"
                           >
                             <div className="w-8 h-8 rounded-full bg-[#4856CD] text-white flex items-center justify-center flex-shrink-0 text-sm">
                               {index + 1}
