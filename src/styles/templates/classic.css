@@ -18,11 +18,11 @@
   display: flex;
   flex-direction: column;
   width: var(--a4-width);
-  min-height: var(--a4-height);
+  height: var(--a4-height);
   margin: 0 auto;
   background: white;
   font-family: var(--font-family);
-  overflow: visible;
+  overflow: hidden;
   transform-origin: top center;
   transform: scale(var(--scale-factor));
   
@@ -105,13 +105,12 @@
   padding: 1rem 3rem;
   display: flex;
   flex-direction: column;
-  gap: var(--section-spacing); /* שימוש במרווח המוגדל */
+  gap: var(--section-spacing);
   width: 100%;
   overflow: visible;
-  margin-bottom: 1rem;
   font-family: var(--font-family);
-  height: auto;
-  min-height: calc(var(--a4-height) - var(--header-height));
+  height: calc(var(--a4-height) - var(--header-height) - 45px);
+  position: relative;
 }
 
 /* כותרות סקציות */
@@ -412,10 +411,10 @@
   position: relative;
   width: 100%;
   height: 45px;
-  margin-top: auto;
   overflow: hidden;
   border-top-right-radius: 45px;
   background: #1F1B2F;
+  margin-top: auto;
 }
 
 /* כפתורי עריכה */
@@ -467,17 +466,19 @@
   .classic-template {
     transform: none !important;
     width: 210mm !important;
-    min-height: 297mm !important;
+    height: 297mm !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: visible !important;
+    overflow: hidden !important;
+    page-break-after: avoid !important;
   }
   
   #cv-content {
     width: 210mm;
-    min-height: 297mm;
+    height: 297mm;
     margin: 0;
     padding: 0;
+    page-break-after: avoid !important;
   }
   
   .edit-button {
