@@ -320,24 +320,46 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     }
   }, [showTutorial, hasShownPopup, hasInteractedWithEdit, shouldShowPopupAfterTutorial]);
 
+  // יצירת מופע Supabase ללא קאש - נשתמש בו בכל הקריאות
+  const supabaseNoCache = createClientComponentClient({
+    options: {
+      global: {
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Expires': '0',
+        },
+      },
+    },
+  });
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data: sessionData, error: sessionError } = await supabase
+        // שליפת נתוני התבנית מטבלת sessions
+        const { data: sessionData, error: sessionError } = await supabaseNoCache
           .from('sessions')
           .select('template_id')
           .eq('id', sessionId)
-          .single();
+          .maybeSingle();
 
         if (sessionError) throw sessionError;
 
-        const { data: cvDataResult, error: cvError } = await supabase
+        // שליפת נתוני הקורות חיים מטבלת cv_data
+        const { data: cvDataResult, error: cvError } = await supabaseNoCache
           .from('cv_data')
-          .select('format_cv, language')
+          .select('format_cv, language, package, is_editable')
           .eq('session_id', sessionId)
-          .single();
+          .maybeSingle();
 
         if (cvError) throw cvError;
+
+        // עדכון הרשאות העריכה והחבילה
+        if (cvDataResult) {
+          setPackageType(cvDataResult.package as Package);
+          setIsEditable(true);
+          setSelectedPackage(cvDataResult.package as Package);
+        }
 
         const rawData = cvDataResult?.format_cv;
         rawData.language = cvDataResult?.language || 'he';
@@ -349,13 +371,13 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         const formattedData = transformResumeData(rawData);
         const dictionary = await getDictionary(lang);
         
-        // עדכון התבנית הנבחרת בהתאם למה שנשמר בסופהבייס
-        const savedTemplate = sessionData.template_id as keyof typeof templateComponents;
+        // עדכון התבנית הנבחרת
+        const savedTemplate = sessionData?.template_id as keyof typeof templateComponents;
         if (savedTemplate && templateComponents[savedTemplate]) {
           setSelectedTemplate(savedTemplate);
         }
         
-        setTemplate(sessionData.template_id || 'modern');
+        setTemplate(sessionData?.template_id || 'modern');
         setCvData(formattedData);
         setDictionary(dictionary);
         setIsLoading(false);
@@ -369,46 +391,39 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
     if (mounted.current) {
       fetchData();
+
+      // טעינה מחדש כשחוזרים לדף
+      const handleVisibilityChange = () => {
+        if (document.visibilityState === 'visible') {
+          fetchData();
+        }
+      };
+
+      // טעינה מחדש כשחוזרים בהיסטוריה
+      const handlePopState = () => {
+        fetchData();
+      };
+
+      document.addEventListener('visibilitychange', handleVisibilityChange);
+      window.addEventListener('popstate', handlePopState);
+
+      return () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+        window.removeEventListener('popstate', handlePopState);
+        // ניקוי הזיכרון המקומי
+        setCvData(null);
+        setDictionary(null);
+        setTemplate('modern');
+        setSelectedTemplate('classic');
+      };
     }
   }, [sessionId, lang, mounted]);
-
-  useEffect(() => {
-    const checkEditPermissions = async () => {
-      if (!sessionId) return;
-
-      try {
-        const { data, error } = await supabase
-          .from('cv_data')
-          .select('package, is_editable')
-          .eq('session_id', sessionId)
-          .single();
-
-        if (error) throw error;
-
-        if (data) {
-          setPackageType(data.package as Package);
-          setIsEditable(true);
-          // עדכון ה-store
-          setSelectedPackage(data.package as Package);
-        }
-      } catch (error) {
-        console.error('Error checking permissions:', error);
-        toast.error(
-          lang === 'he' 
-            ? 'שגיאה בטעינת הרשאות'
-            : 'Error loading permissions'
-        );
-      }
-    };
-
-    checkEditPermissions();
-  }, [sessionId, supabase, setSelectedPackage]);
 
   const handleSave = async (editedData: ResumeData) => {
     try {
       const typedData = editedData as ResumeDataWithIndex;
       setCvData(editedData);
-      setHasChanges(true);  // מסמן שבוצעו שינויים
+      setHasChanges(true);
       
       const formattedForSave = {
         personal_details: {
@@ -454,9 +469,8 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         }), {})
       };
 
-      console.log('Formatted Data for Save:', formattedForSave);
-
-      const { error } = await supabase
+      // שמירת הנתונים בסופהבייס ללא קאש
+      const { error } = await supabaseNoCache
         .from('cv_data')
         .update({ format_cv: formattedForSave })
         .eq('session_id', sessionId);

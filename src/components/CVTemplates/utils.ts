@@ -203,4 +203,8 @@ export const formatDescription = (description: string | string[], maxItems?: num
   }
   
   return description;
+};
+
+export const getSkillNameClass = (name: string): string => {
+  return name.length > 20 ? 'long-skill-name' : 'skill-name';
 }; 

@@ -287,9 +287,10 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {skills.languages.map((langItem: Language, index) => (
                 <div key={`lang-${index}`} className="professional-skill-item">
                   <div className="professional-skill-content">
-                    <span className="professional-skill-name">{langItem.language}</span>
-                    <span className="professional-skill-separator">|</span>
-                    <span className="professional-skill-level">{langItem.level}</span>
+                    <div className="professional-skill-wrapper">
+                      <span className="professional-skill-name">{langItem.language}</span>
+                      <span className="professional-skill-level">{langItem.level}</span>
+                    </div>
                   </div>
                 </div>
               ))}

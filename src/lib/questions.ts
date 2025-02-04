@@ -36,8 +36,8 @@ export const questions: Question[] = [
       en: 'Contact info - Name, phone, email, address, LinkedIn'
     },
     placeholder: {
-      he: 'שלום! שמי ישראל, מתגורר בתל אביב. ניתן ליצור קשר במספר 052-1234567 או במייל israel@gmail.com. פרופיל לינקדאין: linkedin.com/in/israel',
-      en: 'Hi! I\'m John, living in Tel Aviv. You can reach me at +972-52-1234567 or email me at john@gmail.com. Here\'s my LinkedIn: linkedin.com/in/john'
+      he: 'שלום! שמי ישראל, מתגורר בתל אביב. ניתן ליצור קשר במספר 0521234567 או במייל israel@gmail.com. פרופיל לינקדאין: linkedin.com/in/israel',
+      en: 'Hi! I\'m John, living in Tel Aviv. You can reach me at 0521234567 or email me at john@gmail.com. Here\'s my LinkedIn: linkedin.com/in/john'
     },
     validationId: 'personal_details_main'
   },

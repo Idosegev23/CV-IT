@@ -70,7 +70,7 @@ export const PersonalInfoEdit: React.FC<PersonalInfoEditProps> = ({
   }, [formData]);
 
   const validateField = (field: keyof PersonalInfoType, value: string | undefined): string => {
-    if (!value) {
+    if (!value || value.trim() === '') {
       if (field === 'name') {
         return lang === 'he' ? 'שם הוא שדה חובה' : 'Name is required';
       }
