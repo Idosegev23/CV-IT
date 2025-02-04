@@ -12,145 +12,145 @@ const testimonials = {
   he: [
     {
       name: "עדי לוי",
-      role: "נציגת שירות לקוחות",
-      text: "ממשק מעולה! שווה כל שקל, אני הכי טכנופובית שיש, ובזכות סיביט הנדירה התקבלתי למוקד שירות של חברת הביטוח. ממליצה בחום… זה באמת היה מהיר",
+      role: "מנהלת משאבי אנוש",
+      text: "תודה רבה על השירות המעולה! הצלחתי לעדכן את קורות החיים שלי בקלות ובמהירות. התבנית המקצועית והעיצוב הנקי ממש שדרגו את המסמך",
       image: "/design/1.svg",
       alt: "איור של עדי לוי"
     },
     {
       name: "יוסי כהן",
-      role: "מנהל פרויקטים בנדל\"ן",
-      text: "חיפשתי דרך לחדש את קורות החיים שלי בלי להשתגע. סיביט פשוט הציל אותי – תוך כמה דקות קיבלתי מסמך שנראה מקצועי ברמות אין עליכם!",
+      role: "מהנדס תעשייה וניהול",
+      text: "אחרי 7 שנים באותו מקום עבודה, התקשיתי לארגן את כל הניסיון שצברתי בצורה ברורה. האתר עזר לי להציג את היכולות שלי בצורה מסודרת ומקצועית",
       image: "/design/2.svg",
       alt: "איור של יוסי כהן"
     },
     {
+      name: "מיכל ברק",
+      role: "מעצבת UX/UI",
+      text: "חיפשתי פורמט שיאפשר לי להציג את התיק עבודות שלי בצורה יצירתית אבל עדיין מקצועית. התבנית שבחרתי פה בדיוק ענתה על הצורך. תוך יומיים כבר קיבלתי הזמנה לראיון!",
+      image: "/design/3.svg",
+      alt: "איור של מיכל ברק"
+    },
+    {
       name: "אלכס ויסמן",
-      role: "טכנאי מחשבים",
-      text: "העברית שלי עוד לא מושלמת, וממש פחדתי לכתוב קורות חיים לבד. סיביט עזרו לי לנסח הכל בצורה מקצועית, ואפילו תרגמו לי גם לאנגלית. תוך חודש כבר עבדתי בחברת הייטק גדולה!",
+      role: "מפתח Full Stack",
+      text: "העברית שלי לא מושלמת, והאתר ממש עזר לי לנסח את קורות החיים בצורה מקצועית. האפשרות לתרגום לאנגלית הייתה בונוס משמעותי",
       image: "/design/3.svg",
       alt: "איור של אלכס ויסמן"
     },
     {
-      name: "רייצ'ל גולדשטיין",
-      role: "מהנדסת תוכנה",
-      text: "עליתי לארץ לפני חצי שנה והייתי ממש לחוצה איך להתאים את קורות החיים שלי לשוק הישראלי. סיביט עזרו לי להמיר את הניסיון שלי בצורה מושלמת, וכבר אחרי שבועיים התקבלתי לחברת הייטק בתל אביב!",
-      image: "/design/3.svg",
-      alt: "איור של רייצ'ל גולדשטיין"
-    },
-    {
-      name: "מישל דוד",
-      role: "מעצבת גרפית",
-      text: "כשהגעתי מצרפת, הייתי אבודה לגמרי עם איך מציגים פה קורות חיים. סיביט לא רק עזרו לי עם התרגום, אלא גם התאימו את הפורמט למה שמקובל בישראל. תודה רבה!",
+      name: "שירה אברהמי",
+      role: "מנהלת שיווק דיגיטלי",
+      text: "הייתי צריכה לעדכן את קורות החיים שלי בדחיפות לקראת ראיון. התהליך היה פשוט וקל, והתוצאה הסופית נראית ממש מרשימה. ממליצה בחום!",
       image: "/design/AboutPic.svg",
-      alt: "איור של מישל דוד"
+      alt: "איור של שירה אברהמי"
     },
     {
       name: "דניאל ברקוביץ'",
-      role: "יועץ פיננסי",
-      text: "המעבר מלונדון היה מאתגר, אבל סיביט הפכו את החלק של חיפוש העבודה להרבה יותר קל. הם ידעו בדיוק איך להציג את הניסיון הבינלאומי שלי בצורה שתדבר לחברות ישראליות.",
+      role: "יועץ עסקי",
+      text: "חיפשתי דרך להבליט את ההישגים המקצועיים שלי בצורה שתדבר למנהלים. הפורמט המובנה עזר לי להציג את הערך שאני מביא בצורה ברורה ומשכנעת",
       image: "/design/1.svg",
       alt: "איור של דניאל ברקוביץ'"
     },
     {
-      name: "שרה רוזנבלום",
-      role: "מורה לאנגלית",
-      text: "התלבטתי המון איך להציג את הניסיון ההוראה שלי מארה״ב. סיביט עזרו לי להבליט את היתרונות שלי בצורה שמתאימה למערכת החינוך בארץ. היום אני מלמדת בתיכון מוביל!",
+      name: "נועה רוזן",
+      role: "מורה לחינוך מיוחד",
+      text: "רציתי קורות חיים שישקפו לא רק את הניסיון המקצועי אלא גם את הגישה החינוכית שלי. התבניות המוצעות אפשרו לי להביע את זה בדיוק כמו שרציתי",
       image: "/design/2.svg",
-      alt: "איור של שרה רוזנבלום"
-    },
-    {
-      name: "אליה בן-חיים",
-      role: "טבחית",
-      text: "הגעתי מצרפת עם ניסיון במטבחים מובילים, אבל היה לי קשה להסביר את זה בעברית. סיביט עזרו לי לתרגם את קורות החיים בצורה מקצועית, והיום אני עובדת במסעדת שף מדהימה בתל אביב.",
-      image: "/design/3.svg",
-      alt: "איור של אליה בן-חיים"
+      alt: "איור של נועה רוזן"
     },
     {
       name: "רועי אברהם",
-      role: "מנהל תפעול",
-      text: "אחרי 6 שנים באותו מקום עבודה, לא ידעתי איך לגשת לעדכון קורות החיים. סיביט עזרו לי להציג את הניסיון שלי בצורה עדכנית ומקצועית. תוך שבוע כבר הוזמנתי לראיונות!",
+      role: "מנהל מכירות",
+      text: "פשוט, מהיר ומקצועי. הצלחתי לבנות קורות חיים מרשימים תוך פחות משעה. כבר המלצתי לכל החברים שלי שמחפשים עבודה",
       image: "/design/2.svg",
       alt: "איור של רועי אברהם"
     },
     {
       name: "מיכל שטרן",
-      role: "אחות מוסמכת",
-      text: "חיפשתי דרך להבליט את ההתמחויות והקורסים שעברתי. סיביט ארגנו את הכל בצורה כל כך ברורה ומקצועית, שהתקבלתי ישר למחלקה שרציתי. ממליצה בחום!",
+      role: "אחות במחלקת ילדים",
+      text: "הפורמט המובנה עזר לי להציג את כל ההכשרות והניסיון שלי בצורה מסודרת. קיבלתי המון תגובות חיוביות על העיצוב המקצועי",
       image: "/design/1.svg",
       alt: "איור של מיכל שטרן"
+    },
+    {
+      name: "עומר דוידוב",
+      role: "אנליסט נתונים",
+      text: "חיפשתי דרך להציג את הפרויקטים והמיומנויות הטכניות שלי בצורה שתתפוס את העין. התבנית שבחרתי עזרה לי להשיג בדיוק את זה",
+      image: "/design/3.svg",
+      alt: "איור של עומר דוידוב"
     }
   ],
   en: [
     {
-      name: "Adi Levy",
-      role: "Customer Service Representative",
-      text: "Amazing interface! Worth every penny. I'm the most technophobic person ever, and thanks to the incredible CVIT I got accepted to an insurance company's service center. Highly recommend... it was truly fast!",
+      name: "Adi Levi",
+      role: "HR Manager",
+      text: "Thank you for the excellent service! I managed to update my CV easily and quickly. The professional template and clean design really upgraded my document",
       image: "/design/1.svg",
-      alt: "Adi Levy illustration"
+      alt: "Adi Levi illustration"
     },
     {
       name: "Yossi Cohen",
-      role: "Real Estate Project Manager",
-      text: "I was looking for a way to update my CV without going crazy. CVIT simply saved me - within minutes I got a document that looks incredibly professional!",
+      role: "Industrial Engineer",
+      text: "After 7 years at the same workplace, I struggled to organize all my experience clearly. The site helped me present my skills in an organized and professional way",
       image: "/design/2.svg",
       alt: "Yossi Cohen illustration"
     },
     {
+      name: "Michal Barak",
+      role: "UX/UI Designer",
+      text: "I was looking for a format that would allow me to present my portfolio creatively yet professionally. The template I chose here met exactly what I needed. Within two days I got an interview invitation!",
+      image: "/design/3.svg",
+      alt: "Michal Barak illustration"
+    },
+    {
       name: "Alex Weissman",
-      role: "Computer Technician",
-      text: "My Hebrew isn't perfect yet, and I was really scared to write a CV by myself. CVIT helped me phrase everything professionally, and even translated it to English. Within a month I was already working at a major tech company!",
+      role: "Full Stack Developer",
+      text: "My Hebrew isn't perfect, and the site really helped me phrase my CV professionally. The option to translate to English was a significant bonus",
       image: "/design/3.svg",
       alt: "Alex Weissman illustration"
     },
     {
-      name: "Rachel Goldstein",
-      role: "Software Engineer",
-      text: "After making Aliyah 6 months ago, I was really stressed about adapting my resume to the Israeli market. CVIT helped me translate my experience perfectly, and within two weeks I landed a job at a tech company in Tel Aviv!",
-      image: "/design/3.svg",
-      alt: "Rachel Goldstein illustration"
-    },
-    {
-      name: "Michelle David",
-      role: "Graphic Designer",
-      text: "Coming from France, I was completely lost about how to present my CV here. CVIT not only helped with the translation but also adapted the format to Israeli standards. Thank you so much!",
+      name: "Shira Abrami",
+      role: "Digital Marketing Manager",
+      text: "I needed to update my CV urgently before an interview. The process was simple and easy, and the final result looks really impressive. Highly recommend!",
       image: "/design/AboutPic.svg",
-      alt: "Michelle David illustration"
+      alt: "Shira Abrami illustration"
     },
     {
       name: "Daniel Berkowitz",
-      role: "Financial Advisor",
-      text: "Moving from London was challenging, but CVIT made the job hunting part so much easier. They knew exactly how to present my international experience in a way that resonates with Israeli companies.",
+      role: "Business Consultant",
+      text: "I was looking for a way to highlight my professional achievements in a way that speaks to managers. The structured format helped me present my value clearly and convincingly",
       image: "/design/1.svg",
       alt: "Daniel Berkowitz illustration"
     },
     {
-      name: "Sarah Rosenblum",
-      role: "English Teacher",
-      text: "I was unsure how to present my teaching experience from the US. CVIT helped me highlight my strengths in a way that fits the Israeli education system. Now I'm teaching at a leading high school!",
+      name: "Noa Rosen",
+      role: "Special Education Teacher",
+      text: "I wanted a CV that would reflect not just my professional experience but also my educational approach. The offered templates allowed me to express that exactly as I wanted",
       image: "/design/2.svg",
-      alt: "Sarah Rosenblum illustration"
-    },
-    {
-      name: "Elia Ben-Haim",
-      role: "Chef",
-      text: "I came from France with experience in leading kitchens, but I struggled to explain it in Hebrew. CVIT helped me translate my CV professionally, and today I'm working at an amazing chef restaurant in Tel Aviv.",
-      image: "/design/3.svg",
-      alt: "Elia Ben-Haim illustration"
+      alt: "Noa Rosen illustration"
     },
     {
       name: "Roy Avraham",
-      role: "Operations Manager",
-      text: "After 6 years at the same workplace, I didn't know how to approach updating my CV. CVIT helped me present my experience in a modern and professional way. Within a week I was already invited to interviews!",
+      role: "Sales Manager",
+      text: "Simple, fast and professional. I managed to build an impressive CV in less than an hour. I've already recommended it to all my friends who are job hunting",
       image: "/design/2.svg",
       alt: "Roy Avraham illustration"
     },
     {
       name: "Michal Stern",
-      role: "Registered Nurse",
-      text: "I was looking for a way to highlight my specializations and courses. CVIT organized everything so clearly and professionally that I was immediately accepted to the department I wanted. Highly recommend!",
+      role: "Pediatric Nurse",
+      text: "The structured format helped me present all my training and experience in an organized way. I got lots of positive feedback on the professional design",
       image: "/design/1.svg",
       alt: "Michal Stern illustration"
+    },
+    {
+      name: "Omer Davidov",
+      role: "Data Analyst",
+      text: "I was looking for a way to present my projects and technical skills in an eye-catching way. The template I chose helped me achieve exactly that",
+      image: "/design/3.svg",
+      alt: "Omer Davidov illustration"
     }
   ]
 };

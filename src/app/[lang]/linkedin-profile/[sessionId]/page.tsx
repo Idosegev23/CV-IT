@@ -307,6 +307,8 @@ function LinkedInProfileContent() {
   const [isTranslated, setIsTranslated] = useState(false);
   const [currentSection, setCurrentSection] = useState<keyof LinkedInData>('summary');
   const [formattedData, setFormattedData] = useState<Record<string, FormattedItem[]>>({});
+  const [originalTexts, setOriginalTexts] = useState<Record<string, { original: string; translated: string | null; isTranslated: boolean; originalLanguage: string }>>({});
+  const [isTranslating, setIsTranslating] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchData = async () => {
@@ -354,12 +356,67 @@ function LinkedInProfileContent() {
     window.open(url, '_blank');
   };
 
+  const isEnglishText = (text: string) => {
+    if (!text) return false;
+    // בדיקה מדויקת יותר לטקסט באנגלית
+    const englishWords = text.split(/\s+/).filter(word => word.length > 0);
+    const englishPattern = /^[A-Za-z0-9\s.,!?@#$%^&*()_+\-=;:'"\\/[\]{}|<>•-]*$/;
+    const englishWordCount = englishWords.filter(word => englishPattern.test(word)).length;
+    
+    // אם יותר מ-70% מהמילים הן באנגלית, נחשיב את הטקסט כאנגלית
+    return englishWordCount / englishWords.length > 0.7;
+  };
+
+  const storeOriginalText = (text: string, isEnglish: boolean) => {
+    return {
+      original: text,
+      translated: null,
+      isTranslated: false,
+      originalLanguage: isEnglish ? 'en' : 'he'
+    };
+  };
+
   const handleTranslateSection = async (sectionKey: string, items: FormattedItem[]) => {
     try {
+      // עדכון מצב הטעינה
+      setIsTranslating(prev => ({ ...prev, [sectionKey]: true }));
+
       toast({
         title: isHebrew ? 'טוען...' : 'Loading...',
         description: isHebrew ? 'אנא המתן' : 'Please wait',
       });
+
+      // בדיקה האם יש כבר תרגום קיים
+      const hasTranslation = items.some(item => item.isTranslated);
+      
+      if (hasTranslation) {
+        // החזרה למקור
+        setFormattedData(prevData => ({
+          ...prevData,
+          [sectionKey]: items.map(item => {
+            const originalData = originalTexts[item.id];
+            return {
+              ...item,
+              content: originalData?.original || item.content,
+              fields: item.fields?.map(field => {
+                const fieldId = `${item.id}-${field.name}`;
+                const originalField = originalTexts[fieldId];
+                return {
+                  ...field,
+                  value: originalField?.original || field.value
+                };
+              }),
+              isTranslated: false
+            };
+          })
+        }));
+        
+        toast({
+          title: isHebrew ? 'הוחזר למקור' : 'Restored to Original',
+          description: isHebrew ? 'הטקסט הוחזר לגרסה המקורית' : 'Text restored to original version',
+        });
+        return;
+      }
 
       // תרגום כל הפריטים בסקציה
       const translatedItems = await Promise.all(items.map(async (item) => {
@@ -368,37 +425,62 @@ function LinkedInProfileContent() {
         let translatedContent = item.content;
         let translatedFields = item.fields;
 
-        // תרגום התוכן הראשי אם קיים
+        // שמירת הטקסט המקורי ותרגום התוכן
         if (item.content) {
-          const response = await fetch('/api/translate-section', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: item.content }),
-          });
+          const isEnglish = isEnglishText(item.content);
+          
+          // שמירת המצב המקורי
+          setOriginalTexts(prev => ({
+            ...prev,
+            [item.id]: storeOriginalText(item.content!, isEnglish)
+          }));
 
-          if (response.ok) {
-            const data = await response.json();
-            if (!data.error) {
-              translatedContent = data.translatedText;
-            }
-          }
-        }
-
-        // תרגום השדות אם קיימים
-        if (item.fields) {
-          translatedFields = await Promise.all(item.fields.map(async (field) => {
+          // תרגום רק אם הטקסט אינו בשפה הרצויה
+          if (!isEnglish) {
             const response = await fetch('/api/translate-section', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ text: field.value }),
+              body: JSON.stringify({ text: item.content }),
             });
 
             if (response.ok) {
               const data = await response.json();
-              return {
-                ...field,
-                value: data.error ? field.value : data.translatedText
-              };
+              if (!data.error) {
+                translatedContent = data.translatedText;
+              }
+            }
+          }
+        }
+
+        // תרגום השדות
+        if (item.fields) {
+          translatedFields = await Promise.all(item.fields.map(async (field) => {
+            const isEnglish = isEnglishText(field.value);
+            const fieldId = `${item.id}-${field.name}`;
+            
+            // שמירת המצב המקורי של השדה
+            setOriginalTexts(prev => ({
+              ...prev,
+              [fieldId]: storeOriginalText(field.value, isEnglish)
+            }));
+
+            // תרגום רק אם הטקסט אינו בשפה הרצויה
+            if (!isEnglish) {
+              const response = await fetch('/api/translate-section', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: field.value }),
+              });
+
+              if (response.ok) {
+                const data = await response.json();
+                if (!data.error) {
+                  return {
+                    ...field,
+                    value: data.translatedText
+                  };
+                }
+              }
             }
             return field;
           }));
@@ -428,6 +510,9 @@ function LinkedInProfileContent() {
         description: isHebrew ? 'התרגום נכשל, אנא נסה שוב' : 'Translation failed, please try again',
         variant: 'destructive',
       });
+    } finally {
+      // איפוס מצב הטעינה בסיום
+      setIsTranslating(prev => ({ ...prev, [sectionKey]: false }));
     }
   };
 
@@ -586,10 +671,26 @@ function LinkedInProfileContent() {
                         size="sm"
                         variant="outline"
                         onClick={() => handleTranslateSection(section.key, formattedData[section.key] || [])}
-                        className="rounded-full border-[#B78BE6] text-[#B78BE6] hover:bg-[#B78BE6] hover:text-white min-w-[180px]"
+                        className="rounded-full border-[#B78BE6] text-[#B78BE6] hover:bg-[#B78BE6] hover:text-white min-w-[180px] relative"
+                        disabled={isTranslating[section.key]}
                       >
-                        <Languages className="w-4 h-4 ml-2" />
-                        {isHebrew ? 'תרגם לאנגלית' : 'Translate to English'}
+                        <div className="flex items-center justify-center gap-2">
+                          {isTranslating[section.key] ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-2 border-[#B78BE6] border-t-transparent" />
+                              <span>{isHebrew ? 'מתרגם...' : 'Translating...'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Languages className="w-4 h-4" />
+                              <span>
+                                {formattedData[section.key]?.some(item => item.isTranslated)
+                                  ? (isHebrew ? 'חזרה למקור' : 'Back to Original')
+                                  : (isHebrew ? 'תרגם לאנגלית' : 'Translate to English')}
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </Button>
                     </div>
                   </div>

@@ -12,6 +12,13 @@ import { BackButton } from '@/components/BackButton';
 // הוספת טיפוס Package
 import type { Package } from '@/lib/store';
 
+// הוספת טיפוס Feature
+interface Feature {
+  text: string;
+  included: boolean;
+  tag?: string;
+}
+
 const content = {
   he: {
     title: 'בחירת תוכנית',
@@ -22,34 +29,33 @@ const content = {
         title: 'Basic',
         price: '75',
         features: [
-          { text: 'קורות חיים בעברית', included: true },
-          { text: 'עיצוב קורות חיים', included: true },
-          { text: 'מציאת עבודה (הפצה לחברות השמה)', included: true },
-          { text: 'הכנה לריאיון העבודה', included: true },
-          { text: 'מחשבון שכר - כמה אני שווה', included: true },
-          { text: 'קובץ PDF להורדה', included: true },
-        ]
+          { text: 'קורות חיים בעברית', included: true } as Feature,
+          { text: 'עיצוב קורות חיים', included: true } as Feature,
+          { text: 'עריכת קורות חיים', included: true } as Feature,
+          { text: 'מציאת עבודה (הפצה לחברות השמה)', included: true } as Feature,
+          { text: 'מחשבון שכר - כמה אני שווה', included: true } as Feature,
+          { text: 'קובץ PDF להורדה', included: true } as Feature,
+        ] as Feature[]
       },
       advanced: {
         title: 'Advanced',
         price: '85',
         recommended: true,
         features: [
-          { text: 'כל מה שבחבילת Basic ובנוסף:', included: true },
-          { text: 'קורות חיים באנגלית', included: true },
-          { text: 'עריכת קורות חיים', included: true },
-          { text: 'בניית פרופיל לינקדאין אוטומטית', included: true },
-        ]
+          { text: 'כל מה שבחבילת Basic ובנוסף:', included: true } as Feature,
+          { text: 'קורות חיים באנגלית', included: true } as Feature,
+          { text: 'תבנית מותאמת לפרופיל לינקדאין', included: true } as Feature,
+        ] as Feature[]
       },
       pro: {
         title: 'Pro',
         price: '95',
         features: [
-          { text: 'כל מה שבחבילת Advanced ובנוסף:', included: true },
-          { text: 'הכנה אישית לריאיון העבודה', included: true },
-          { text: 'ליווי אישי מול המעסיקים', included: true },
-          { text: 'שובר לריאיון העבודה עם מוניות GetCVit', included: true },
-        ]
+          { text: 'כל מה שבחבילת Advanced ובנוסף:', included: true } as Feature,
+          { text: 'הכנה לריאיון העבודה', included: true } as Feature,
+          { text: 'ליווי אישי מול המעסיקים', included: true } as Feature,
+          { text: 'שובר לריאיון העבודה עם מוניות GetCVit', included: true, tag: 'בבנייה' } as Feature,
+        ] as Feature[]
       }
     },
     cta: 'אני רוצה את זה',
@@ -65,34 +71,33 @@ const content = {
         title: 'Basic',
         price: '75',
         features: [
-          { text: 'Hebrew CV', included: true },
-          { text: 'CV Design', included: true },
-          { text: 'Job Search (Distribution to Recruitment Companies)', included: true },
-          { text: 'Interview Preparation', included: true },
-          { text: 'Salary Calculator - Know Your Worth', included: true },
-          { text: 'PDF File Download', included: true },
-        ]
+          { text: 'Hebrew CV', included: true } as Feature,
+          { text: 'CV Design', included: true } as Feature,
+          { text: 'CV Editing', included: true } as Feature,
+          { text: 'Job Search (Distribution to Recruitment Companies)', included: true } as Feature,
+          { text: 'Salary Calculator - Know Your Worth', included: true } as Feature,
+          { text: 'PDF File Download', included: true } as Feature,
+        ] as Feature[]
       },
       advanced: {
         title: 'Advanced',
         price: '85',
         recommended: true,
         features: [
-          { text: 'Everything in Basic package plus:', included: true },
-          { text: 'English CV', included: true },
-          { text: 'CV Editing', included: true },
-          { text: 'Automatic LinkedIn Profile Creation', included: true },
-        ]
+          { text: 'Everything in Basic package plus:', included: true } as Feature,
+          { text: 'English CV', included: true } as Feature,
+          { text: 'LinkedIn Profile Template', included: true } as Feature,
+        ] as Feature[]
       },
       pro: {
         title: 'Pro',
         price: '95',
         features: [
-          { text: 'Everything in Advanced package plus:', included: true },
-          { text: 'Personal Interview Preparation', included: true },
-          { text: 'Personal Guidance with Employers', included: true },
-          { text: 'GetCVit - Job Interview Taxi Voucher', included: true },
-        ]
+          { text: 'Everything in Advanced package plus:', included: true } as Feature,
+          { text: 'Job Interview Preparation', included: true } as Feature,
+          { text: 'Personal Guidance with Employers', included: true } as Feature,
+          { text: 'GetCVit - Job Interview Taxi Voucher', included: true, tag: 'Coming Soon' } as Feature,
+        ] as Feature[]
       }
     },
     cta: 'I want this',
@@ -298,7 +303,7 @@ export default function PackagesPage() {
                 {currentContent.packages.basic.features.map((feature, index) => (
                   <div 
                     key={index} 
-                    className={`flex items-center gap-2 ${isRTL ? 'mr-auto pl-6' : 'ml-auto pr-6'}`}
+                    className={`flex items-center gap-2 ${isRTL ? 'mr-auto pl-6' : 'ml-auto pr-6'} relative`}
                     style={{ direction: isRTL ? 'rtl' : 'ltr' }}
                   >
                     <Image
@@ -309,6 +314,11 @@ export default function PackagesPage() {
                       className="flex-shrink-0"
                     />
                     <span className="text-base text-gray-600">{feature.text}</span>
+                    {feature.tag && (
+                      <span className="absolute -top-2 -right-2 bg-[#4754D6] text-white text-xs px-2 py-1 rounded-full transform rotate-12">
+                        {feature.tag}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -350,7 +360,7 @@ export default function PackagesPage() {
                 {currentContent.packages.advanced.features.map((feature, index) => (
                   <div 
                     key={index} 
-                    className={`flex items-center gap-2 ${isRTL ? 'mr-auto pl-6' : 'ml-auto pr-6'}`}
+                    className={`flex items-center gap-2 ${isRTL ? 'mr-auto pl-6' : 'ml-auto pr-6'} relative`}
                     style={{ direction: isRTL ? 'rtl' : 'ltr' }}
                   >
                     <Image
@@ -361,6 +371,11 @@ export default function PackagesPage() {
                       className="flex-shrink-0"
                     />
                     <span className="text-base text-gray-600">{feature.text}</span>
+                    {feature.tag && (
+                      <span className="absolute -top-2 -right-2 bg-[#4754D6] text-white text-[10px] px-2 py-0.5 rounded-full transform rotate-12 whitespace-nowrap">
+                        {feature.tag}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
@@ -402,7 +417,7 @@ export default function PackagesPage() {
                 {currentContent.packages.pro.features.map((feature, index) => (
                   <div 
                     key={index} 
-                    className={`flex items-center gap-2 ${isRTL ? 'mr-auto pl-6' : 'ml-auto pr-6'}`}
+                    className={`flex items-center gap-2 ${isRTL ? 'mr-auto pl-6' : 'ml-auto pr-6'} relative`}
                     style={{ direction: isRTL ? 'rtl' : 'ltr' }}
                   >
                     <Image
@@ -413,6 +428,11 @@ export default function PackagesPage() {
                       className="flex-shrink-0"
                     />
                     <span className="text-base text-gray-600">{feature.text}</span>
+                    {feature.tag && (
+                      <span className="absolute -top-2 -right-2 bg-[#4754D6] text-white text-[10px] px-2 py-0.5 rounded-full transform rotate-12 whitespace-nowrap">
+                        {feature.tag}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

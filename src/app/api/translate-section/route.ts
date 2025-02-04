@@ -22,27 +22,15 @@ export async function POST(request: Request) {
       messages: [
         {
           role: 'user',
-          content: `Translate all of this text from Hebrew to English, including labels and titles. 
-                   Translate everything exactly as is, keeping the same structure and format.
-                   DONT ADD ANY NOTES OR EXPLANATIONS!
-                   IF THE CONTENT IS A LIST, KEEP THE LIST FORMAT!
-                   IF THE CONTENT IS A TABLE, KEEP THE TABLE FORMAT!
-                   IF THE CONTENT IS A BULLET POINT, KEEP THE BULLET POINT FORMAT!
-                   IF THE CONTENT IS A NUMBER, KEEP THE NUMBER FORMAT!
-                   IF THE CONTENT IS A DATE, KEEP THE DATE FORMAT!
-                   IF THE CONTENT IS A TIME, KEEP THE TIME FORMAT!
-                   IF THE CONTENT IS A PERCENTAGE, KEEP THE PERCENTAGE FORMAT!
-                   IF THE CONTENT IS A CURRENCY, KEEP THE CURRENCY FORMAT!
-                   IF THE CONTENT IS A LINK, KEEP THE LINK FORMAT!
-                   IF THE CONTENT IS A PHONE NUMBER, KEEP THE PHONE NUMBER FORMAT!
-                   IF THE CONTENT IS A EMAIL, KEEP THE EMAIL FORMAT!
-                   IF THE CONTENT IS A ADDRESS, KEEP THE ADDRESS FORMAT!
-                   IF THE CONTENT IS A COMPANY NAME, KEEP THE COMPANY NAME FORMAT!
-                   IF THE CONTENT IS A JOB TITLE, KEEP THE JOB TITLE FORMAT!
-                   IF THE CONTENT IS A SKILL, KEEP THE SKILL FORMAT!
-                   IF THE CONTENT IS A LANGUAGE, KEEP THE LANGUAGE FORMAT!
-                   NUMBER AND DATES SHOULD BE KEPT AS IS!
-                   Here's the text to translate:
+          content: `Translate the following text ${text.includes('•') ? 'from Hebrew to English' : 'from English to Hebrew'}.
+                   Important rules:
+                   1. Provide ONLY the direct translation
+                   2. Keep all formatting (bullet points, numbers, dates) exactly as is
+                   3. Do not add any notes, explanations or metadata
+                   4. Preserve all special characters (•, -, etc.)
+                   5. Keep all proper nouns, company names, and technical terms in their original form
+                   
+                   Text to translate:
                    ${text}`
         }
       ]
