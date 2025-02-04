@@ -169,7 +169,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 {isEditing && (
                   <button
                     onClick={() => handleEdit('personalInfo', 0)}
-                    className="edit-button"
+                    className="general-edit-button general-edit-button-personal"
                     title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
                   >
                     <Edit2 className="w-4 h-4" />
@@ -225,18 +225,15 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
         {/* תקציר מקצועי */}
         {data.personalInfo.summary && (
           <section className="general-section">
-            <h3 className="general-section-title">
-              {t.professionalSummary}
-              {isEditing && (
-                <button
-                  onClick={() => handleEdit('professionalSummary', 0)}
-                  className="edit-button"
-                  title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              )}
-            </h3>
+            {isEditing && (
+              <button
+                onClick={() => handleEdit('professionalSummary', 0)}
+                className="general-edit-button general-edit-button-summary"
+                title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
             <div className="general-professional-summary">
               <p>{data.personalInfo.summary}</p>
             </div>
@@ -254,7 +251,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('experience', 0)}
-                  className="edit-button"
+                  className="general-edit-button general-edit-button-experience"
                   title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -301,7 +298,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('education', 0)}
-                  className="edit-button"
+                  className="general-edit-button general-edit-button-education"
                   title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -347,7 +344,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('military', 0)}
-                  className="edit-button"
+                  className="general-edit-button general-edit-button-military"
                   title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -396,7 +393,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('skills', 0)}
-                  className="edit-button"
+                  className="general-edit-button general-edit-button-skills"
                   title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -455,7 +452,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('language', 0)}
-                  className="edit-button"
+                  className="general-edit-button general-edit-button-languages"
                   title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >
                   <Edit2 className="w-4 h-4" />

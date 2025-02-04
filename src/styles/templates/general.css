@@ -603,6 +603,7 @@
   font-weight: 500;
   max-width: 95%;
   margin-bottom: 2rem;
+  margin-top: 4rem;
 }
 
 .general-professional-summary p {
@@ -610,4 +611,105 @@
   padding: 0;
   text-align: justify;
   hyphens: auto;
+}
+
+/* כפתורי עריכה - סגנונות בסיסיים */
+.general-edit-button {
+  position: absolute !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  background: white !important;
+  border: 1px solid rgba(72, 86, 205, 0.2) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  z-index: 10 !important;
+  opacity: 1 !important;
+}
+
+/* כפתור עריכה - פרטים אישיים */
+.general-edit-button-personal {
+  right: -35rem !important;
+  top: -30% !important;
+}
+
+/* כפתור עריכה - תקציר מקצועי */
+.general-edit-button-summary {
+  right: 30px !important;
+  top: -30px !important;
+  transform: translateY(0) !important;
+}
+
+/* כפתור עריכה - ניסיון תעסוקתי */
+.general-edit-button-experience {
+  right: 10rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור עריכה - השכלה */
+.general-edit-button-education {
+  right: 10rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור עריכה - שירות צבאי */
+.general-edit-button-military {
+  right: 10rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור עריכה - כישורים */
+.general-edit-button-skills {
+  right: 10rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור עריכה - שפות */
+.general-edit-button-languages {
+  right: 10rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* סגנון האייקון */
+.general-edit-button svg {
+  width: 14px !important;
+  height: 14px !important;
+  color: #4856CD !important;
+}
+
+/* טולטיפ */
+.general-edit-button::after {
+  content: attr(title) !important;
+  position: absolute !important;
+  background: rgba(72, 86, 205, 0.9) !important;
+  color: white !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  right: calc(100% + 8px) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* הופעת טולטיפ בריחוף */
+.general-edit-button:hover::after {
+  opacity: 1 !important;
+}
+
+/* הגדרת position: relative לכל המכילים של הכפתורים */
+.general-section-title,
+.general-header-name,
+.general-professional-summary {
+  position: relative !important;
 } 
