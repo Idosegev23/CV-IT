@@ -148,7 +148,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('personalInfo', 0)}
-                  className="edit-button mr-2 -mt-1"
+                  className="creative-edit-button creative-edit-button-personal"
                   title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
                 >
                   <Edit2 size={14} />
@@ -204,7 +204,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('skills', 0)}
-                  className="edit-button"
+                  className="creative-edit-button creative-edit-button-skills"
                   title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                 >
                   <Edit2 size={14} />
@@ -290,7 +290,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('languages', 0)}
-                  className="edit-button"
+                  className="creative-edit-button creative-edit-button-languages"
                   title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >
                   <Edit2 size={14} />
@@ -342,18 +342,15 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
         {/* תקציר מקצועי */}
         {data.personalInfo.summary && (
           <div className="creative-summary">
-            <h2 className="creative-summary-title relative">
-              {t.professionalSummary}
-              {isEditing && (
-                <button 
-                  onClick={() => handleEdit('professionalSummary', 0)}
-                  className="edit-button absolute right-full ml-2"
-                  title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
-                >
-                  <Edit2 size={14} />
-                </button>
-              )}
-            </h2>
+            {isEditing && (
+              <button 
+                onClick={() => handleEdit('professionalSummary', 0)}
+                className="creative-edit-button creative-edit-button-summary"
+                title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
+              >
+                <Edit2 size={14} />
+              </button>
+            )}
             <div className="creative-summary-content">
               <p>{data.personalInfo.summary}</p>
             </div>
@@ -368,7 +365,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('experience', 0)}
-                  className="edit-button absolute right-full ml-2"
+                  className="creative-edit-button creative-edit-button-experience"
                   title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                 >
                   <Edit2 size={14} />
@@ -412,7 +409,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('education', 0)}
-                  className="edit-button"
+                  className="creative-edit-button creative-edit-button-education"
                   title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                 >
                   <Edit2 size={14} />
@@ -455,7 +452,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('military', 0)}
-                  className="edit-button"
+                  className="creative-edit-button creative-edit-button-military"
                   title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                 >
                   <Edit2 size={14} />

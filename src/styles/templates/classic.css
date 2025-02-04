@@ -423,7 +423,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  opacity: 0;
+  opacity: 1;
   transition: opacity 0.2s ease-in-out;
   display: flex;
   align-items: center;
@@ -436,15 +436,25 @@
   transform: translateY(-50%);
 }
 
-.section-container:hover .edit-button,
-.experience-item:hover .edit-button,
-.education-item:hover .edit-button,
-.skill-item:hover .edit-button,
-.language-item:hover .edit-button,
-.header-contact:hover .edit-button,
-.section-title:hover .edit-button,
-.header-name:hover .edit-button,
-.summary-content:hover .edit-button {
+/* עדכון הטולטיפ */
+.edit-button::after {
+  content: attr(title);
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(72, 86, 205, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.edit-button:hover::after {
   opacity: 1;
 }
 
