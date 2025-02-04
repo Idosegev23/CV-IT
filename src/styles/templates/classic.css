@@ -64,6 +64,8 @@
   font-family: var(--font-family);
   letter-spacing: -0.02em;
   margin-bottom: 0.3rem;
+  position: relative;
+  padding-left: 2rem;
 }
 
 .header-name-first {
@@ -120,12 +122,32 @@
   margin-bottom: var(--item-spacing);
   padding-bottom: 0.2rem;
   position: relative;
-  padding-right: 1.5rem;
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: none;
+  padding-left: 2rem;
+}
+
+.section-title .edit-button {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.header-name .edit-button {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.summary-content .edit-button {
+  position: absolute;
+  left: 0;
+  top: 0;
 }
 
 /* כותרות מיוחדות - קרובות יותר לדופן ימין */
@@ -279,9 +301,9 @@
 }
 
 .skills-items,
-.languages-skills-items {
+.languages-items {
   display: block;
-  padding: 0 1.5rem 0 6rem;
+  padding: 0 1.5rem;
   line-height: 1.3;
   text-align: right;
   margin-top: 0.3rem;
@@ -304,49 +326,34 @@
 
 .languages-items {
   display: block;
-  padding: 0 1.5rem 0 7rem;
+  padding: 0 1.5rem;
   line-height: 1.3;
   text-align: right;
   margin-top: 0.3rem;
   width: 100%;
 }
 
-.languages-items .skill-name {
-  font-weight: 500;
-  color: #1F1B2F;
-  display: inline;
-}
-
-.languages-items span {
-  display: inline;
-  font-size: 0.9rem;
-  color: #333;
-  font-weight: 300;
-}
-
-.languages-items span:not(:last-child)::after {
-  content: '|';
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.4;
-  font-weight: 200;
-}
-
-.skill-item {
+.languages-items .skill-item {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
   font-size: 0.9rem;
+  white-space: pre !important;
 }
 
-.skill-item .skill-name {
+.languages-items .skill-name {
   font-weight: 500;
   color: #1F1B2F;
 }
 
-.skill-item .skill-level {
+.languages-items .skill-level {
   font-weight: 300;
   color: #666;
+}
+
+/* הסרת הגדרות כפולות */
+.languages-items span:not(:last-child)::after {
+  display: none;
 }
 
 /* תקציר */
@@ -355,6 +362,7 @@
   margin: var(--section-spacing) 0;
   padding: 0 1.5rem;
   text-align: right;
+  position: relative;
 }
 
 .summary-content {
@@ -362,12 +370,41 @@
   line-height: 1.4;
   color: #333;
   font-weight: 300;
-  margin: 0;
+  margin-top: 1.5rem;
   padding: 0;
   text-align: justify;
   max-width: 100%;
   white-space: pre-wrap;
   word-wrap: break-word;
+  position: relative;
+}
+
+/* עדכון כפתור העריכה בתקציר */
+.summary-section .edit-button {
+  position: absolute !important;
+  right: 0 !important;
+  top: -1rem !important;
+  transform: none !important;
+}
+
+[dir="rtl"] .summary-section .edit-button {
+  left: auto !important;
+  right: 0 !important;
+  top: -1rem !important;
+}
+
+/* ביטול הגדרות קודמות שמתנגשות */
+.summary-content .edit-button {
+  position: absolute !important;
+  right: 0 !important;
+  top: -1rem !important;
+  transform: none !important;
+}
+
+[dir="rtl"] .summary-content .edit-button {
+  left: auto !important;
+  right: 0 !important;
+  top: -1rem !important;
 }
 
 /* פוטר */
@@ -383,27 +420,20 @@
 
 /* כפתורי עריכה */
 .edit-button {
-  position: absolute;
-  right: -2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: white;
-  border: 1px solid rgba(72, 86, 205, 0.2);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: all 0.2s ease;
-  opacity: 0;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.edit-button:hover {
-  background: rgba(72, 86, 205, 0.1);
+  padding: 0.25rem;
+  border-radius: 4px;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .section-container:hover .edit-button,
@@ -411,7 +441,10 @@
 .education-item:hover .edit-button,
 .skill-item:hover .edit-button,
 .language-item:hover .edit-button,
-.header-contact:hover .edit-button {
+.header-contact:hover .edit-button,
+.section-title:hover .edit-button,
+.header-name:hover .edit-button,
+.summary-content:hover .edit-button {
   opacity: 1;
 }
 
@@ -576,4 +609,73 @@
 
 .contact-item span {
   font-weight: 300;
+}
+
+/* תיקון למצב RTL */
+[dir="rtl"] .section-title {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+[dir="rtl"] .edit-button {
+  left: auto !important;
+  right: -1.5rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור פרטים אישיים */
+[dir="rtl"] .header-name .edit-button {
+  left: auto !important;
+  right: 8rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור תקציר */
+[dir="rtl"] .summary-section .edit-button {
+  left: auto !important;
+  right: 0 !important;
+  top: -1rem !important;
+  transform: none !important;
+}
+
+/* כפתור ניסיון תעסוקתי */
+[dir="rtl"] .experience-section .edit-button {
+  left: auto !important;
+  right: 8rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור השכלה */
+[dir="rtl"] .education-section .edit-button {
+  left: auto !important;
+  right: 8rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור צבאי */
+[dir="rtl"] .military-section .edit-button {
+  left: auto !important;
+  right: 8rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור כישורים */
+[dir="rtl"] .skills-section .edit-button {
+  left: auto !important;
+  right: 8rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* כפתור שפות */
+[dir="rtl"] .languages-section .edit-button {
+  left: auto !important;
+  right: 8rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }

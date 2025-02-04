@@ -153,13 +153,15 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         <div className="relative z-10">
           <div className="header-name-wrapper section-container">
             <h1 className="header-name">
-              <div className="flex items-center">
-                <span className="header-name-first">{firstName}</span>
-                {lastName && <span className="header-name-last">{lastName}</span>}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className="header-name-first">{firstName}</span>
+                  {lastName && <span className="header-name-last">{lastName}</span>}
+                </div>
                 {isEditing && (
                   <button
                     onClick={() => onEdit('personalInfo', 0)}
-                    className="edit-button ml-80 opacity-100"
+                    className="edit-button mr-2"
                     title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
                   >
                     <Edit2 className="w-4 h-4" />
@@ -225,17 +227,17 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {/* תקציר */}
         {data.personalInfo.summary && (
           <section className="summary-section section-container relative">
+            {isEditing && (
+              <button
+                onClick={() => onEdit('professionalSummary', 0)}
+                className="edit-button"
+                title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
             <div className="summary-content">
               {data.personalInfo.summary}
-              {isEditing && (
-                <button
-                  onClick={() => onEdit('professionalSummary', 0)}
-                  className="edit-button"
-                  title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              )}
             </div>
           </section>
         )}
@@ -244,12 +246,14 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {experience && experience.length > 0 && (
           <section className="experience-section">
             <div className="section-container">
-              <h2 className="section-title relative">
-                {t.workExperience}
+              <h2 className="section-title relative flex items-center justify-between">
+                <div className="flex items-center">
+                  {t.workExperience}
+                </div>
                 {isEditing && (
                   <button
                     onClick={() => onEdit('experience', 0)}
-                    className="edit-button"
+                    className="edit-button mr-2"
                     title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                   >
                     <Edit2 className="w-4 h-4" />
@@ -293,12 +297,14 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {education?.degrees && education.degrees.length > 0 && (
           <section className="education-section">
             <div className="section-container">
-              <h2 className="section-title relative">
-                {t.education}
+              <h2 className="section-title relative flex items-center justify-between">
+                <div className="flex items-center">
+                  {t.education}
+                </div>
                 {isEditing && (
                   <button
                     onClick={() => onEdit('education', 0)}
-                    className="edit-button"
+                    className="edit-button mr-2"
                     title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                   >
                     <Edit2 className="w-4 h-4" />
@@ -338,12 +344,14 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {military && (
           <section className="military-section">
             <div className="section-container">
-              <h2 className="section-title relative">
-                {military.role?.toLowerCase().includes('לאומי') ? t.nationalService : t.militaryService}
+              <h2 className="section-title relative flex items-center justify-between">
+                <div className="flex items-center">
+                  {military.role?.toLowerCase().includes('לאומי') ? t.nationalService : t.militaryService}
+                </div>
                 {isEditing && (
                   <button
                     onClick={() => onEdit('military', 0)}
-                    className="edit-button"
+                    className="edit-button mr-2"
                     title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                   >
                     <Edit2 className="w-4 h-4" />
@@ -379,12 +387,14 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {skills && (
           <section className="skills-section">
             <div className="section-container">
-              <h2 className="section-title relative">
-                {t.skills}
+              <h2 className="section-title relative flex items-center justify-between">
+                <div className="flex items-center">
+                  {t.skills}
+                </div>
                 {isEditing && (
                   <button
                     onClick={() => onEdit('skills', 0)}
-                    className="edit-button"
+                    className="edit-button mr-2"
                     title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                   >
                     <Edit2 className="w-4 h-4" />
@@ -427,12 +437,14 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         {/* שפות */}
         {skills.languages && skills.languages.length > 0 && (
           <section className="languages-section section-container">
-            <h2 className="section-title">
-              {t.languages}
+            <h2 className="section-title flex items-center justify-between">
+              <div className="flex items-center">
+                {t.languages}
+              </div>
               {isEditing && (
                 <button
                   onClick={() => onEdit('languages', 0)}
-                  className="edit-button"
+                  className="edit-button mr-2"
                   title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -441,12 +453,12 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
             </h2>
             <div className="languages-items">
               {skills.languages.map((langItem, index) => (
-                <>
-                  <span key={`lang-${index}`} className="languages-items">
-                    <span className="skill-name">{langItem.language}</span> - <span>{langItem.level}</span>
-                  </span>
-                  {index < skills.languages.length - 1 && <span> | </span>}
-                </>
+                <span key={`lang-${index}`} className="skill-item relative">
+                  <span className="skill-name">{langItem.language}</span>
+                  {" - "}
+                  <span className="skill-level">{langItem.level}</span>
+                  {index < skills.languages.length - 1 && " | "}
+                </span>
               ))}
             </div>
           </section>

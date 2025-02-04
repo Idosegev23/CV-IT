@@ -118,12 +118,19 @@ export default function FinishPage() {
   };
 
   const features: Record<string, FeatureConfig> = {
+    backToEdit: {
+      icon: 'edit',
+      title: isRTL ? 'חזרה לעריכה' : 'Back to Edit',
+      description: isRTL ? 'חזרה למסך עריכת קורות החיים' : 'Return to CV editing screen',
+      requiredPackage: 'basic',
+      route: `/${lang}/create/template/${sessionId}/form`
+    },
     download: {
       icon: 'downloadPDF',
-      title: isRTL ? 'PDF הורדת' : 'Download PDF',
+      title: isRTL ? 'הורדת קורות חיים' : 'Download CV',
       description: isRTL ? 'הורד את קורות החיים שלך בפורמט PDF' : 'Download your CV in PDF format',
       requiredPackage: 'basic',
-      route: `/${lang}/create/template/${sessionId}/preview`
+      route: '#'
     },
     sendCV: {
       icon: 'look',
@@ -203,6 +210,31 @@ export default function FinishPage() {
   const handleFeatureClick = async (featureKey: string) => {
     setCurrentAction(featureKey);
     const feature = features[featureKey];
+    
+    if (featureKey === 'download') {
+      setShowLoadingModal(true);
+      try {
+        const response = await fetch(`/api/generate-pdf?sessionId=${sessionId}`);
+        if (!response.ok) {
+          throw new Error('Failed to generate PDF');
+        }
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'cv.pdf';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        console.error('Error downloading PDF:', error);
+        toast.error(isRTL ? 'אירעה שגיאה בהורדת קורות החיים' : 'Error downloading CV');
+      } finally {
+        setShowLoadingModal(false);
+      }
+      return;
+    }
     
     if (featureKey === 'translate') {
       setShowLoadingModal(true);
