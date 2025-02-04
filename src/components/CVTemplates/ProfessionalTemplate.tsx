@@ -154,7 +154,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
             {isEditing && (
               <button
                 onClick={() => handleEdit('personalInfo', 0)}
-                className="edit-button"
+                className="professional-edit-button professional-edit-button-personal"
                 title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
               >
                 <Edit2 size={14} />
@@ -226,7 +226,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {isEditing && (
                 <button 
                   onClick={() => handleEdit('skills', 0)}
-                  className="edit-button"
+                  className="professional-edit-button professional-edit-button-skills"
                   title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -275,7 +275,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {isEditing && (
                 <button 
                   onClick={() => handleEdit('languages', 0)}
-                  className="edit-button"
+                  className="professional-edit-button professional-edit-button-languages"
                   title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -309,15 +309,14 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
         {/* תקציר מקצועי */}
         <section className="professional-summary relative">
           {isEditing && (
-            <button 
+            <button
               onClick={() => handleEdit('professionalSummary', 0)}
-              className="edit-button"
+              className="professional-edit-button professional-edit-button-summary"
               title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
             >
               <Edit2 className="w-4 h-4" />
             </button>
           )}
-          <h2 className="professional-section-title">{t.professionalSummary}</h2>
           <p className="professional-summary-text" style={{
             textAlign: 'justify',
             padding: '0 1rem',
@@ -338,7 +337,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {isEditing && (
                 <button 
                   onClick={() => handleEdit('experience', 0)}
-                  className="edit-button"
+                  className="professional-edit-button professional-edit-button-experience"
                   title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -387,7 +386,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {isEditing && (
                 <button 
                   onClick={() => handleEdit('education', 0)}
-                  className="edit-button"
+                  className="professional-edit-button professional-edit-button-education"
                   title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                 >
                   <Edit2 className="w-4 h-4" />
@@ -432,7 +431,7 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               {isEditing && (
                 <button 
                   onClick={() => handleEdit('military', 0)}
-                  className="edit-button"
+                  className="professional-edit-button professional-edit-button-military"
                   title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                 >
                   <Edit2 className="w-4 h-4" />

@@ -89,6 +89,7 @@
   gap: 0.2rem;
   font-size: clamp(1.5rem, 3vw, 2.2rem);
   line-height: 1.1;
+  position: relative !important;
 }
 
 .professional-name-first {
@@ -151,6 +152,7 @@
   font-size: clamp(1rem, 2vw, 1.2rem);
   color: #F3F4F1;
   margin-bottom: 0.8rem;
+  position: relative !important;
 }
 
 /* רשימת שפות */
@@ -550,6 +552,7 @@
 /* תקציר מקצועי */
 .professional-summary {
   margin-bottom: 1.2rem;
+  position: relative !important;
 }
 
 .professional-summary-text {
@@ -736,94 +739,96 @@
   }
 }
 
-/* כפתורי עריכה והוספה */
-.edit-button,
-.add-button {
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 1px solid rgba(72, 86, 205, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 10;
-  opacity: 1;
+/* כפתורי עריכה - סגנונות בסיסיים */
+.professional-edit-button {
+  position: absolute !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  background: white !important;
+  border: 1px solid rgba(72, 86, 205, 0.2) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  z-index: 10 !important;
+  opacity: 1 !important;
 }
 
-.edit-button {
-  right: -30px;
-  top: 50%;
-  transform: translateY(-50%);
+/* כפתור עריכה - פרטים אישיים */
+.professional-edit-button-personal {
+  left: 90px !important;
+  top: 50% !important;
+  transform: translateY(30px) !important;
 }
 
-.add-button {
-  right: -30px;
-  bottom: -12px;
+/* כפתור עריכה - תקציר מקצועי */
+.professional-edit-button-summary {
+  right: -30px !important;
+  top: -14px !important;
 }
 
-.professional-section-title,
-.professional-experience-item,
-.professional-education-item,
-.professional-skill-item,
-.professional-header,
-.professional-summary {
-  position: relative;
+/* כפתור עריכה - ניסיון תעסוקתי */
+.professional-edit-button-experience {
+  right: 100px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }
 
-.edit-button:hover,
-.add-button:hover {
-  background: rgba(72, 86, 205, 0.1);
+/* כפתור עריכה - השכלה */
+.professional-edit-button-education {
+  right: 85px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }
 
-.add-button:hover {
-  transform: scale(1.1);
+/* כפתור עריכה - שירות צבאי */
+.professional-edit-button-military {
+  right: 100px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }
 
-.edit-button svg,
-.add-button svg {
-  width: 14px;
-  height: 14px;
-  color: #4856CD;
+/* כפתור עריכה - כישורים */
+.professional-edit-button-skills {
+  right: 60px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }
 
-/* טולטיפים */
-.edit-button::after,
-.add-button::after {
-  content: attr(title);
-  position: absolute;
-  right: calc(100% + 8px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(72, 86, 205, 0.9);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
+/* כפתור עריכה - שפות */
+.professional-edit-button-languages {
+  right: 50px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }
 
-.edit-button:hover::after,
-.add-button:hover::after {
-  opacity: 1;
+/* סגנון האייקון */
+.professional-edit-button svg {
+  width: 14px !important;
+  height: 14px !important;
+  color: #4856CD !important;
 }
 
-/* התאמות לעמודה הימנית */
-.professional-right-column .edit-button,
-.professional-right-column .add-button {
-  right: auto;
-  left: -20px;
+/* טולטיפ */
+.professional-edit-button::after {
+  content: attr(title) !important;
+  position: absolute !important;
+  background: rgba(72, 86, 205, 0.9) !important;
+  color: white !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  right: calc(100% + 8px) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
 }
 
-.professional-right-column .edit-button::after,
-.professional-right-column .add-button::after {
-  right: auto;
-  left: calc(100% + 8px);
+/* הופעת טולטיפ בריחוף */
+.professional-edit-button:hover::after {
+  opacity: 1 !important;
 } 
