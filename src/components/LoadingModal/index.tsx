@@ -11,6 +11,7 @@ interface LoadingModalProps {
   dictionary: Dictionary;
   action?: 'generate-pdf' | 'send-cv' | 'send-interview-request' | 'translate-cv' | 'download-pdf';
   isSuccess?: boolean;
+  onSuccessClose?: () => void;
 }
 
 const getLoadingText = (action: string | undefined, lang: string) => {
@@ -140,7 +141,7 @@ const getFunnyText = (action: string | undefined, lang: string): string[] => {
           'מנסה לפצח את קוד המורס של המחשב',
           'רץ במסדרונות הדיגיטליים',
           'מחפש את הקסם בין הביטים והבייטים',
-          'מנסה לשכנע את האינטרנט לעבוד מה�� יותר'
+          'מנסה לשכנע את האינטרנט לעבוד מה יותר'
         ];
     }
   }
@@ -203,15 +204,74 @@ const getFunnyText = (action: string | undefined, lang: string): string[] => {
   }
 };
 
+const getSuccessText = (action: string | undefined, lang: string): string[] => {
+  if (lang === 'he') {
+    switch (action) {
+      case 'send-cv':
+        return [
+          '🎯 קורות החיים שלך בדרך למעסיק המושלם',
+          '🌟 עוד מעט הטלפון שלך יתחיל לצלצל',
+          '🚀 המסע שלך לעבודה החדשה מתחיל עכשיו',
+          '✨ הכישרון שלך עומד להתגלות',
+          '🎪 הבמה שלך מוכנה, אנחנו רק מצחצחים את הזרקורים',
+          '🎭 המראיינים כבר מתאמנים על חיוך נחמד בשבילך'
+        ];
+      case 'send-interview-request':
+        return [
+          '🎯 ההכנה לראיון שלך בדרך להצלחה',
+          '🌟 אנחנו כבר מכינים לך את השטיח האדום',
+          '🎪 שומרים לך את הכיסא הכי נוח באולם הראיונות',
+          '✨ המדריך שלך לראיון כבר מחמם מנועים',
+          '🎭 בקרוב תהיה מוכן/ה לכבוש כל ראיון'
+        ];
+      default:
+        return [
+          '🌟 הצלחנו! הכל מוכן בשבילך',
+          '✨ המשימה הושלמה בהצלחה',
+          '🎯 הכל מוכן ומחכה לך',
+          '🚀 יצאנו לדרך בהצלחה'
+        ];
+    }
+  } else {
+    switch (action) {
+      case 'send-cv':
+        return [
+          '🎯 Your CV is on its way to the perfect employer',
+          '🌟 Get ready for your phone to start ringing',
+          '🚀 Your journey to your new job starts now',
+          '✨ Your talent is about to be discovered',
+          '🎪 Your stage is ready, we\'re just polishing the spotlights',
+          '🎭 The interviewers are practicing their nice smiles for you'
+        ];
+      case 'send-interview-request':
+        return [
+          '🎯 Your interview prep is on track for success',
+          '🌟 We\'re rolling out the red carpet for you',
+          '🎪 Saving you the comfiest chair in the interview room',
+          '✨ Your interview guide is warming up',
+          '🎭 Soon you\'ll be ready to ace any interview'
+        ];
+      default:
+        return [
+          '🌟 Success! Everything is ready for you',
+          '✨ Mission accomplished successfully',
+          '🎯 All set and waiting for you',
+          '🚀 We\'re off to a great start'
+        ];
+    }
+  }
+};
+
 export const LoadingModal: React.FC<LoadingModalProps> = ({ 
   isOpen, 
   lang, 
   dictionary, 
   action,
-  isSuccess 
+  isSuccess,
+  onSuccessClose,
 }) => {
   const loadingText = getLoadingText(action, lang);
-  const funnyTexts = getFunnyText(action, lang);
+  const funnyTexts = isSuccess ? getSuccessText(action, lang) : getFunnyText(action, lang);
   const [funnyIndex, setFunnyIndex] = useState(0);
 
   const successAnimation = {
@@ -368,6 +428,18 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
             </div>
           </div>
         </div>
+
+        {isSuccess && (
+          <motion.button
+            onClick={onSuccessClose}
+            className="mt-6 px-6 py-3 bg-[#4856CD] text-white rounded-full font-medium hover:bg-[#3A45C0] transition-colors"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            {lang === 'he' ? 'הבנתי, תודה!' : 'Got it, thanks!'}
+          </motion.button>
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -65,6 +65,8 @@ interface CVData {
   };
 }
 
+const supabase = createClientComponentClient();
+
 export default function FinishPage() {
   const params = useParams();
   const lang = (params?.lang ?? 'he') as 'he' | 'en';
@@ -75,7 +77,7 @@ export default function FinishPage() {
   const [currentPackage, setCurrentPackage] = useState<Package>('basic');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [showLoadingModal, setShowLoadingModal] = useState(false);
-  const [showSendCVModal, setShowSendCVModal] = useState(true);
+  const [showSendCVModal, setShowSendCVModal] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<{
     feature: string;
     requiredPackage: Package;
@@ -84,9 +86,9 @@ export default function FinishPage() {
   } | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [currentAction, setCurrentAction] = useState<string>('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const router = useRouter();
-  const supabase = createClientComponentClient();
 
   useEffect(() => {
     const loadData = async () => {
@@ -112,6 +114,14 @@ export default function FinishPage() {
     loadData();
   }, [lang, sessionId, supabase]);
 
+  useEffect(() => {
+    // בדיקה אם הפופאפ כבר הוצג למשתמש
+    const hasSeenSendCVModal = localStorage.getItem(`hasSeenSendCVModal_${sessionId}`);
+    if (!hasSeenSendCVModal) {
+      setShowSendCVModal(true);
+    }
+  }, [sessionId]);
+
   const calculateUpgradePrice = (currentPkg: Package, targetPkg: Package): number => {
     if (!currentPkg || !targetPkg) return 0;
     return PACKAGE_PRICES[targetPkg] - PACKAGE_PRICES[currentPkg];
@@ -123,19 +133,19 @@ export default function FinishPage() {
       title: isRTL ? 'חזרה לעריכה' : 'Back to Edit',
       description: isRTL ? 'חזרה למסך עריכת קורות החיים' : 'Return to CV editing screen',
       requiredPackage: 'basic',
-      route: `/${lang}/create/template/${sessionId}/form`
+      route: `/${lang}/create/template/${sessionId}/preview`
     },
     download: {
       icon: 'downloadPDF',
       title: isRTL ? 'הורדת קורות חיים' : 'Download CV',
-      description: isRTL ? 'הורד את קורות החיים שלך בפורמט PDF' : 'Download your CV in PDF format',
+      description: isRTL ? 'הורדת קורות החיים שלך בפורמט PDF' : 'Download your CV in PDF format',
       requiredPackage: 'basic',
       route: '#'
     },
     sendCV: {
       icon: 'look',
-      title: isRTL ? 'חיפוש עבודה' : 'Job Search',
-      description: isRTL ? 'שלח את קורות החיים שלך למעסיקים פוטנציאליים' : 'Send your CV to potential employers',
+      title: isRTL ? 'שליחה לחברות השמה' : 'Send to Recruiters',
+      description: isRTL ? 'שליחת קורות החיים שלך לחברות ההשמה המובילות במשק. והם יצרו איתך קשר בהקדם' : 'Send your CV to leading recruitment companies. A recruiter will contact you soon',
       requiredPackage: 'basic',
       route: '#'
     },
@@ -214,15 +224,33 @@ export default function FinishPage() {
     if (featureKey === 'download') {
       setShowLoadingModal(true);
       try {
-        const response = await fetch(`/api/generate-pdf?sessionId=${sessionId}`);
-        if (!response.ok) {
-          throw new Error('Failed to generate PDF');
+        // מציאת הקובץ בדאטהבייס
+        const { data: cvData, error: cvError } = await supabase
+          .from('cv_data')
+          .select('pdf_filename, format_cv')
+          .eq('session_id', sessionId)
+          .single();
+
+        if (cvError || !cvData?.pdf_filename) {
+          console.error('CV data error:', cvError);
+          throw new Error('CV data not found');
         }
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
+
+        // הורדת הקובץ מהאחסון
+        const { data: fileData, error: storageError } = await supabase.storage
+          .from('CVs')
+          .download(cvData.pdf_filename);
+
+        if (storageError || !fileData) {
+          console.error('Storage error:', storageError);
+          throw new Error('Failed to download CV file');
+        }
+
+        // יצירת URL והורדת הקובץ
+        const url = window.URL.createObjectURL(fileData);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'cv.pdf';
+        a.download = `${cvData.format_cv?.personal_details?.name || 'cv'}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
@@ -286,39 +314,31 @@ export default function FinishPage() {
     }
     
     if (featureKey === 'sendCV') {
-      setShowLoadingModal(true);
       try {
+        setShowLoadingModal(true);
         const response = await fetch('/api/send-cv', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            sessionId
+            sessionId,
           }),
         });
-
+        
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to send CV');
+          throw new Error('Failed to send CV');
         }
 
-        // נציג את אנימציית ההצלחה למשך שנייה וחצי
+        // קודם סוגרים את המודל הקודם
+        handleCloseSendCVModal();
         setIsSuccess(true);
-        await new Promise(resolve => setTimeout(resolve, 1500));
 
       } catch (error) {
-        console.error('Error sending CV:', error);
-        toast.error(
-          isRTL 
-            ? 'אופס! היונה התעייפה באמצע הדרך 🕊️' 
-            : 'Oops! Our pigeon got tired midway 🕊️'
-        );
-      } finally {
+        console.error('Error:', error);
+        toast.error(isRTL ? 'אירעה שגיאה בשליחת קורות החיים' : 'Error sending CV');
         setShowLoadingModal(false);
-        setIsSuccess(false);
       }
-      return;
     }
     
     if (featureKey === 'interview') {
@@ -432,6 +452,53 @@ export default function FinishPage() {
     }
   };
 
+  const handleCloseSendCVModal = () => {
+    setShowSendCVModal(false);
+    // שמירה בלוקל סטורג' שהמשתמש כבר ראה את הפופאפ
+    localStorage.setItem(`hasSeenSendCVModal_${sessionId}`, 'true');
+  };
+
+  const handleSendCV = async () => {
+    try {
+      setShowLoadingModal(true);
+      
+      // קודם כל מוודאים שיש PDF
+      const pdfResponse = await fetch(`/api/generate-pdf?sessionId=${sessionId}`);
+      if (!pdfResponse.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+      
+      // אחרי שיש PDF, שולחים את קורות החיים
+      const response = await fetch('/api/send-cv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to send CV');
+      }
+      
+      // קודם סוגרים את המודל הקודם
+      handleCloseSendCVModal();
+      setIsSuccess(true);
+
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error(isRTL ? 'אירעה שגיאה בשליחת קורות החיים' : 'Error sending CV');
+      setShowLoadingModal(false);
+    }
+  };
+
+  const handleSuccessClose = () => {
+    setIsSuccess(false);
+    setShowLoadingModal(false);
+  };
+
   const renderFeatureButton = (featureKey: string, feature: FeatureConfig) => (
     <motion.div
       key={featureKey}
@@ -502,46 +569,13 @@ export default function FinishPage() {
                 
                 <div className="flex gap-4 pt-4">
                   <button
-                    onClick={async () => {
-                      try {
-                        setShowLoadingModal(true);
-                        
-                        // קודם כל מוודאים שיש PDF
-                        const pdfResponse = await fetch(`/api/generate-pdf?sessionId=${sessionId}`);
-                        if (!pdfResponse.ok) {
-                          throw new Error('Failed to generate PDF');
-                        }
-                        
-                        // אחרי שיש PDF, שולחים את קורות החיים
-                        const response = await fetch('/api/send-cv', {
-                          method: 'POST',
-                          headers: {
-                            'Content-Type': 'application/json',
-                          },
-                          body: JSON.stringify({
-                            sessionId,
-                          }),
-                        });
-                        
-                        if (!response.ok) {
-                          throw new Error('Failed to send CV');
-                        }
-                        
-                        toast.success(isRTL ? 'קורות החיים נשלחו בהצלחה!' : 'CV sent successfully!');
-                      } catch (error) {
-                        console.error('Error:', error);
-                        toast.error(isRTL ? 'אירעה שגיאה בשליחת קורות החיים' : 'Error sending CV');
-                      } finally {
-                        setShowLoadingModal(false);
-                        setShowSendCVModal(false);
-                      }
-                    }}
+                    onClick={handleSendCV}
                     className="flex-1 px-6 py-4 bg-[#4754D6] text-white rounded-full font-medium hover:bg-[#3A45C0] transition-colors text-lg"
                   >
                     {isRTL ? 'יאללה' : "Let's Go"}
                   </button>
                   <button
-                    onClick={() => setShowSendCVModal(false)}
+                    onClick={handleCloseSendCVModal}
                     className="flex-1 px-6 py-4 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors text-lg"
                   >
                     {isRTL ? 'לא עכשיו' : 'Not Now'}
@@ -615,14 +649,84 @@ export default function FinishPage() {
         isOpen={showLoadingModal}
         lang={lang}
         dictionary={dictionary}
-        action={isSuccess ? undefined : (
-          currentAction === 'sendCV' ? 'send-cv' : 
-          currentAction === 'interview' ? 'send-interview-request' : 
-          currentAction === 'translate' ? 'translate-cv' : 
-          'download-pdf'
-        )}
+        action={isSuccess ? undefined : 'send-cv'}
         isSuccess={isSuccess}
+        onSuccessClose={handleSuccessClose}
       />
+
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <motion.div 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="bg-white rounded-[32px] overflow-hidden max-w-md w-full relative p-8 text-center"
+          >
+            <div className="mb-6">
+              <motion.div 
+                className="w-20 h-20 mx-auto bg-[#4856CD] rounded-full flex items-center justify-center"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ 
+                  type: "spring",
+                  stiffness: 260,
+                  damping: 20,
+                  delay: 0.1
+                }}
+              >
+                <motion.svg 
+                  className="w-10 h-10 text-white"
+                  viewBox="0 0 24 24"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ 
+                    duration: 0.5,
+                    delay: 0.2
+                  }}
+                >
+                  <motion.path
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20 6L9 17l-5-5"
+                  />
+                </motion.svg>
+              </motion.div>
+            </div>
+
+            <motion.h2 
+              className="text-2xl font-bold text-gray-800 mb-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+            >
+              {isRTL ? 'קורות החיים נשלחו בהצלחה!' : 'CV Sent Successfully!'}
+            </motion.h2>
+
+            <motion.p 
+              className="text-gray-600 text-lg mb-8"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              {isRTL 
+                ? 'שלחנו את קורות החיים שלך לחברות ההשמה המובילות. עכשיו רק נשאר לחכות שהטלפון יצלצל 📞'
+                : 'We\'ve sent your CV to leading recruitment companies. Now just wait for your phone to ring 📞'}
+            </motion.p>
+
+            <motion.button
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              onClick={() => setShowSuccessModal(false)}
+              className="w-full px-6 py-4 bg-[#4856CD] text-white rounded-full font-medium hover:bg-[#3A45C0] transition-colors text-lg"
+            >
+              {isRTL ? 'הבנתי, תודה!' : 'Got it, thanks!'}
+            </motion.button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
