@@ -107,14 +107,14 @@ const getFunnyText = (action: string | undefined, lang: string): string[] => {
         ];
       case 'send-interview-request':
         return [
-          'מאמן את המראיינים להיות נחמדים במיוחד',
-          'מכין את השטיח האדום לראיון שלך',
-          'מחמם את הכיסא הכי נוח בחדר הראיונות',
-          'מלמד את המראיינים איך לחייך בלי להפחיד',
-          'מכין קפה חם למראיינים העתידיים שלך',
-          'מתאמן על שאלות קשות מול המראה',
-          'מסדר את העניבות של המראיינים',
-          'מוודא שיש עוגיות טעימות בחדר הראיונות'
+          'מכינים את חדר האימונים לראיון',
+          'מסדרים את הכיסא הכי נוח',
+          'מכינים טיפים מנצחים',
+          'אוספים את כל הניסיון המקצועי',
+          'מארגנים את חומרי ההכנה',
+          'מתאימים את התכנית האישית',
+          'מכינים תרגילי הדמיה לראיון',
+          'מלטשים את התשובות המנצחות'
         ];
       case 'translate-cv':
         return [
@@ -165,14 +165,14 @@ const getFunnyText = (action: string | undefined, lang: string): string[] => {
       ];
     case 'send-interview-request':
       return [
-        'Training our interviewers to be extra nice',
-        'Rolling out the red carpet for your interview',
-        'Warming up the comfiest chair in the interview room',
-        'Teaching interviewers how to smile without being scary',
-        'Preparing hot coffee for your future interviewers',
-        'Practicing tough questions in front of the mirror',
-        'Straightening the interviewers\' ties',
-        'Making sure there are tasty cookies in the interview room'
+        'Preparing the interview training room',
+        'Arranging the comfiest chair',
+        'Crafting winning tips',
+        'Gathering professional experience',
+        'Organizing preparation materials',
+        'Customizing your personal plan',
+        'Setting up interview simulations',
+        'Polishing winning answers'
       ];
     case 'translate-cv':
       return [
@@ -218,11 +218,12 @@ const getSuccessText = (action: string | undefined, lang: string): string[] => {
         ];
       case 'send-interview-request':
         return [
-          '🎯 ההכנה לראיון שלך בדרך להצלחה',
-          '🌟 אנחנו כבר מכינים לך את השטיח האדום',
-          '🎪 שומרים לך את הכיסא הכי נוח באולם הראיונות',
-          '✨ המדריך שלך לראיון כבר מחמם מנועים',
-          '🎭 בקרוב תהיה מוכן/ה לכבוש כל ראיון'
+          '🎯 בקשת ההכנה לראיון התקבלה בהצלחה',
+          '📧 נשלח מייל עם תכנית הכנה אישית',
+          '🌟 נציג מהצוות ייצור קשר בקרוב',
+          '✨ במייל מחכה מדריך מקיף להכנה לראיון',
+          '💪 כל הכלים להצלחה בראיון נמצאים במייל',
+          '🎯 תכנית ההכנה האישית מחכה במייל'
         ];
       default:
         return [
@@ -245,11 +246,12 @@ const getSuccessText = (action: string | undefined, lang: string): string[] => {
         ];
       case 'send-interview-request':
         return [
-          '🎯 Your interview prep is on track for success',
-          '🌟 We\'re rolling out the red carpet for you',
-          '🎪 Saving you the comfiest chair in the interview room',
-          '✨ Your interview guide is warming up',
-          '🎭 Soon you\'ll be ready to ace any interview'
+          '🎯 Interview preparation request received successfully',
+          '📧 Personal preparation plan sent to your email',
+          '🌟 Our team member will contact you soon',
+          '✨ A comprehensive interview guide awaits in your email',
+          '💪 All tools for interview success are in your email',
+          '🎯 Your personal preparation plan is ready in your email'
         ];
       default:
         return [
@@ -336,110 +338,39 @@ export const LoadingModal: React.FC<LoadingModalProps> = ({
             </div>
 
             {/* Text Content */}
-            <div className="space-y-4 max-w-sm text-center">
-              <h2 className="text-2xl font-bold text-primary">
-                {isSuccess 
-                  ? (lang === 'he' ? 'נשלח בהצלחה!' : 'Sent Successfully!')
-                  : loadingText.title
-                }
-              </h2>
-              
-              <p className="text-sm text-gray-600">
-                {isSuccess
-                  ? (action === 'download-pdf' 
-                      ? loadingText.afterDownload
-                      : (lang === 'he' 
-                          ? 'קורות החיים שלך נשלחו בהצלחה'
-                          : 'Your CV has been sent successfully'
-                        )
-                    )
-                  : loadingText.description
-                }
-              </p>
-
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={funnyIndex}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.4 }}
-                  className="text-base font-medium text-primary"
-                  aria-live="polite"
-                >
+            <div className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  {loadingText.title}
+                </h3>
+                <p className="text-gray-600">
                   {funnyTexts[funnyIndex]}
-                </motion.p>
-              </AnimatePresence>
+                </p>
+              </motion.div>
             </div>
 
-            {/* Floating Points */}
-            <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+            {/* Success Button */}
+            {isSuccess && onSuccessClose && (
               <motion.div
-                animate={{
-                  y: [0, -20, 0],
-                  x: [0, 15, 0],
-                  rotate: [0, 45, 0],
-                }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-10 right-10"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="mt-6"
               >
-                <Image 
-                  src="/design/piont.svg" 
-                  alt="" 
-                  width={24} 
-                  height={24} 
-                  className="opacity-60" 
-                />
+                <button
+                  onClick={onSuccessClose}
+                  className="bg-primary hover:bg-primary/90 text-white font-medium py-2 px-6 rounded-full transition-all duration-200 transform hover:scale-105"
+                >
+                  {lang === 'he' ? 'הבנתי, תודה!' : 'Got it, thanks!'}
+                </button>
               </motion.div>
-              <motion.div
-                animate={{
-                  y: [0, 20, 0],
-                  x: [0, -15, 0],
-                  rotate: [0, -45, 0],
-                }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute bottom-10 left-10"
-              >
-                <Image 
-                  src="/design/piont.svg" 
-                  alt="" 
-                  width={20} 
-                  height={20} 
-                  className="opacity-50" 
-                />
-              </motion.div>
-              <motion.div
-                animate={{
-                  y: [0, -15, 0],
-                  x: [0, -10, 0],
-                  rotate: [0, -30, 0],
-                }}
-                transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                className="absolute top-1/2 left-10"
-              >
-                <Image 
-                  src="/design/piont.svg" 
-                  alt="" 
-                  width={16} 
-                  height={16} 
-                  className="opacity-40" 
-                />
-              </motion.div>
-            </div>
+            )}
           </div>
         </div>
-
-        {isSuccess && (
-          <motion.button
-            onClick={onSuccessClose}
-            className="mt-6 px-6 py-3 bg-[#4856CD] text-white rounded-full font-medium hover:bg-[#3A45C0] transition-colors"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            {lang === 'he' ? 'הבנתי, תודה!' : 'Got it, thanks!'}
-          </motion.button>
-        )}
       </DialogContent>
     </Dialog>
   );

@@ -65,6 +65,8 @@ interface CVData {
   };
 }
 
+type ActionType = 'send-interview-request' | 'send-cv' | 'generate-pdf' | 'translate-cv' | 'download-pdf' | undefined;
+
 const supabase = createClientComponentClient();
 
 export default function FinishPage() {
@@ -85,7 +87,7 @@ export default function FinishPage() {
     upgradePrice: number;
   } | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [currentAction, setCurrentAction] = useState<string>('');
+  const [currentAction, setCurrentAction] = useState<ActionType>(undefined);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const router = useRouter();
@@ -218,7 +220,7 @@ export default function FinishPage() {
   };
 
   const handleFeatureClick = async (featureKey: string) => {
-    setCurrentAction(featureKey);
+    setCurrentAction(featureKey as ActionType);
     const feature = features[featureKey];
     
     if (featureKey === 'download') {
@@ -343,6 +345,7 @@ export default function FinishPage() {
     
     if (featureKey === 'interview') {
       setShowLoadingModal(true);
+      setCurrentAction('send-interview-request');
       try {
         const { data: cvData, error: cvError } = await supabase
           .from('cv_data')
@@ -368,31 +371,7 @@ export default function FinishPage() {
           throw new Error('Failed to send interview request');
         }
 
-        // נציג את אנימציית ההצלחה למשך שנייה וחצי
         setIsSuccess(true);
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        const successMessages = isRTL ? [
-          '🎭 המראיינים כבר מתאמנים על חיוך נחמד בשבילך!',
-          '🎪 הבמה שלך מוכנה, אנחנו רק מצחצחים את הזרקורים',
-          '🎯 המדריך שלך לראיון כבר מחמם את המנועים',
-          '🎪 שומרים לך את הכיסא הכי נוח באולם הראיונות'
-        ] : [
-          '🎭 Our interviewers are practicing their nice smiles for you!',
-          '🎪 Your stage is ready, we\'re just polishing the spotlights',
-          '🎯 Your interview guide is warming up the engines',
-          '🎪 We\'re saving you the comfiest chair in the interview room'
-        ];
-
-        toast.success(
-          successMessages[Math.floor(Math.random() * successMessages.length)],
-          {
-            description: isRTL 
-              ? 'ניצור איתך קשר ממש בקרוב! 📞' 
-              : 'We\'ll contact you very soon! 📞',
-            duration: 6000
-          }
-        );
 
       } catch (error) {
         console.error('Error sending interview request:', error);
@@ -401,9 +380,6 @@ export default function FinishPage() {
             ? '🎪 אופס! נראה שהבמה צריכה עוד קצת תיקונים...' 
             : '🎪 Oops! Looks like our stage needs some more adjustments...'
         );
-      } finally {
-        setShowLoadingModal(false);
-        setIsSuccess(false);
       }
       return;
     }
@@ -649,7 +625,7 @@ export default function FinishPage() {
         isOpen={showLoadingModal}
         lang={lang}
         dictionary={dictionary}
-        action={isSuccess ? undefined : 'send-cv'}
+        action={currentAction}
         isSuccess={isSuccess}
         onSuccessClose={handleSuccessClose}
       />
