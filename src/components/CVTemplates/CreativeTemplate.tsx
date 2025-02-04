@@ -7,6 +7,10 @@ import { Assistant } from 'next/font/google';
 import { formatDescription, formatDate, splitName } from './utils';
 import { Edit2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import MailIcon from '../../../public/design/creative/MailIcon.svg';
+import PhoneIcon from '../../../public/design/creative/PhoneIcon.svg';
+import LocIcon from '../../../public/design/creative/LocIcon.svg';
+import LinkedInIcon from '../../../public/design/creative/LinkedInIcon.svg';
 
 const assistant = Assistant({ 
   subsets: ['hebrew', 'latin'],
@@ -154,9 +158,38 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
           </div>
           <div className="creative-separator" />
           <div className="creative-contact-info">
-            <div>{data.personalInfo.email && `${t.email}: ${data.personalInfo.email}`}</div>
-            <div>{data.personalInfo.phone && `${t.phone}: ${data.personalInfo.phone}`}</div>
-            <div>{data.personalInfo.address && `${t.address}: ${data.personalInfo.address}`}</div>
+            {data.personalInfo.email && (
+              <div className="creative-contact-item">
+                <div className="creative-contact-item-icon">
+                  <Image src={MailIcon.src} alt={t.email} width={16} height={16} />
+                </div>
+                <span>{data.personalInfo.email}</span>
+              </div>
+            )}
+            {data.personalInfo.phone && (
+              <div className="creative-contact-item">
+                <div className="creative-contact-item-icon">
+                  <Image src={PhoneIcon.src} alt={t.phone} width={16} height={16} />
+                </div>
+                <span>{data.personalInfo.phone}</span>
+              </div>
+            )}
+            {data.personalInfo.address && (
+              <div className="creative-contact-item">
+                <div className="creative-contact-item-icon">
+                  <Image src={LocIcon.src} alt={t.address} width={16} height={16} />
+                </div>
+                <span>{data.personalInfo.address}</span>
+              </div>
+            )}
+            {data.personalInfo.linkedin && (
+              <div className="creative-contact-item">
+                <div className="creative-contact-item-icon">
+                  <Image src={LinkedInIcon.src} alt="LinkedIn" width={16} height={16} />
+                </div>
+                <span>{data.personalInfo.linkedin.replace(/^https?:\/\//, '')}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -165,13 +198,13 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
           (Array.isArray(data.skills.technical) && data.skills.technical.length > 0) || 
           (Array.isArray(data.skills.soft) && data.skills.soft.length > 0)
         ) && (
-          <div className="creative-section">
+          <div className="creative-section creative-skills-section">
             <h2 className="creative-section-title relative">
               {t.skills}
               {isEditing && (
                 <button
                   onClick={() => handleEdit('skills', 0)}
-                  className="edit-button absolute right-full ml-2"
+                  className="edit-button"
                   title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                 >
                   <Edit2 size={14} />
@@ -181,46 +214,83 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
             <div className="creative-separator" />
             <div className="creative-skills">
               {/* כישורים טכניים עם נקודות */}
-              {Array.isArray(data.skills.technical) && data.skills.technical.map((skill, index) => (
-                <div key={`tech-${index}`} className="creative-skill-item">
-                  <div className="creative-skill-content">
-                    <span className={getSkillNameClass(skill.name)}>{skill.name}</span>
-                    <div className="creative-skill-level">
-                      {[...Array(5)].map((_, i) => (
+              {Array.isArray(data.skills.technical) && data.skills.technical.length > 0 && (
+                <div className="creative-skills-group">
+                  <h3 className="creative-skills-subtitle">{t.technicalSkills}</h3>
+                  <div className="creative-skills-legend">
+                    <div className="creative-skills-legend-item">
+                      <div className="creative-skills-legend-dots">
                         <Image
-                          key={i}
-                          src={i >= skill.level ? '/design/creative/level_empty.svg' : '/design/creative/level_full.svg'}
-                          alt={i >= skill.level ? t.emptyDot : t.fullDot}
-                          width={8}
-                          height={8}
+                          src="/design/creative/level_empty.svg"
+                          alt={t.emptyDot}
+                          width={6}
+                          height={6}
                         />
-                      ))}
+                      </div>
+                      <span className="creative-skills-legend-text">מתחיל</span>
+                    </div>
+                    <div className="creative-skills-legend-item">
+                      <div className="creative-skills-legend-dots">
+                        {[...Array(5)].map((_, i) => (
+                          <Image
+                            key={i}
+                            src="/design/creative/level_full.svg"
+                            alt={t.fullDot}
+                            width={6}
+                            height={6}
+                          />
+                        ))}
+                      </div>
+                      <span className="creative-skills-legend-text">מומחה</span>
                     </div>
                   </div>
+                  {data.skills.technical.map((skill, index) => (
+                    <div key={`tech-${index}`} className="creative-skill-item">
+                      <div className="creative-skill-content">
+                        <span className={getSkillNameClass(skill.name)}>{skill.name}</span>
+                        <div className="creative-skill-level">
+                          {[...Array(5)].map((_, i) => (
+                            <Image
+                              key={i}
+                              src={i >= skill.level ? '/design/creative/level_empty.svg' : '/design/creative/level_full.svg'}
+                              alt={i >= skill.level ? t.emptyDot : t.fullDot}
+                              width={8}
+                              height={8}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
               
               {/* כישורים רכים ללא נקודות */}
-              {Array.isArray(data.skills.soft) && data.skills.soft.map((skill, index) => (
-                <div key={`soft-${index}`} className="creative-skill-item soft-skill">
-                  <div className="creative-skill-content">
-                    <span className={getSkillNameClass(skill.name)}>{skill.name}</span>
-                  </div>
+              {Array.isArray(data.skills.soft) && data.skills.soft.length > 0 && (
+                <div className="creative-skills-group">
+                  <h3 className="creative-skills-subtitle">{t.softSkills}</h3>
+                  {data.skills.soft.map((skill, index) => (
+                    <div key={`soft-${index}`} className="creative-skill-item soft-skill">
+                      <div className="creative-skill-content">
+                        <span className={getSkillNameClass(skill.name)}>{skill.name}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           </div>
         )}
 
         {/* שפות */}
         {data.skills.languages && data.skills.languages.length > 0 && (
-          <div className="creative-section">
+          <div className="creative-section creative-languages-section">
             <h2 className="creative-section-title relative">
               {t.languages}
               {isEditing && (
                 <button
                   onClick={() => handleEdit('languages', 0)}
-                  className="edit-button absolute right-full ml-2"
+                  className="edit-button"
                   title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >
                   <Edit2 size={14} />
@@ -322,11 +392,11 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     </span>
                   </div>
                   {exp.description && exp.description.length > 0 && (
-                    <ul className="creative-experience-description">
-                      {formatDescription(exp.description, data.experience.length).map((desc, i) => (
-                        <li key={i}>{desc}</li>
+                    <div className="creative-experience-description">
+                      {formatDescription(exp.description, exp.description.length).map((desc, i) => (
+                        <div key={i}>{desc}</div>
                       ))}
-                    </ul>
+                    </div>
                   )}
                 </div>
               ))}
@@ -342,7 +412,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('education', 0)}
-                  className="edit-button absolute right-full ml-2"
+                  className="edit-button"
                   title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                 >
                   <Edit2 size={14} />
@@ -352,20 +422,25 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
             <div className="creative-experience-items">
               {data.education.degrees.map((degree, index) => (
                 <div key={index} className="creative-experience-item">
-                  <div className="creative-experience-header">
-                    <div className="creative-experience-title-wrapper">
-                      <h3 className="creative-experience-position">{`${degree.type} ${degree.field}`}</h3>
-                      <span className="creative-experience-company">{degree.institution}</span>
+                  <div className="creative-experience-title-wrapper">
+                    <div className="creative-education-header">
+                      <div className="creative-education-main">
+                        <h3 className="creative-education-degree">{degree.type}</h3>
+                        <span className="creative-education-institution">{degree.institution}</span>
+                      </div>
+                      <span className="creative-experience-date">
+                        {formatDate(degree.startDate, degree.endDate, cvLang)}
+                      </span>
                     </div>
-                    <div className="creative-experience-date">
-                      {formatDate(degree.startDate, degree.endDate, cvLang)}
-                    </div>
+                    {(degree.field || degree.specialization) && (
+                      <div className="creative-education-details">
+                        {degree.field && <div>{degree.field}</div>}
+                        {degree.specialization && (
+                          <div>{`${t.specialization}: ${degree.specialization}`}</div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {degree.specialization && (
-                    <div className="creative-education-description">
-                      {`${t.specialization}: ${degree.specialization}`}
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -380,7 +455,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               {isEditing && (
                 <button
                   onClick={() => handleEdit('military', 0)}
-                  className="edit-button absolute right-full ml-2"
+                  className="edit-button"
                   title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                 >
                   <Edit2 size={14} />
@@ -389,22 +464,24 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
             </h2>
             <div className="creative-experience-items">
               <div className="creative-experience-item">
-                <div className="creative-experience-header">
-                  <div className="creative-experience-title-wrapper">
-                    <h3 className="creative-experience-position">{military?.role}</h3>
-                    <span className="creative-experience-company">{military?.unit}</span>
+                <div className="creative-experience-title-wrapper">
+                  <div className="creative-military-header">
+                    <div className="creative-military-main">
+                      <h3 className="creative-military-role">{military?.role}</h3>
+                      <span className="creative-military-unit">{military?.unit}</span>
+                    </div>
+                    <span className="creative-experience-date">
+                      {formatDate(data.military.startDate, data.military.endDate, cvLang)}
+                    </span>
                   </div>
-                  <div className="creative-experience-date">
-                    {formatDate(data.military.startDate, data.military.endDate, cvLang)}
-                  </div>
+                  {data.military.description && data.military.description.length > 0 && (
+                    <div className="creative-military-details">
+                      {formatDescription(data.military.description, 3).map((desc, i) => (
+                        <div key={i}>{desc}</div>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                {data.military.description && data.military.description.length > 0 && (
-                  <ul className="creative-experience-description">
-                    {formatDescription(data.military.description, 3).map((desc, i) => (
-                      <li key={i}>{desc}</li>
-                    ))}
-                  </ul>
-                )}
               </div>
             </div>
           </div>

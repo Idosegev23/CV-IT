@@ -120,11 +120,29 @@
   flex-direction: column;
   gap: 0.4rem;
   font-weight: 300 !important;
-  font-size: clamp(0.7rem, 1.5vw, 0.95rem);
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
   color: #F3F4F1;
   opacity: 0.9;
   white-space: normal;
   word-wrap: break-word;
+}
+
+.professional-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contact-icon {
+  opacity: 0.9;
+  filter: brightness(0) invert(1);
+  width: 14px;
+  height: 14px;
+}
+
+.professional-contact-item span {
+  font-weight: 300;
+  font-size: 0.8rem;
 }
 
 /* כותרות משניות */
@@ -174,7 +192,7 @@
 .professional-skills {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.8rem;
   padding-right: 0.3rem;
 }
 
@@ -199,30 +217,27 @@
 
 .professional-skill-content {
   display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
   width: 100%;
+}
+
+.professional-skill-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
 }
 
 .professional-skill-name {
   font-size: 0.9rem;
   color: white;
-  min-width: 0;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  flex: 1;
-}
-
-.professional-skill-separator {
-  color: white;
-  opacity: 0.5;
-  margin: 0 2px;
+  font-weight: 400;
 }
 
 .professional-skill-level {
-  white-space: nowrap;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  color: white;
+  opacity: 0.8;
+  font-weight: 200;
 }
 
 /* לוגו בתחתית */

@@ -91,6 +91,36 @@
 
 .creative-contact-info {
   font-weight: 300 !important;
+  font-size: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.creative-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: white;
+}
+
+.creative-contact-item-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.creative-contact-item-icon img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
+.creative-contact-item span {
+  font-size: 0.85rem;
+  opacity: 0.9;
 }
 
 .creative-section-title {
@@ -179,6 +209,9 @@
   font-weight: 700;
   margin-bottom: 0.5rem;
   color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* שפות */
@@ -217,6 +250,21 @@
   padding-right: 0.5rem;
 }
 
+.creative-skills-subtitle {
+  font-size: 0.9rem;
+  color: white;
+  font-weight: 500 !important;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.creative-skills-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
 .creative-skill-item {
   display: flex;
   justify-content: space-between;
@@ -249,7 +297,7 @@
 .creative-left-column {
   width: var(--left-column-width);
   height: 100%;
-  padding: 2rem;
+  padding: 2rem 2rem 2rem 1.5rem;
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -267,10 +315,11 @@
 .creative-bg-grey {
   position: absolute;
   top: 5rem;
-  left: 7rem;
-  width: 50%;
+  left: 2rem;
+  width: 60%;
   transform: translateY(2rem);
   filter: brightness(0) invert(1);
+  opacity: 0.8;
 }
 
 /* ניסיון תעסוקתי, השכלה ושירות צבאי */
@@ -278,7 +327,8 @@
   margin-bottom: 1.5rem;
   position: relative;
   z-index: 1;
-  padding: 0 2rem;
+  padding: 0;
+  margin-left: -1.5rem;
 }
 
 .creative-experience:first-of-type {
@@ -301,7 +351,10 @@
   align-items: center;
   margin-bottom: 0.5rem;
   gap: 1rem;
-  max-width: 90%;
+  width: 100%;
+  max-width: 100%;
+  padding-right: 2rem;
+  margin-right: -2rem;
 }
 
 .creative-experience-title {
@@ -325,29 +378,40 @@
   font-size: 0.9rem;
   color: #666;
   white-space: nowrap;
+  min-width: 120px;
+  text-align: left;
 }
 
 .creative-experience-description {
-  list-style-type: none;
-  padding: 0;
-  margin: 0.5rem 0;
-  max-width: 90%;
-}
-
-.creative-experience-description li {
-  display: inline;
-  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   font-size: 0.9rem;
-  line-height: 1.4;
   color: #4B4553;
-  font-weight: 200;
+  font-weight: 300;
+  line-height: 1.4;
+  margin-top: 0.2rem;
+  padding-right: 0;
+  width: 100%;
+  max-width: 100%;
 }
 
-.creative-experience-description li:not(:last-child)::after {
-  content: '';
-  margin: 0 0.25rem;
+.creative-experience-description > div {
+  display: inline;
+  white-space: normal;
+}
+
+.creative-experience-description > div:not(:last-child)::after {
+  content: '|';
+  margin: 0 0.5rem;
   color: #4B4553;
-  opacity: 0.6;
+  opacity: 0.4;
+}
+
+/* התאמות LTR */
+.creative-template[dir="ltr"] .creative-experience-description {
+  padding-right: 0;
+  padding-left: 0.5rem;
 }
 
 @media print {
@@ -374,6 +438,9 @@
   color: #4B4553;
   font-size: 1.2rem;
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .creative-experience-position {
@@ -386,9 +453,10 @@
 /* הוספת סגנון לתקציר המקצועי */
 .creative-summary {
   margin: 1rem 0;
-  padding: 0 2rem;
+  padding: 0;
   position: relative;
   z-index: 2;
+  margin-left: -1.5rem;
 }
 
 .creative-summary-title {
@@ -396,6 +464,9 @@
   font-weight: 600;
   margin-bottom: 0.75rem;
   color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .creative-summary-content {
@@ -450,7 +521,7 @@
 .creative-left-column {
   width: var(--left-column-width);
   height: 100%;
-  padding: 2rem;
+  padding: 2rem 2rem 2rem 1.5rem;
   position: relative;
   overflow: hidden;
   z-index: 1;
@@ -515,7 +586,7 @@
 
 .creative-template[dir="ltr"] .creative-bg-grey {
   left: auto;
-  right: 7rem;
+  right: 2rem;
   transform: translateY(2rem) scaleX(-1);
 }
 
@@ -640,4 +711,223 @@
 
 .creative-skill-name {
   font-weight: 400 !important;
+}
+
+/* כפתורי עריכה - כללי */
+.creative-template .edit-button {
+  position: relative !important;
+  right: auto !important;
+  left: auto !important;
+  transform: none !important;
+}
+
+/* כפתורי עריכה - עמודה ימנית וכותרת */
+.creative-right-column .edit-button,
+.creative-summary .edit-button,
+.creative-experience .edit-button {
+  margin-right: 8rem;
+  margin-left: 0.5rem;
+}
+
+/* כפתורי עריכה - כישורים ושפות */
+.creative-skills-section .edit-button,
+.creative-languages-section .edit-button {
+  position: absolute !important;
+  left: -0.5rem !important;
+  top: 0;
+  margin: 0;
+}
+
+/* כפתור עריכה - פרטים אישיים */
+.creative-personal-info .edit-button {
+  position: absolute !important;
+  top: -1.5rem;
+  right: 8rem !important;
+  left: -0.5rem !important;
+  margin: 0;
+}
+
+/* טולטיפים */
+.creative-template .edit-button::after {
+  right: auto;
+  left: calc(100% + 8px);
+}
+
+/* התאמות LTR */
+.creative-template[dir="ltr"] .edit-button::after {
+  left: auto;
+  right: calc(100% + 8px);
+}
+
+.creative-template[dir="ltr"] .creative-personal-info .edit-button {
+  right: auto !important;
+  left: 0 !important;
+}
+
+.creative-template[dir="ltr"] .creative-skills-section .edit-button,
+.creative-template[dir="ltr"] .creative-languages-section .edit-button {
+  right: 1rem !important;
+  left: auto !important;
+}
+
+/* עדכון מיקום כותרות בעמודה השמאלית */
+.creative-skills-section .creative-section-title,
+.creative-languages-section .creative-section-title {
+  position: relative;
+  padding-left: 3rem;
+}
+
+.creative-template[dir="ltr"] .creative-skills-section .creative-section-title,
+.creative-template[dir="ltr"] .creative-languages-section .creative-section-title {
+  padding-left: 0;
+  padding-right: 3rem;
+} 
+
+/* השכלה */
+.creative-experience-title-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  width: 100%;
+}
+
+.creative-education-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  padding-right: 2rem;
+  margin-right: -2rem;
+}
+
+.creative-education-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.creative-education-degree {
+  font-size: 1.1rem;
+  color: #4B4553;
+  font-weight: 600 !important;
+  margin: 0;
+}
+
+.creative-education-institution {
+  font-size: 0.9rem;
+  color: #4B4553;
+  font-weight: 300 !important;
+}
+
+.creative-education-details {
+  font-size: 0.9rem;
+  color: #4B4553;
+  font-weight: 300;
+  line-height: 1.4;
+  margin-top: 0.2rem;
+  padding-right: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* התאמות LTR להשכלה */
+.creative-template[dir="ltr"] .creative-education-details {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+
+/* שירות צבאי */
+.creative-military-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+  gap: 1rem;
+  width: 100%;
+  max-width: 100%;
+  padding-right: 2rem;
+  margin-right: -2rem;
+}
+
+.creative-military-main {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.creative-military-role {
+  font-size: 1.1rem;
+  color: #4B4553;
+  font-weight: 600 !important;
+  margin: 0;
+}
+
+.creative-military-unit {
+  font-size: 0.9rem;
+  color: #4B4553;
+  font-weight: 300 !important;
+}
+
+.creative-military-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #4B4553;
+  font-weight: 300;
+  line-height: 1.4;
+  margin-top: 0.2rem;
+  padding-right: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.creative-military-details > div {
+  display: inline;
+}
+
+.creative-military-details > div:not(:last-child)::after {
+  content: '|';
+  margin: 0 0.5rem;
+  color: #4B4553;
+  opacity: 0.4;
+}
+
+/* התאמות LTR לשירות צבאי */
+.creative-template[dir="ltr"] .creative-military-details {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+
+.creative-skills-legend {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 0.8rem;
+  font-size: 0.75rem;
+  color: white;
+  opacity: 0.9;
+  padding-right: 0.3rem;
+}
+
+.creative-skills-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.creative-skills-legend-dots {
+  display: flex;
+  gap: 2px;
+  min-width: 18px;
+  justify-content: flex-end;
+}
+
+.creative-skills-legend-text {
+  white-space: nowrap;
+  min-width: 28px;
 } 

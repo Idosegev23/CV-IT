@@ -549,3 +549,31 @@
   opacity: 0.4;
   font-weight: 200;
 }
+
+/* פרטי קשר בהדר */
+.classic-contact-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-right: 2rem;
+  margin-top: 0.5rem;
+  color: #F3F4F1;
+  font-size: 0.9rem;
+  font-weight: 300;
+  opacity: 0.9;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.contact-icon {
+  opacity: 0.9;
+  filter: brightness(0) invert(1);
+}
+
+.contact-item span {
+  font-weight: 300;
+}

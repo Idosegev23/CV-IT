@@ -168,16 +168,55 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
               </div>
             </h1>
           </div>
-          <div className="header-contact section-container relative">
-            <div className="flex items-center gap-2 relative">
-              <div className="flex-1">
-                {personalInfo.email && <span>{personalInfo.email}</span>}
-                {personalInfo.email && personalInfo.phone && <span className="contact-separator">|</span>}
-                {personalInfo.phone && <span>{personalInfo.phone}</span>}
-                {personalInfo.phone && personalInfo.address && <span className="contact-separator">|</span>}
-                {personalInfo.address && <span>{personalInfo.address}</span>}
+          <div className="classic-contact-info">
+            {personalInfo.email && (
+              <div className="contact-item">
+                <Image
+                  src="/design/classic/MailIcon.svg"
+                  alt="email"
+                  width={16}
+                  height={16}
+                  className="contact-icon"
+                />
+                <span>{personalInfo.email}</span>
               </div>
-            </div>
+            )}
+            {personalInfo.phone && (
+              <div className="contact-item">
+                <Image
+                  src="/design/classic/PhoneIcon.svg"
+                  alt="phone"
+                  width={16}
+                  height={16}
+                  className="contact-icon"
+                />
+                <span>{personalInfo.phone}</span>
+              </div>
+            )}
+            {personalInfo.address && (
+              <div className="contact-item">
+                <Image
+                  src="/design/classic/LocIcon.svg"
+                  alt="address"
+                  width={16}
+                  height={16}
+                  className="contact-icon"
+                />
+                <span>{personalInfo.address}</span>
+              </div>
+            )}
+            {personalInfo.linkedin && (
+              <div className="contact-item">
+                <Image
+                  src="/design/classic/LinkedInIcon.svg"
+                  alt="linkedin"
+                  width={16}
+                  height={16}
+                  className="contact-icon"
+                />
+                <span>{personalInfo.linkedin.replace(/^https?:\/\//, '')}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -375,8 +414,6 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                     {skills.soft.map((skill, index) => (
                       <span key={`soft-${index}`} className="skill-item relative">
                         <span className="skill-name">{skill.name}</span>
-                        {" - "}
-                        <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
                         {index < skills.soft.length - 1 && " | "}
                       </span>
                     ))}

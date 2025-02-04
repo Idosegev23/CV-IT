@@ -28,6 +28,7 @@
   transform: scale(var(--scale-factor));
 }
 
+/* Print Styles */
 @page {
   size: A4;
   margin: 0;
@@ -35,18 +36,13 @@
 }
 
 @media print {
-  /* Reset any browser defaults */
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-  }
-
-  body {
-    margin: 0;
-    padding: 0;
-    width: 210mm;
-    height: 297mm;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   .general-template {
@@ -56,9 +52,6 @@
     margin: 0 !important;
     padding: 0.5cm 1.5cm 1.5cm !important;
     overflow: hidden !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
@@ -66,40 +59,24 @@
     bottom: 0 !important;
   }
 
-  /* וידוא שכל התמונות והצבעים מודפסים כראוי */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    color-adjust: exact !important;
-  }
-
-  /* מניעת שבירת עמוד באמצע אלמנטים */
-  .section {
+  .general-section {
     page-break-inside: avoid;
-  }
-
-  /* וידוא שהתמונות מודפסות */
-  img {
-    print-color-adjust: exact;
-  }
-
-  /* התאמת שקיפויות להדפסה */
-  .header-decoration img,
-  .footer-decorations img {
-    opacity: 0.8 !important;
   }
 }
 
 /* Header Styles */
 .general-header {
-  height: 4%;
-  min-height: 4vh;
-  margin-bottom: 3rem;
+  height: 50px;
+  margin-bottom: 2rem;
   position: relative;
   display: flex;
   align-items: center;
   text-align: right;
   direction: rtl;
+  max-width: calc(var(--a4-width) - 3cm);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
 }
 
 .general-header::after {
@@ -114,345 +91,130 @@
 
 .general-header-content {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: center;
   width: 100%;
+  height: 100%;
+  gap: 1rem;
+  padding-right: 0;
 }
 
 .general-header-name {
   order: 2;
+  flex-shrink: 0;
+  margin-right: auto;
+  padding-right: 2rem;
+  position: relative;
 }
 
 .general-header-name h1 {
-  font-size: 38px;
+  font-size: 32px;
   margin: 0;
   display: flex;
   gap: 0.5rem;
   align-items: baseline;
   color: var(--primary-color);
+  white-space: nowrap;
 }
 
-.firstname {
+.general-firstname {
   font-weight: 600;
   color: var(--primary-color);
 }
 
-.lastname {
+.general-lastname {
   font-weight: 300;
   color: var(--primary-color);
 }
 
 /* Contact Info */
-.contact-info {
+.general-contact-info {
   display: flex;
   gap: 0.8rem;
   justify-content: flex-start;
   order: 1;
-  margin-right: 2rem;
+  margin-right: 0;
+  height: 100%;
+  align-items: center;
+  min-width: 0;
+  flex: 1;
 }
 
-.contact-item {
+.general-contact-item {
   display: flex;
   align-items: center;
   gap: 0.3rem;
   color: var(--primary-color);
-  font-size: 18px;
+  font-size: 13px;
+  white-space: nowrap;
+  min-width: fit-content;
 }
 
-.contact-item-icon {
-  width: 20px;
-  height: 20px;
+.general-contact-item span {
+  white-space: nowrap;
+  min-width: fit-content;
+}
+
+.general-contact-item-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: var(--background-color);
+  border: 1px solid #000000;
+  border-radius: 50%;
+  padding: 4px;
 }
 
-.contact-item-icon img {
+.general-contact-item-icon img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
 /* Content Layout */
-.content {
+.general-content {
   position: relative;
-  margin-top: 4rem;
+  margin-top: 2rem;
+  --line-start-position: 120px;
 }
 
-/* הקו האנכי הראשי */
-.content::before {
+.general-content::before {
   content: '';
   position: absolute;
-  top: 120px;
-  right: 0;
-  width: 1px;
-  height: calc(100% - 120px);
-  background: var(--line-color);
-}
-
-/* Section Styles */
-.section {
-  margin-bottom: 1.3rem;
-  position: relative;
-}
-
-/* Military Service Section */
-.section:has(.section-title:contains("שירות צבאי")) {
-  order: 3;
-  margin-bottom: 1.3rem;
-}
-
-/* Skills Section */
-.section:has(.section-title:contains("כישורים")) {
-  order: 4;
-  margin-bottom: 1.3rem;
-  max-width: 60%;
-  position: relative;
-  z-index: 2;
-}
-
-/* Languages Section */
-.section:has(.section-title:contains("שפות")) {
-  order: 5;
-  margin-bottom: 8rem;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  position: relative;
-  padding-right: 3rem;
-  transform: translateY(-8px);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* הקו האופקי מהאייקון */
-.section-title::after {
-  content: '';
-  position: absolute;
-  right: -24px;
-  top: 24px;
-  width: 6rem;
-  height: 1px;
-  background-color: #000000 !important;
+  top: var(--line-start-position);
+  right: 0px;
+  width: 2px;
+  height: calc(100% - var(--line-start-position) - 30px);
+  background-color: #000000;
   z-index: 1;
-  display: block !important;
 }
 
-/* נקודת הסיום של הקו */
-.section:not(.summary-section) .section-title::before {
-  content: '';
-  position: absolute;
-  right: calc(10.2rem - 24px);
-  top: 22px;
-  width: 4px;
-  height: 4px;
-  background-color: #000000 !important;
-  border-radius: 50%;
-  z-index: 1;
-  display: block !important;
-}
-
-.section-icon {
-  width: 48px;
-  height: 48px;
-  position: absolute;
-  right: -24px;
-  top: 0;
-  background: var(--background-color);
-  border: 1px solid #000000;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-/* Timeline Content */
-.timeline-container {
-  padding-top: 0.3rem;
-  padding-right: 1.5rem;
-  margin-bottom: 1rem;
-}
-
-.timeline-item {
-  position: relative;
-  padding-right: 1.5rem;
-  margin-bottom: 1rem;
-  direction: rtl;
-  text-align: right;
-}
-
-.timeline-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.3rem;
-  width: 100%;
-}
-
-.timeline-title-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-}
-
-.timeline-position {
-  font-weight: 600;
-  font-size: 0.95rem;
-  white-space: nowrap;
-}
-
-.timeline-separator {
-  margin: 0 0.5rem;
-  opacity: 0.4;
-  font-weight: 200;
-}
-
-.timeline-company {
-  font-weight: 300;
-  font-size: 0.95rem;
-  white-space: nowrap;
-}
-
-.timeline-date {
-  font-size: 0.9rem;
-  color: #666;
-  white-space: nowrap;
-  min-width: fit-content;
-  margin-right: 0;
-  margin-left: 5rem;
-  direction: ltr;
-  text-align: right;
-  font-weight: 300;
-}
-
-[dir="rtl"] .timeline-date {
-  margin-left: 0;
-  margin-right: 5rem;
-}
-
-.timeline-content {
-  margin-top: 0.3rem;
-  padding-right: 1rem;
-  font-size: 14px;
-  line-height: 1.4;
-  direction: rtl;
-  text-align: right;
-}
-
-.timeline-content ul {
-  margin: 0;
-  padding-right: 1.5rem;
-  padding-left: 0;
-  list-style-type: none;
-}
-
-.timeline-content li {
-  margin-bottom: 0.2rem;
-  position: relative;
-}
-
-.timeline-content li::before {
-  content: '•';
-  position: absolute;
-  right: -1rem;
-}
-
-/* Skills and Languages */
-.skills-grid {
-  padding-right: 3rem;
-  margin-top: 0.1rem;
-  max-width: 75%;
-  direction: rtl;
-  text-align: right;
-  line-height: 1.8;
-}
-
-.skill-item {
-  font-size: 14px;
-  font-weight: 300;
-  color: var(--primary-color);
-  white-space: normal;
-  display: inline;
-}
-
-.skill-item:last-child {
-  margin-left: 0;
-}
-
-.languages-grid {
-  padding-right: 3rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.1rem;
-  max-width: 70%;
-  direction: rtl;
-  text-align: right;
-}
-
-.language-item {
-  font-size: 14px;
-  display: flex;
-  gap: 0.5rem;
-  direction: rtl;
-  text-align: right;
-}
-
-.language-name {
-  font-weight: 500;
-  color: var(--primary-color);
-}
-
-.language-level {
-  color: var(--primary-color);
-}
-
-.language-name::after {
-  content: " - ";
-  margin: 0;
-}
-
-/* Responsive Design */
-@media print {
-  .general-template {
-    padding: 1cm;
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .contact-info {
-    flex-direction: column;
-  }
-}
-
-.header-decoration {
+/* Decorations */
+.general-header-decoration {
   position: absolute;
   top: 6rem;
   z-index: 1;
   transform: scale(1.2);
 }
 
-.right-decoration {
+.general-right-decoration {
   right: -4rem;
 }
 
-.left-decoration {
+.general-left-decoration {
   left: 2rem;
   transform: scale(1.2) scaleX(-1);
 }
 
-.header-decoration img {
+.general-header-decoration img {
   opacity: 0.8;
 }
 
 /* Footer Decorations */
-.footer-decorations {
+.general-footer-decorations {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -462,7 +224,7 @@
   z-index: 1;
 }
 
-.building-decoration {
+.general-building-decoration {
   position: absolute;
   bottom: 3rem;
   left: 2rem;
@@ -470,7 +232,7 @@
   transform: scale(0.6);
 }
 
-.icon-decoration {
+.general-icon-decoration {
   position: absolute;
   bottom: 8rem;
   left: 2rem;
@@ -478,7 +240,7 @@
   transform: scale(0.8);
 }
 
-.cloud-decoration {
+.general-cloud-decoration {
   position: absolute;
   bottom: 12rem;
   left: 9rem;
@@ -486,390 +248,276 @@
   transform: scale(0.5);
 }
 
-.footer-decorations img {
+.general-footer-decorations img {
   opacity: 0.8;
 }
 
-.skill-level {
-  display: inline-flex;
-  gap: 3px;
-  align-items: center;
-  margin: 0 4px;
-}
-
-.skill-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background-color: #e0e0e0;
-  transition: background-color 0.3s ease;
-}
-
-.skill-dot.filled {
-  background-color: #4B4553;
-}
-
-/* Summary Section Styles */
-.summary-content {
-  padding-right: 3rem;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.6;
-  color: var(--primary-color);
-  margin-top: 0.5rem;
-  max-width: 90%;
-}
-
-.summary-content p {
-  margin: 0;
-  text-align: justify;
-}
-
-/* Add new summary section styles */
-.summary-section {
-  margin-bottom: 1rem;
-  padding: 0 1rem;
+/* Section Styles */
+.general-section {
+  margin-bottom: 1.3rem;
   position: relative;
+}
+
+.general-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  position: relative;
+  padding-right: 3rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.general-section-icon {
+  width: 48px;
+  height: 48px;
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--background-color);
+  border: 1px solid #000000;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 2;
 }
 
-.summary-title {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 0.1rem;
-  color: var(--primary-color);
-}
-
-/* Update existing styles for LTR support */
-.general-template.ltr {
-  direction: ltr;
-  text-align: left;
-}
-
-.general-template.ltr .content::before {
-  right: auto;
-  left: 0;
-}
-
-.general-template.ltr .section-title {
-  padding-right: 0;
-  padding-left: 3rem;
-}
-
-.general-template.ltr .section-icon {
-  right: auto;
-  left: -24px;
-}
-
-.general-template.ltr .section-title::after {
-  right: auto;
-  left: -24px;
-  width: 6rem;
-}
-
-.general-template.ltr .section-title::before {
-  right: auto;
-  left: calc(10.2rem - 24px);
-}
-
-.general-template.ltr .timeline-item {
-  padding-right: 0;
-  padding-left: 3rem;
-  direction: ltr;
-  text-align: left;
-}
-
-.general-template.ltr .timeline-content ul {
-  padding-right: 0;
-  padding-left: 1.5rem;
-}
-
-.general-template.ltr .timeline-content li::before {
-  right: auto;
-  left: -1rem;
-}
-
-.general-template.ltr .skills-grid,
-.general-template.ltr .languages-grid {
-  padding-right: 0;
-  padding-left: 3rem;
-  direction: ltr;
-  text-align: left;
-}
-
-.general-template.ltr .contact-info {
-  margin-right: 0;
-  margin-left: 2rem;
-}
-
-/* Update decorations for LTR */
-.general-template.ltr .right-decoration {
-  right: auto;
-  left: -4rem;
-  transform: scale(1.2) scaleX(-1);
-}
-
-.general-template.ltr .left-decoration {
-  left: auto;
-  right: 2rem;
-  transform: scale(1.2);
-}
-
-/* עדכון מפריד הכישורים */
-.skill-item:not(:last-child)::after {
-  content: ' | ';
-  margin: 0 4px;
-  color: var(--primary-color);
-}
-
-/* הסרת המפריד הקודם */
-.skill-item:last-child::after {
-  content: none;
-}
-
-.summary-section .section-title::after,
-.summary-section .section-title::before {
-  display: none;
-}
-
-.section:not(.summary-section) .section-title::after {
-  content: '';
-  position: absolute;
-  right: -24px;
-  top: 24px;
-  width: 6rem;
-  height: 1px;
-  background-color: #000000 !important;
-  z-index: 1;
-  display: block !important;
-}
-
-.section:not(.summary-section) .section-title::before {
-  content: '';
-  position: absolute;
-  right: calc(10.2rem - 24px);
-  top: 22px;
-  width: 4px;
-  height: 4px;
-  background-color: #000000 !important;
-  border-radius: 50%;
-  z-index: 1;
-  display: block !important;
-}
-
-/* עדכון תיאור */
-.timeline-description {
-  padding-right: 1.5rem;
-  margin-top: 0.3rem;
+.general-section-content {
+  padding-right: 3.5rem;
+  text-align: justify;
   font-size: 0.9rem;
   line-height: 1.4;
   font-weight: 300;
 }
 
-.timeline-description li {
+/* Experience Styles */
+.general-experience-item {
+  margin-bottom: 1rem;
+  padding-right: 3.5rem;
+}
+
+.general-experience-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.general-experience-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.general-experience-company {
+  font-weight: 300;
+  font-size: 0.95rem;
+}
+
+.general-experience-company::before {
+  content: '|';
+  margin: 0 0.5rem;
+  opacity: 0.7;
+  font-weight: 200;
+}
+
+.general-experience-date {
+  margin-right: auto;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 300;
+}
+
+.general-experience-description {
+  margin-top: 0.5rem;
+  padding-right: 1rem;
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.general-experience-description li {
+  font-size: 0.9rem;
+  font-weight: 300;
   display: inline;
 }
 
-.timeline-description li:not(:last-child)::after {
+.general-experience-description li:not(:last-child)::after {
   content: " | ";
   margin: 0 0.5rem;
   opacity: 0.7;
   font-weight: 200;
 }
 
-/* עדכון התאריכים בכל המקומות */
-.timeline-header h4 {
+/* Education Styles */
+.general-timeline-container {
+  padding-right: 3.5rem;
+}
+
+.general-timeline-item {
+  margin-bottom: 1rem;
+}
+
+.general-timeline-header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex: 1;
-  margin: 0;
 }
 
-.timeline-header h4 .timeline-date {
-  margin-right: 0;
-  margin-left: 5rem;
+.general-timeline-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-[dir="rtl"] .timeline-header h4 .timeline-date {
-  margin-left: 0;
-  margin-right: 5rem;
-}
-
-/* עדכון גרסת LTR */
-.general-template.ltr .timeline-container {
-  padding-right: 0;
-  padding-left: 1.5rem;
-}
-
-.general-template.ltr .timeline-item {
-  padding-right: 0;
-  padding-left: 1.5rem;
-}
-
-.general-template.ltr .timeline-description {
-  padding-right: 0;
-  padding-left: 1.5rem;
-}
-
-/* כוחק את כל ההגדרות הישנות */
-.skills-grid,
-.languages-grid,
-.skill-item:last-child,
-.language-item,
-.language-name,
-.language-level,
-.language-name::after,
-.skill-dot,
-.skill-dot.filled,
-.skill-item::after,
-.skill-item:not(:last-child)::after,
-.languages-items > span:not(:last-child)::after {
-  display: none !important;
-  content: none !important;
-}
-
-/* משאיר רק את העיצוב החדש */
-.skills-section,
-.languages-section {
-  margin: 0.4rem 0;
-}
-
-.skills-section .section-title,
-.languages-section .section-title {
-  padding-right: 1.5rem !important;
-}
-
-.skills-items {
-  display: block;
-  padding-right: 1.5rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  text-align: right;
-  max-width: 100%;
-  white-space: normal;
-  word-break: keep-all;
-}
-
-.skill-item {
-  display: inline-block;
-  font-size: 0.9rem;
-  color: #333;
-  margin-bottom: 0.2rem;
-}
-
-.skill-name {
+.general-timeline-position {
   font-weight: 600;
-  color: #1F1B2F;
+  font-size: 0.95rem;
 }
 
-.skill-level {
+.general-timeline-company {
+  font-weight: 300;
+  font-size: 0.95rem;
+}
+
+.general-timeline-company::before {
+  content: '|';
+  margin: 0 0.5rem;
+  opacity: 0.7;
+  font-weight: 200;
+}
+
+.general-timeline-date {
+  margin-right: auto;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 300;
+}
+
+.general-timeline-description {
+  margin-top: 0.5rem;
+  padding-right: 1rem;
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.general-timeline-description li {
+  font-size: 0.9rem;
+  font-weight: 300;
+  display: inline;
+}
+
+.general-timeline-description li:not(:last-child)::after {
+  content: " | ";
+  margin: 0 0.5rem;
+  opacity: 0.7;
+  font-weight: 200;
+}
+
+.general-timeline-separator {
+  display: none;
+}
+
+/* Skills Styles */
+.general-skills-section {
+  margin-bottom: 1.3rem;
+  padding-right: 0rem;
+}
+
+.general-skills-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-right: 3.5rem;
+  padding-left: 3.5rem;
+}
+
+.general-skills-category {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.general-skills-subtitle {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 0.3rem;
+}
+
+.general-skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.general-skill-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.95rem;
+}
+
+.general-skill-name {
+  font-weight: 600;
+}
+
+.general-skill-level {
   font-weight: 300;
   color: #666;
 }
 
-.skill-separator {
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.4;
-  font-weight: 200;
-  display: inline-block;
-}
-
-.skills-type-separator {
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.4;
-  font-weight: 200;
-  display: inline-block;
-}
-
-.skills-section {
-  margin-bottom: 2rem;
-  margin-left: 10rem;
-}
-
-/* שפות */
-.languages-section {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  max-width: 65%;
-  position: relative;
-  z-index: 2;
-}
-
-.languages-items {
-  display: block;
-  padding: 0 1.5rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  text-align: right;
-  max-width: 100%;
-}
-
-.languages-items > span {
-  display: inline;
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.languages-items > span:not(:last-child)::after {
-  content: " | ";
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.4;
+.general-skill-separator {
+  margin: 0 0.5rem;
+  opacity: 0.7;
   font-weight: 200;
 }
 
-/* מחיקת ההגדרות החוסמות */
-.skills-grid,
-.skill-item:last-child,
-.skill-dot,
-.skill-dot.filled {
-  all: unset;
+/* Languages Styles */
+.general-languages-section {
+  margin-bottom: 1.3rem;
+  padding-right: 0rem;
 }
 
-.skills-items {
-  display: block;
-  padding-right: 1.5rem;
-  line-height: 1.4;
-  margin-top: 0.5rem;
-  text-align: right;
-  max-width: 100%;
+.general-languages-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-right: 3.5rem;
+  align-items: center;
 }
 
-.skill-item {
-  display: inline;
-  font-size: 0.9rem;
-  color: #333;
+.general-languages-items > span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.95rem;
 }
 
-.skill-name {
+.general-languages-items > span > span:first-child {
   font-weight: 600;
-  color: #1F1B2F;
 }
 
-.skill-level {
+.general-languages-items > span > span:last-child {
   font-weight: 300;
   color: #666;
 }
 
-.skill-item:not(:last-child)::after {
+.general-languages-items > span:not(:last-child)::after {
   content: " | ";
-  margin: 0 0.8rem;
-  color: #666;
-  opacity: 0.4;
+  margin: 0 0.5rem;
+  opacity: 0.7;
   font-weight: 200;
 }
 
-.skills-section {
-  margin-bottom: 2rem;
-  margin-left: 10rem;
-}
-
-/* כפתורי עריכה והוספה */
+/* Edit Button Styles */
 .edit-button {
-  position: absolute;
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -879,26 +527,10 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   z-index: 10;
-  opacity: 1;
-  right: -30px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.section-title .edit-button {
   position: relative;
-  right: 0;
-  top: 0;
-  transform: none;
-  margin-right: 8px;
-}
-
-[dir="rtl"] .section-title .edit-button {
-  margin-right: 0;
-  margin-left: 8px;
+  transform: translateY(0px);
 }
 
 .edit-button:hover {
@@ -911,124 +543,71 @@
   color: #4856CD;
 }
 
-/* טולטיפים */
-.edit-button::after {
-  content: attr(title);
-  position: absolute;
-  right: calc(100% + 8px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(72, 86, 205, 0.9);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
+/* עדכון כפתור העריכה בהדר */
+.general-header-name .edit-button {
+  position: absolute !important;
+  right: -2rem !important;
+  top: 50% !important;
+  transform: translateY(-40px) !important;
 }
 
-.edit-button:hover::after {
-  opacity: 1;
+/* Section Title Edit Button */
+.general-section-title .edit-button {
+  left: -4rem;
 }
 
-/* התאמות לעמודה הימנית */
-.right-column .edit-button,
-.right-column .add-button {
-  right: auto;
-  left: -20px;
-}
-
-.right-column .edit-button::after,
-.right-column .add-button::after {
-  right: auto;
-  left: calc(100% + 8px);
-}
-
-/* כפתורי עריכה */
-.edit-button {
-  position: absolute;
-  right: -20px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: white;
-  border: 1px solid rgba(72, 86, 205, 0.1);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.edit-button:hover {
-  background: rgba(72, 86, 205, 0.1);
-}
-
-.edit-button svg {
-  width: 14px;
-  height: 14px;
-  color: #4856CD;
-}
-
-/* טולטיפים */
-.edit-button::after {
-  content: attr(title);
-  position: absolute;
-  right: calc(100% + 8px);
-  top: 50%;
-  transform: translateY(-50%);
-  background: rgba(72, 86, 205, 0.9);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.edit-button:hover::after {
-  opacity: 1;
-}
-
-/* התאמות לכיוון RTL */
+/* RTL Support */
 [dir="rtl"] .edit-button {
+  left: -4rem;
   right: auto;
-  left: -20px;
 }
 
-[dir="rtl"] .edit-button::after {
-  right: auto;
-  left: calc(100% + 8px);
+[dir="ltr"] .edit-button {
+  right: -4rem;
+  left: auto;
 }
 
-/* התאמות לסקשנים ספציפיים */
-.section {
-  position: relative;
+/* טולטיפ של הכפתור */
+.edit-button::after {
+  content: attr(title);
+  position: absolute;
+  right: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(72, 86, 205, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
-.section-title {
-  position: relative;
+.edit-button:hover::after {
+  opacity: 1;
 }
 
-.section .edit-button {
-  top: 0;
-  transform: translateY(0);
+/* הופעת הכפתור בהובר על הכותרת */
+.general-section-title:hover .edit-button,
+.general-header-name:hover .edit-button {
+  opacity: 1;
 }
 
-.section .edit-button:hover {
-  transform: scale(1.1);
+.general-professional-summary {
+  padding-right: 3.5rem;
+  text-align: justify;
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 500;
+  max-width: 95%;
+  margin-bottom: 2rem;
 }
 
-/* התאמות למצב הדפסה */
-@media print {
-  .edit-button {
-    display: none;
-  }
+.general-professional-summary p {
+  margin: 0;
+  padding: 0;
+  text-align: justify;
+  hyphens: auto;
 } 

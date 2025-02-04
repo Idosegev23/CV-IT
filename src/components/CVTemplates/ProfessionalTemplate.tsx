@@ -6,6 +6,7 @@ import { Assistant, Rubik } from 'next/font/google';
 import { formatDate } from './utils';
 import { Edit2, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 interface ProfessionalTemplateProps {
   data: ResumeData;
@@ -166,22 +167,50 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
           <div className="professional-contact">
             {personalInfo.phone && (
               <div className="professional-contact-item">
-                {t.phone}: {personalInfo.phone}
+                <Image
+                  src="/design/professional/PhoneIcon.svg"
+                  alt="phone"
+                  width={16}
+                  height={16}
+                  className="contact-icon"
+                />
+                <span>{personalInfo.phone}</span>
               </div>
             )}
             {personalInfo.email && (
               <div className="professional-contact-item">
-                {t.email}: {personalInfo.email}
+                <Image
+                  src="/design/professional/MailIcon.svg"
+                  alt="email"
+                  width={16}
+                  height={16}
+                  className="contact-icon"
+                />
+                <span>{personalInfo.email}</span>
               </div>
             )}
             {personalInfo.address && (
               <div className="professional-contact-item">
-                {t.address}: {personalInfo.address}
+                <Image
+                  src="/design/professional/LocIcon.svg"
+                  alt="address"
+                  width={16}
+                  height={16}
+                  className="contact-icon"
+                />
+                <span>{personalInfo.address}</span>
               </div>
             )}
             {personalInfo.linkedin && (
               <div className="professional-contact-item">
-                LinkedIn: {personalInfo.linkedin}
+                <Image
+                  src="/design/professional/LinkedInIcon.svg"
+                  alt="linkedin"
+                  width={16}
+                  height={16}
+                  className="contact-icon"
+                />
+                <span>{personalInfo.linkedin.replace(/^https?:\/\//, '')}</span>
               </div>
             )}
           </div>
@@ -212,9 +241,10 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
                   {skills.technical.map((skill, index) => (
                     <div key={`tech-${index}`} className="professional-skill-item">
                       <div className="professional-skill-content">
-                        <span className="professional-skill-name">{skill.name}</span>
-                        <span className="professional-skill-separator">|</span>
-                        <span className="professional-skill-level">{getSkillLevel(skill.level)}</span>
+                        <div className="professional-skill-wrapper">
+                          <span className="professional-skill-name">{skill.name}</span>
+                          <span className="professional-skill-level">{getSkillLevel(skill.level)}</span>
+                        </div>
                       </div>
                     </div>
                   ))}

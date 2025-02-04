@@ -4,6 +4,7 @@ import { ResumeData, Language, Degree, MilitaryService } from '../../types/resum
 import MailIcon from '../../../public/design/general/MailIcon.svg';
 import PhoneIcon from '../../../public/design/general/PhoneIcon.svg';
 import LocIcon from '../../../public/design/general/LocIcon.svg';
+import LinkedInIcon from '../../../public/design/general/LinkedInIcon.svg';
 import BusiIcon from '../../../public/design/general/busiIcon.svg';
 import SchoolIcon from '../../../public/design/general/SchoolIcon.svg';
 import MilIcon from '../../../public/design/general/MilIcon.svg';
@@ -114,6 +115,24 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
     return () => window.removeEventListener('resize', adjustSize);
   }, [data]);
 
+  useEffect(() => {
+    const adjustLinePosition = () => {
+      const summarySection = document.querySelector('.general-professional-summary');
+      const content = document.querySelector('.general-content') as HTMLElement;
+      if (summarySection && content) {
+        const summaryHeight = summarySection.getBoundingClientRect().height;
+        const contentStyle = getComputedStyle(content);
+        const marginTop = parseInt(contentStyle.marginTop);
+        const lineStartPosition = summaryHeight + marginTop + 40; // 40px נוסף למרווח
+        content.style.setProperty('--line-start-position', `${lineStartPosition}px`);
+      }
+    };
+
+    adjustLinePosition();
+    window.addEventListener('resize', adjustLinePosition);
+    return () => window.removeEventListener('resize', adjustLinePosition);
+  }, [data.personalInfo.summary]);
+
   const getSkillLevel = (level: number) => {
     if (typeof level !== 'number') return 'רמה טובה';
 
@@ -145,8 +164,8 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
           <div className="general-header-content">
             <div className="general-header-name relative">
               <h1>
-                <span className="firstname">{firstName}</span>
-                <span className="lastname">{lastName}</span>
+                <span className="general-firstname">{firstName}</span>
+                <span className="general-lastname">{lastName}</span>
                 {isEditing && (
                   <button
                     onClick={() => handleEdit('personalInfo', 0)}
@@ -159,49 +178,66 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               </h1>
             </div>
 
-            <div className="contact-info" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+            <div className="general-contact-info" dir={lang === 'he' ? 'rtl' : 'ltr'}>
               {data.personalInfo.email && (
-                <div className="contact-item">
-                  <div className="contact-item-icon">
+                <div className="general-contact-item">
+                  <div className="general-contact-item-icon">
                     <Image src={MailIcon} alt="email" width={16} height={16} />
                   </div>
                   <span>{data.personalInfo.email}</span>
                 </div>
               )}
               {data.personalInfo.phone && (
-                <div className="contact-item">
-                  <div className="contact-item-icon">
+                <div className="general-contact-item">
+                  <div className="general-contact-item-icon">
                     <Image src={PhoneIcon} alt="phone" width={16} height={16} />
                   </div>
                   <span>{data.personalInfo.phone}</span>
                 </div>
               )}
               {data.personalInfo.address && (
-                <div className="contact-item">
-                  <div className="contact-item-icon">
+                <div className="general-contact-item">
+                  <div className="general-contact-item-icon">
                     <Image src={LocIcon} alt="location" width={16} height={16} />
                   </div>
                   <span>{data.personalInfo.address}</span>
                 </div>
               )}
+              {data.personalInfo.linkedin && (
+                <div className="general-contact-item">
+                  <div className="general-contact-item-icon">
+                    <Image src={LinkedInIcon} alt="linkedin" width={16} height={16} />
+                  </div>
+                  <span>{data.personalInfo.linkedin.replace(/^https?:\/\//, '')}</span>
+                </div>
+              )}
             </div>
           </div>
         </header>
-        <div className="header-decoration right-decoration">
+        <div className="general-header-decoration general-right-decoration">
           <Image src={DecUpLeft} alt="" width={150} height={150} priority />
         </div>
-        <div className="header-decoration left-decoration">
+        <div className="general-header-decoration general-left-decoration">
           <Image src={DecUpLeft} alt="" width={150} height={150} priority />
         </div>
-        <div className="content">
+        <div className="general-content">
 
-        {/* Summary Section */}
+        {/* תקציר מקצועי */}
         {data.personalInfo.summary && (
-          <section className="summary-section">
-            <h3 className="summary-title">
+          <section className="general-section">
+            <h3 className="general-section-title">
               {t.professionalSummary}
+              {isEditing && (
+                <button
+                  onClick={() => handleEdit('professionalSummary', 0)}
+                  className="edit-button"
+                  title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              )}
             </h3>
-            <div className="summary-content">
+            <div className="general-professional-summary">
               <p>{data.personalInfo.summary}</p>
             </div>
           </section>
@@ -209,9 +245,9 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
 
         {/* Work Experience */}
         {data.experience && data.experience.length > 0 && (
-          <section className="section">
-            <h3 className="section-title">
-              <div className="section-icon">
+          <section className="general-section">
+            <h3 className="general-section-title">
+              <div className="general-section-icon">
                 <Image src={BusiIcon} alt="work" width={48} height={48} />
               </div>
               {t.workExperience}
@@ -225,24 +261,24 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 </button>
               )}
             </h3>
-            <div className="section-content">
+            <div className="general-section-content">
               {data.experience.map((exp, index) => (
-                <div key={index} className="experience-item">
-                  <div className="experience-header">
-                    <h4 className="experience-title">
+                <div key={index} className="general-experience-item">
+                  <div className="general-experience-header">
+                    <h4 className="general-experience-title">
                       {exp.position}
                     </h4>
                     {exp.company && (
-                      <span className="experience-company">
+                      <span className="general-experience-company">
                         {exp.company}
                       </span>
                     )}
-                    <span className="experience-date">
+                    <span className="general-experience-date">
                       {formatDate(exp.startDate, exp.endDate, lang)}
                     </span>
                   </div>
                   {exp.description && exp.description.length > 0 && (
-                    <ul className="experience-description">
+                    <ul className="general-experience-description">
                       {formatDescription(exp.description, data.experience.length).map((desc, i) => (
                         <li key={i}>{desc}</li>
                       ))}
@@ -256,9 +292,9 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
 
         {/* Education */}
         {data.education?.degrees && data.education.degrees.length > 0 && (
-          <section className="section">
-            <h3 className="section-title">
-              <div className="section-icon">
+          <section className="general-section">
+            <h3 className="general-section-title">
+              <div className="general-section-icon">
                 <Image src={SchoolIcon} alt="education" width={48} height={48} />
               </div>
               {t.education}
@@ -272,25 +308,25 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 </button>
               )}
             </h3>
-            <div className="timeline-container">
+            <div className="general-timeline-container">
               {data.education.degrees.map((degree, index) => (
-                <div key={index} className="timeline-item">
-                  <div className="timeline-header">
-                    <div className="timeline-title-wrapper">
-                      <span className="timeline-position">{degree.type} {degree.field}</span>
+                <div key={index} className="general-timeline-item">
+                  <div className="general-timeline-header">
+                    <div className="general-timeline-title-wrapper">
+                      <span className="general-timeline-position">{degree.type} {degree.field}</span>
                       {degree.institution && (
                         <>
-                          <span className="timeline-separator">|</span>
-                          <span className="timeline-company">{degree.institution}</span>
+                          <span className="general-timeline-separator">|</span>
+                          <span className="general-timeline-company">{degree.institution}</span>
                         </>
                       )}
                     </div>
-                    <span className="timeline-date">
+                    <span className="general-timeline-date">
                       {formatDate(degree.startDate, degree.endDate, lang)}
                     </span>
                   </div>
                   {degree.specialization && (
-                    <div className="timeline-description">
+                    <div className="general-timeline-description">
                       <li>{`${t.specialization}: ${degree.specialization}`}</li>
                     </div>
                   )}
@@ -302,9 +338,9 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
 
         {/* Military Service */}
         {data.military && (
-          <section className="section">
-            <h3 className="section-title">
-              <div className="section-icon">
+          <section className="general-section">
+            <h3 className="general-section-title">
+              <div className="general-section-icon">
                 <Image src={MilIcon} alt="military" width={48} height={48} />
               </div>
               {t.militaryService}
@@ -318,24 +354,24 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 </button>
               )}
             </h3>
-            <div className="timeline-container">
-              <div className="timeline-item">
-                <div className="timeline-header">
-                  <div className="timeline-title-wrapper">
-                    <span className="timeline-position">{data.military.role}</span>
+            <div className="general-timeline-container">
+              <div className="general-timeline-item">
+                <div className="general-timeline-header">
+                  <div className="general-timeline-title-wrapper">
+                    <span className="general-timeline-position">{data.military.role}</span>
                     {data.military.unit && (
                       <>
-                        <span className="timeline-separator">|</span>
-                        <span className="timeline-company">{data.military.unit}</span>
+                        <span className="general-timeline-separator">|</span>
+                        <span className="general-timeline-company">{data.military.unit}</span>
                       </>
                     )}
                   </div>
-                  <span className="timeline-date">
+                  <span className="general-timeline-date">
                     {formatDate(data.military.startDate, data.military.endDate, lang)}
                   </span>
                 </div>
                 {data.military.description && data.military.description.length > 0 && (
-                  <ul className="timeline-description">
+                  <ul className="general-timeline-description">
                     {formatDescription(data.military.description, 3).map((desc, i) => (
                       <li key={i}>{desc}</li>
                     ))}
@@ -351,9 +387,9 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
           (Array.isArray(data.skills.technical) && data.skills.technical.length > 0) || 
           (Array.isArray(data.skills.soft) && data.skills.soft.length > 0)
         ) && (
-          <section className="skills-section">
-            <h3 className="section-title">
-              <div className="section-icon">
+          <section className="general-skills-section">
+            <h3 className="general-section-title">
+              <div className="general-section-icon">
                 <Image src={SkillIcon} alt="skills" width={48} height={48} />
               </div>
               {t.skills}
@@ -367,44 +403,52 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 </button>
               )}
             </h3>
-            <div className="skills-items">
+            <div className="general-skills-items">
               {/* Technical Skills */}
-              {Array.isArray(data.skills.technical) && data.skills.technical.map((skill, index) => (
-                <React.Fragment key={`tech-${index}`}>
-                  <span className="skill-item">
-                    <span className="skill-name">{skill.name}</span>
-                    {skill.level && (
-                      <span className="skill-level"> - {getSkillLevel(skill.level)}</span>
-                    )}
-                  </span>
-                  {index < data.skills.technical.length - 1 && <span className="skill-separator">|</span>}
-                </React.Fragment>
-              ))}
-              
-              {/* Separator between technical and soft skills */}
-              {Array.isArray(data.skills.technical) && data.skills.technical.length > 0 && 
-               Array.isArray(data.skills.soft) && data.skills.soft.length > 0 && (
-                <span className="skills-type-separator">|</span>
+              {Array.isArray(data.skills.technical) && data.skills.technical.length > 0 && (
+                <div className="general-skills-category">
+                  <h4 className="general-skills-subtitle">{t.technicalSkills}</h4>
+                  <div className="general-skills-list">
+                    {data.skills.technical.map((skill, index) => (
+                      <React.Fragment key={`tech-${index}`}>
+                        <span className="general-skill-item">
+                          <span className="general-skill-name">{skill.name}</span>
+                          {skill.level && (
+                            <span className="general-skill-level"> - {getSkillLevel(skill.level)}</span>
+                          )}
+                        </span>
+                        {index < data.skills.technical.length - 1 && <span className="general-skill-separator">|</span>}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
               )}
               
               {/* Soft Skills */}
-              {Array.isArray(data.skills.soft) && data.skills.soft.map((skill, index) => (
-                <React.Fragment key={`soft-${index}`}>
-                  <span className="skill-item">
-                    <span className="skill-name">{skill.name}</span>
-                  </span>
-                  {index < data.skills.soft.length - 1 && <span className="skill-separator">|</span>}
-                </React.Fragment>
-              ))}
+              {Array.isArray(data.skills.soft) && data.skills.soft.length > 0 && (
+                <div className="general-skills-category">
+                  <h4 className="general-skills-subtitle">{t.softSkills}</h4>
+                  <div className="general-skills-list">
+                    {data.skills.soft.map((skill, index) => (
+                      <React.Fragment key={`soft-${index}`}>
+                        <span className="general-skill-item">
+                          <span className="general-skill-name">{skill.name}</span>
+                        </span>
+                        {index < data.skills.soft.length - 1 && <span className="general-skill-separator">|</span>}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </section>
         )}
 
         {/* Languages */}
         {data.skills?.languages && data.skills.languages.length > 0 && (
-          <section className="languages-section">
-            <h3 className="section-title">
-              <div className="section-icon">
+          <section className="general-languages-section">
+            <h3 className="general-section-title">
+              <div className="general-section-icon">
                 <Image src={LangIcon} alt="languages" width={48} height={48} />
               </div>
               {t.languages}
@@ -418,7 +462,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 </button>
               )}
             </h3>
-            <div className="languages-items">
+            <div className="general-languages-items">
               {data.skills.languages.map((lang, index) => (
                 <span key={index}>
                   <span>{lang.language}</span>
@@ -431,8 +475,8 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
         )}
         </div>
       </div>
-      <div className="footer-decorations">
-        <div className="cloud-decoration">
+      <div className="general-footer-decorations">
+        <div className="general-cloud-decoration">
           <Image 
             src={Cloud} 
             alt="" 
@@ -441,7 +485,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
             style={{ opacity: 0.8 }}
           />
         </div>
-        <div className="building-decoration">
+        <div className="general-building-decoration">
           <Image 
             src={Building} 
             alt="" 
@@ -451,7 +495,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
             priority
           />
         </div>
-        <div className="icon-decoration">
+        <div className="general-icon-decoration">
           <Image 
             src={IconDec} 
             alt="" 
