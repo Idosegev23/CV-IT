@@ -40,5 +40,15 @@
     "updateSuccessDescription": "Data updated directly in your LinkedIn profile",
     "updateError": "Update Error",
     "updateErrorDescription": "Could not update profile directly. Please copy and paste manually."
+  },
+  "messages": {
+    "translating": "Translating CV...",
+    "translateSuccess": "CV translated successfully",
+    "translateError": "Error translating CV"
+  },
+  "buttons": {
+    "translate": "Translate",
+    "translateToHebrew": "Translate to Hebrew",
+    "translateToEnglish": "Translate to English"
   }
 } 

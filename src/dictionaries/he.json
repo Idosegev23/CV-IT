@@ -40,5 +40,15 @@
     "updateSuccessDescription": "הנתונים עודכנו ישירות בפרופיל הלינקדאין שלך",
     "updateError": "שגיאה בעדכון",
     "updateErrorDescription": "לא ניתן לעדכן ישירות את הפרופיל. אנא העתק והדבק ידנית."
+  },
+  "messages": {
+    "translating": "מתרגם את קורות החיים...",
+    "translateSuccess": "קורות החיים תורגמו בהצלחה",
+    "translateError": "שגיאה בתרגום קורות החיים"
+  },
+  "buttons": {
+    "translate": "תרגם",
+    "translateToHebrew": "תרגם לעברית",
+    "translateToEnglish": "תרגם לאנגלית"
   }
 } 

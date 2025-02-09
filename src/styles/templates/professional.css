@@ -5,8 +5,10 @@
   --base-spacing: 0.1rem;
   --a4-width: 210mm;
   --a4-height: 297mm;
-  --right-column-width: 250px;
-  --left-column-width: calc(100% - var(--right-column-width));
+  --right-column-width-rtl: 250px;
+  --left-column-width-rtl: calc(100% - var(--right-column-width-rtl));
+  --right-column-width-ltr: calc(100% - 250px);
+  --left-column-width-ltr: 250px;
   --separator-color: rgba(255, 255, 255, 0.34);
   --font-family: 'Assistant', sans-serif !important;
 }
@@ -24,6 +26,12 @@
   transform: scale(var(--scale-factor));
   --adjusted-font-size: calc(var(--base-font-size) * var(--scale-factor));
   --adjusted-spacing: calc(var(--base-spacing) * var(--scale-factor));
+  flex-direction: row;
+}
+
+/* התאמות למצב אנגלית - היפוך התבנית */
+.professional-template[dir="ltr"] {
+  flex-direction: row-reverse;
 }
 
 @media print {
@@ -63,9 +71,9 @@
   }
 }
 
-/* עמודה ימנית */
+/* עמודה ימנית - ברירת מחדל (עברית) */
 .professional-right-column {
-  width: var(--right-column-width);
+  width: var(--right-column-width-rtl);
   min-height: var(--a4-height);
   padding: 1.5rem;
   display: flex;
@@ -74,6 +82,11 @@
   background-color: #4B4553;
   color: #F3F4F1;
   position: relative;
+}
+
+/* התאמות טקסט למצב אנגלית */
+.professional-template[dir="ltr"] .professional-right-column {
+  text-align: left;
 }
 
 /* כותרת ראשית */
@@ -146,6 +159,15 @@
   font-size: 0.8rem;
 }
 
+/* התאמת פרטי קשר למצב אנגלית */
+.professional-template[dir="ltr"] .professional-contact {
+  text-align: left;
+}
+
+.professional-template[dir="ltr"] .professional-contact-item {
+  flex-direction: row;
+}
+
 /* כותרות משניות */
 .professional-section-title {
   font-weight: 600 !important;
@@ -153,6 +175,11 @@
   color: #F3F4F1;
   margin-bottom: 0.8rem;
   position: relative !important;
+}
+
+/* התאמת כותרות למצב אנגלית */
+.professional-template[dir="ltr"] .professional-section-title {
+  text-align: left;
 }
 
 /* רשימת שפות */
@@ -194,7 +221,7 @@
 .professional-skills {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.1rem;
   padding-right: 0.3rem;
 }
 
@@ -202,8 +229,8 @@
   font-weight: 500 !important;
   font-size: 0.9rem;
   color: #F3F4F1;
-  margin-top: 0.8rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0.3rem;
   opacity: 0.9;
 }
 
@@ -214,7 +241,7 @@
   font-size: 0.8rem;
   color: white;
   opacity: 0.9;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
 .professional-skill-content {
@@ -246,7 +273,7 @@
 .professional-logo {
   position: absolute;
   bottom: 0.5rem;
-  right: 9rem;
+  right: 10rem;
   width: 48px;
   height: 48px;
   display: flex;
@@ -260,15 +287,26 @@
   object-fit: contain;
 }
 
-/* עמודה שמאלית */
+/* התאמת לוגו למצב אנגלית */
+.professional-template[dir="ltr"] .professional-logo {
+  right: auto;
+  left: -5rem;
+}
+
+/* עמודה שמאלית - ברירת מחדל (עברית) */
 .professional-left-column {
-  width: var(--left-column-width);
+  width: var(--left-column-width-rtl);
   padding: 2.5rem;
   background: #F3F4F1;
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
   font-family: var(--font-family);
+}
+
+/* התאמות טקסט למצב אנגלית */
+.professional-template[dir="ltr"] .professional-left-column {
+  text-align: left;
 }
 
 /* כותרות ראשיות בעמודה השמאלית */
@@ -278,6 +316,11 @@
   color: #1F1B2F;
   margin-bottom: 1.2rem;
   font-family: var(--font-family);
+}
+
+/* התאמת כותרות למצב אנגלית */
+.professional-template[dir="ltr"] .professional-section-title {
+  text-align: left;
 }
 
 /* ניסיון תעסוקתי, השכלה ושירות צבאי */
@@ -339,9 +382,11 @@
   font-weight: 400;
 }
 
-[dir="rtl"] .professional-experience-date,
-[dir="rtl"] .professional-education-date,
-[dir="rtl"] .professional-military-date {
+/* התאמת תאריכים למצב אנגלית */
+.professional-template[dir="ltr"] .professional-experience-date,
+.professional-template[dir="ltr"] .professional-education-date,
+.professional-template[dir="ltr"] .professional-military-date {
+  text-align: right;
   margin-left: 0;
   margin-right: 5rem;
 }
@@ -369,11 +414,16 @@
   opacity: 0.7;
 }
 
-.professional-education-specialization {
-  font-size: clamp(0.8rem, 1.7vw, 0.95rem);
-  color: #666;
-  margin-top: 0.2rem;
-  padding-right: 0.5rem;
+/* התאמת תיאורים למצב אנגלית */
+.professional-template[dir="ltr"] .professional-experience-description,
+.professional-template[dir="ltr"] .professional-education-specialization {
+  padding-left: 1.5rem;
+  padding-right: 0;
+}
+
+.professional-experience-description li::before {
+  right: auto;
+  left: -1.2rem;
 }
 
 /* השכלה */
@@ -456,45 +506,10 @@
   line-height: 1.3;
 }
 
-/* תמיכה ב-LTR */
-[dir="ltr"] .professional-skills {
+/* התאמת כישורים למצב אנגלית */
+.professional-template[dir="ltr"] .professional-skills {
   padding-left: 0.3rem;
   padding-right: 0;
-}
-
-[dir="ltr"] .professional-skill-item {
-  padding-left: 1rem;
-  padding-right: 0;
-}
-
-[dir="ltr"] .professional-skill-item::before {
-  left: 0;
-  right: auto;
-}
-
-[dir="ltr"] .professional-experience-description li::before {
-  right: auto;
-  left: -1.2rem;
-}
-
-[dir="ltr"] .professional-experience-description,
-[dir="ltr"] .professional-education,
-[dir="ltr"] .professional-military {
-  margin-right: 0;
-  margin-left: 1rem;
-  padding-right: 0;
-  padding-left: 1.2rem;
-}
-
-[dir="ltr"] .professional-experience-title-wrapper {
-  margin-left: 0;
-  margin-right: 120px;
-}
-
-[dir="ltr"] .professional-experience-date {
-  left: auto;
-  right: 0;
-  text-align: right;
 }
 
 .professional-skill-level {
@@ -831,4 +846,259 @@
 /* הופעת טולטיפ בריחוף */
 .professional-edit-button:hover::after {
   opacity: 1 !important;
+}
+
+/* התאמת כפתורי עריכה למצב אנגלית */
+.professional-template[dir="ltr"] .professional-edit-button {
+  right: auto;
+  left: 0;
+}
+
+/* התאמות למצב אנגלית - היפוך גדלי העמודות */
+.professional-template[dir="ltr"] .professional-right-column {
+  width: var(--right-column-width-ltr);
+}
+
+.professional-template[dir="ltr"] .professional-left-column {
+  width: var(--left-column-width-ltr);
+}
+
+/* התאמות למצב אנגלית */
+.professional-template-en {
+  flex-direction: row-reverse;
+}
+
+.professional-template-en .professional-right-column {
+  background-color: #F3F4F1;
+  text-align: left;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.professional-template-en .professional-left-column {
+  background-color: #4B4553;
+  color: #F3F4F1;
+  text-align: left;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+}
+
+/* עדכון צבעי טקסט בעמודה השמאלית במצב אנגלית */
+.professional-template-en .professional-left-column .professional-section-title {
+  color: #F3F4F1;
+}
+
+.professional-template-en .professional-left-column .professional-experience-title,
+.professional-template-en .professional-left-column .professional-education-title,
+.professional-template-en .professional-left-column .professional-military-title {
+  color: #F3F4F1;
+}
+
+.professional-template-en .professional-left-column .professional-experience-company,
+.professional-template-en .professional-left-column .professional-education-institution,
+.professional-template-en .professional-left-column .professional-military-unit {
+  color: #F3F4F1;
+  opacity: 0.9;
+}
+
+.professional-template-en .professional-left-column .professional-experience-date,
+.professional-template-en .professional-left-column .professional-education-date,
+.professional-template-en .professional-left-column .professional-military-date {
+  color: #F3F4F1;
+  opacity: 0.8;
+}
+
+.professional-template-en .professional-left-column .professional-experience-description li,
+.professional-template-en .professional-left-column .professional-education-specialization,
+.professional-template-en .professional-left-column .professional-military-description {
+  color: #F3F4F1;
+  opacity: 0.9;
+}
+
+/* עדכון צבעי טקסט בעמודה הימנית במצב אנגלית */
+.professional-template-en .professional-right-column .professional-section-title {
+  color: #1F1B2F;
+}
+
+.professional-template-en .professional-right-column .professional-name {
+  color: #1F1B2F;
+}
+
+.professional-template-en .professional-right-column .professional-contact {
+  color: #1F1B2F;
+}
+
+.professional-template-en .professional-right-column .professional-separator {
+  background: rgba(31, 27, 47, 0.34);
+}
+
+.professional-template-en .professional-right-column .professional-skill-name,
+.professional-template-en .professional-right-column .professional-skill-level {
+  color: #1F1B2F;
+}
+
+/* התאמות למצב עברית */
+.professional-template-he {
+  flex-direction: row;
+}
+
+.professional-template-he .professional-right-column {
+  background-color: #4B4553;
+  color: #F3F4F1;
+  text-align: right;
+  padding-right: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.professional-template-he .professional-left-column {
+  background-color: #F3F4F1;
+  text-align: right;
+  padding-right: 2.5rem;
+  padding-left: 2.5rem;
+}
+
+/* עדכון צבעי טקסט בעמודה הימנית במצב עברית */
+.professional-template-he .professional-right-column .professional-section-title,
+.professional-template-he .professional-right-column .professional-name,
+.professional-template-he .professional-right-column .professional-contact,
+.professional-template-he .professional-right-column .professional-skill-name,
+.professional-template-he .professional-right-column .professional-skill-level {
+  color: #F3F4F1;
+}
+
+.professional-template-he .professional-right-column .professional-separator {
+  background: rgba(243, 244, 241, 0.34);
+}
+
+/* עדכון צבעי טקסט בעמודה השמאלית במצב עברית */
+.professional-template-he .professional-left-column .professional-section-title,
+.professional-template-he .professional-left-column .professional-experience-title,
+.professional-template-he .professional-left-column .professional-education-title,
+.professional-template-he .professional-left-column .professional-military-title {
+  color: #1F1B2F;
+}
+
+.professional-template-he .professional-left-column .professional-experience-company,
+.professional-template-he .professional-left-column .professional-education-institution,
+.professional-template-he .professional-left-column .professional-military-unit {
+  color: #333;
+  opacity: 0.9;
+}
+
+.professional-template-he .professional-left-column .professional-experience-date,
+.professional-template-he .professional-left-column .professional-education-date,
+.professional-template-he .professional-left-column .professional-military-date {
+  color: #666;
+  opacity: 0.8;
+}
+
+.professional-template-he .professional-left-column .professional-experience-description li,
+.professional-template-he .professional-left-column .professional-education-specialization,
+.professional-template-he .professional-left-column .professional-military-description {
+  color: #333;
+  opacity: 0.9;
+}
+
+/* עדכון מיקום בולטים לפי שפת קורות החיים */
+.professional-template-he .professional-experience-description li::before {
+  content: "•";
+  position: absolute;
+  right: -1.2rem;
+  left: auto;
+  opacity: 0.7;
+}
+
+.professional-template-he .professional-experience-description li {
+  position: relative;
+  padding-right: 1rem;
+  padding-left: 0;
+  margin-right: 1rem;
+  margin-left: 0;
+}
+
+.professional-template-he .professional-experience-description {
+  padding-right: 1.5rem;
+  padding-left: 0;
+  list-style-type: none;
+}
+
+/* שמירה על המצב הקיים באנגלית */
+.professional-template-en .professional-experience-description li::before {
+  content: "•";
+  position: absolute;
+  left: -1.2rem;
+  right: auto;
+  opacity: 0.7;
+}
+
+.professional-template-en .professional-experience-description li {
+  position: relative;
+  padding-left: 1rem;
+  padding-right: 0;
+  margin-left: 1rem;
+  margin-right: 0;
+}
+
+.professional-template-en .professional-experience-description {
+  padding-left: 1.5rem;
+  padding-right: 0;
+  list-style-type: none;
+}
+
+/* עדכון צבעי טקסט בעמודה השמאלית במצב אנגלית */
+.professional-template-en .professional-left-column .professional-section-title,
+.professional-template-en .professional-left-column .professional-experience-title,
+.professional-template-en .professional-left-column .professional-education-title,
+.professional-template-en .professional-left-column .professional-military-title,
+.professional-template-en .professional-left-column .professional-experience-company,
+.professional-template-en .professional-left-column .professional-education-institution,
+.professional-template-en .professional-left-column .professional-military-unit,
+.professional-template-en .professional-left-column .professional-experience-date,
+.professional-template-en .professional-left-column .professional-education-date,
+.professional-template-en .professional-left-column .professional-military-date,
+.professional-template-en .professional-left-column .professional-experience-description li,
+.professional-template-en .professional-left-column .professional-education-specialization,
+.professional-template-en .professional-left-column .professional-military-description {
+  color: #F3F4F1 !important;
+  opacity: 0.9 !important;
+}
+
+/* עדכון צבעי טקסט בעמודה השמאלית במצב עברית */
+.professional-template-he .professional-left-column .professional-section-title,
+.professional-template-he .professional-left-column .professional-experience-title,
+.professional-template-he .professional-left-column .professional-education-title,
+.professional-template-he .professional-left-column .professional-military-title,
+.professional-template-he .professional-left-column .professional-experience-company,
+.professional-template-he .professional-left-column .professional-education-institution,
+.professional-template-he .professional-left-column .professional-military-unit,
+.professional-template-he .professional-left-column .professional-experience-date,
+.professional-template-he .professional-left-column .professional-education-date,
+.professional-template-he .professional-left-column .professional-military-date,
+.professional-template-he .professional-left-column .professional-experience-description li,
+.professional-template-he .professional-left-column .professional-education-specialization,
+.professional-template-he .professional-left-column .professional-military-description {
+  color: #333 !important;
+  opacity: 0.9 !important;
+}
+
+/* עדכון צבעי טקסט בעמודה הימנית במצב אנגלית */
+.professional-template-en .professional-right-column .professional-experience-title,
+.professional-template-en .professional-right-column .professional-education-title,
+.professional-template-en .professional-right-column .professional-military-title,
+.professional-template-en .professional-right-column .professional-experience-company,
+.professional-template-en .professional-right-column .professional-education-institution,
+.professional-template-en .professional-right-column .professional-military-unit,
+.professional-template-en .professional-right-column .professional-experience-date,
+.professional-template-en .professional-right-column .professional-education-date,
+.professional-template-en .professional-right-column .professional-military-date,
+.professional-template-en .professional-right-column .professional-experience-description li,
+.professional-template-en .professional-right-column .professional-education-specialization,
+.professional-template-en .professional-right-column .professional-military-description {
+  color: #333 !important;
+  opacity: 0.9 !important;
+}
+
+.professional-template-en .professional-right-column .professional-experience-description li::before {
+  color: #333 !important;
+  opacity: 0.7 !important;
 } 

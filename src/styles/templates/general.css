@@ -20,12 +20,20 @@
   padding: 0.5cm 1.5cm 1.5cm;
   background: var(--background-color);
   color: var(--primary-color);
-  direction: rtl;
-  text-align: right;
   position: relative;
   overflow: hidden;
   transform-origin: top left;
   transform: scale(var(--scale-factor));
+}
+
+.general-template[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+.general-template[dir="ltr"] {
+  direction: ltr;
+  text-align: left;
 }
 
 /* Print Styles */
@@ -66,17 +74,25 @@
 
 /* Header Styles */
 .general-header {
-  height: 50px;
+  height: 55px;
   margin-bottom: 2rem;
   position: relative;
   display: flex;
-  align-items: center;
-  text-align: right;
-  direction: rtl;
+  align-items: flex-start;
   max-width: calc(var(--a4-width) - 3cm);
   margin-left: auto;
   margin-right: auto;
-  padding: 0 1rem;
+  padding: 0 !important;
+}
+
+[dir="rtl"] .general-header {
+  text-align: right;
+  direction: rtl;
+}
+
+[dir="ltr"] .general-header {
+  text-align: left;
+  direction: ltr;
 }
 
 .general-header::after {
@@ -89,22 +105,62 @@
   background: var(--line-color);
 }
 
-.general-header-content {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  gap: 1rem;
-  padding-right: 0;
+[data-cv-lang="en"].general-header::after,
+[data-cv-lang="en"] .general-header::after {
+  right: -1.5cm !important;
+  left: auto !important;
 }
 
+.general-header-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  gap: 0.5rem;
+}
+
+[data-cv-lang="en"].general-header-content,
+[data-cv-lang="en"] .general-header-content {
+  flex-direction: column !important;
+}
+
+/* RTL/LTR Header Content */
+[data-cv-lang="he"] .general-header-content {
+  padding-right: 0 !important;
+  text-align: right !important;
+}
+
+[data-cv-lang="en"] .general-header-content {
+  padding-left: 0 !important;
+  text-align: left !important;
+}
+
+/* Header Name Styles */
 .general-header-name {
-  order: 2;
-  flex-shrink: 0;
-  margin-right: auto;
-  padding-right: 2rem;
+  order: 1;
   position: relative;
+  margin-top: -1rem;
+}
+
+[dir="rtl"] .general-header-name {
+  margin-right: -3rem;
+  padding-right: 2rem;
+  text-align: right;
+}
+
+[dir="ltr"] .general-header-name {
+  margin-left: -3rem;
+  padding-left: 2rem;
+  text-align: left;
+}
+
+/* RTL/LTR Header Name */
+[data-cv-lang="he"] .general-header-name {
+  text-align: right !important;
+}
+
+[data-cv-lang="en"] .general-header-name {
+  text-align: left !important;
 }
 
 .general-header-name h1 {
@@ -131,23 +187,58 @@
 .general-contact-info {
   display: flex;
   gap: 0.8rem;
-  justify-content: flex-start;
-  order: 1;
-  margin-right: 0;
-  height: 100%;
+  order: 2;
+  height: auto;
   align-items: center;
   min-width: 0;
   flex: 1;
+  margin-top: -1.5rem;
+}
+
+[dir="rtl"] .general-contact-info {
+  justify-content: flex-start;
+  margin-right: 0;
+  margin-left: auto;
+}
+
+[dir="ltr"] .general-contact-info {
+  justify-content: flex-start;
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* RTL/LTR Contact Info */
+[data-cv-lang="he"] .general-contact-info {
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+}
+
+[data-cv-lang="en"] .general-contact-info {
+  flex-direction: row-reverse !important;
+  justify-content: flex-start !important;
 }
 
 .general-contact-item {
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  color: var(--primary-color);
-  font-size: 13px;
-  white-space: nowrap;
-  min-width: fit-content;
+}
+
+[dir="rtl"] .general-contact-item {
+  flex-direction: row;
+}
+
+[dir="ltr"] .general-contact-item {
+  flex-direction: row-reverse;
+}
+
+/* Contact Items Direction */
+[data-cv-lang="he"] .general-contact-item {
+  flex-direction: row !important;
+}
+
+[data-cv-lang="en"] .general-contact-item {
+  flex-direction: row-reverse !important;
 }
 
 .general-contact-item span {
@@ -181,11 +272,26 @@
   --line-start-position: 120px;
 }
 
-.general-content::before {
+/* קו אנכי - ברירת מחדל (עברית) */
+[data-cv-lang="he"] .general-content::before {
   content: '';
   position: absolute;
   top: var(--line-start-position);
-  right: 0px;
+  right: 0px !important;
+  left: auto !important;
+  width: 2px;
+  height: calc(100% - var(--line-start-position) - 30px);
+  background-color: #000000;
+  z-index: 1;
+}
+
+/* קו אנכי - אנגלית */
+[data-cv-lang="en"] .general-content::before {
+  content: '';
+  position: absolute;
+  top: var(--line-start-position);
+  left: 0px !important;
+  right: auto !important;
   width: 2px;
   height: calc(100% - var(--line-start-position) - 30px);
   background-color: #000000;
@@ -224,12 +330,14 @@
   z-index: 1;
 }
 
+/* Default positions (Hebrew) */
 .general-building-decoration {
   position: absolute;
   bottom: 3rem;
   left: 2rem;
   z-index: 2;
   transform: scale(0.6);
+  transition: all 0.3s ease;
 }
 
 .general-icon-decoration {
@@ -238,6 +346,7 @@
   left: 2rem;
   z-index: 3;
   transform: scale(0.8);
+  transition: all 0.3s ease;
 }
 
 .general-cloud-decoration {
@@ -246,6 +355,26 @@
   left: 9rem;
   z-index: 1;
   transform: scale(0.5);
+  transition: all 0.3s ease;
+}
+
+/* English positions */
+[data-cv-lang="en"] ~ .general-footer-decorations .general-building-decoration {
+  left: auto;
+  right: 2rem;
+  transform: scale(0.6) scaleX(-1);
+}
+
+[data-cv-lang="en"] ~ .general-footer-decorations .general-icon-decoration {
+  left: auto;
+  right: 2rem;
+  transform: scale(0.8) scaleX(-1);
+}
+
+[data-cv-lang="en"] ~ .general-footer-decorations .general-cloud-decoration {
+  left: auto;
+  right: 9rem;
+  transform: scale(0.5) scaleX(-1);
 }
 
 .general-footer-decorations img {
@@ -712,4 +841,74 @@
 .general-header-name,
 .general-professional-summary {
   position: relative !important;
+}
+
+/* RTL Support for section title */
+[dir="rtl"] .general-section-title {
+  padding-right: 3rem;
+}
+
+[dir="ltr"] .general-section-title {
+  padding-left: 3rem;
+}
+
+/* RTL Support for section icon */
+[dir="rtl"] .general-section-icon {
+  right: -24px !important;
+  left: auto !important;
+}
+
+[dir="ltr"] .general-section-icon {
+  left: -24px !important;
+  right: auto !important;
+}
+
+/* RTL Support for section content */
+[dir="rtl"] .general-section-content {
+  padding-right: 3.5rem;
+  text-align: right;
+}
+
+[dir="ltr"] .general-section-content {
+  padding-left: 3.5rem;
+  text-align: left;
+}
+
+/* RTL Support for experience item */
+[dir="rtl"] .general-experience-item {
+  padding-right: 3.5rem;
+}
+
+[dir="ltr"] .general-experience-item {
+  padding-left: 3.5rem;
+}
+
+/* RTL Support for professional summary */
+[dir="rtl"] .general-professional-summary {
+  padding-right: 3.5rem;
+}
+
+[dir="ltr"] .general-professional-summary {
+  padding-left: 3.5rem;
+}
+
+/* עדכון הפדינג של התוכן בהתאם לשפה */
+[data-cv-lang="he"] .general-section-content,
+[data-cv-lang="he"] .general-timeline-container,
+[data-cv-lang="he"] .general-experience-item,
+[data-cv-lang="he"] .general-skills-items,
+[data-cv-lang="he"] .general-languages-items,
+[data-cv-lang="he"] .general-professional-summary {
+  padding-right: 3.5rem !important;
+  padding-left: 0 !important;
+}
+
+[data-cv-lang="en"] .general-section-content,
+[data-cv-lang="en"] .general-timeline-container,
+[data-cv-lang="en"] .general-experience-item,
+[data-cv-lang="en"] .general-skills-items,
+[data-cv-lang="en"] .general-languages-items,
+[data-cv-lang="en"] .general-professional-summary {
+  padding-left: 3.5rem !important;
+  padding-right: 0 !important;
 } 

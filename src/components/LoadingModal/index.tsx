@@ -225,6 +225,14 @@ const getSuccessText = (action: string | undefined, lang: string): string[] => {
           '💪 כל הכלים להצלחה בראיון נמצאים במייל',
           '🎯 תכנית ההכנה האישית מחכה במייל'
         ];
+      case 'translate-cv':
+        return [
+          '🌍 קורות החיים שלך מדברים עכשיו בשפה חדשה',
+          '🎯 התרגום הושלם בהצלחה',
+          '✨ קורות החיים שלך מוכנים לכבוש את העולם',
+          '🚀 עכשיו אפשר להגיע רחוק יותר',
+          '🌟 הכישרון שלך עכשיו נגיש ליותר אנשים'
+        ];
       default:
         return [
           '🌟 הצלחנו! הכל מוכן בשבילך',
@@ -252,6 +260,14 @@ const getSuccessText = (action: string | undefined, lang: string): string[] => {
           '✨ A comprehensive interview guide awaits in your email',
           '💪 All tools for interview success are in your email',
           '🎯 Your personal preparation plan is ready in your email'
+        ];
+      case 'translate-cv':
+        return [
+          '🌍 Your CV now speaks a new language',
+          '🎯 Translation completed successfully',
+          '✨ Your CV is ready to conquer the world',
+          '🚀 Now you can reach further',
+          '🌟 Your talent is now accessible to more people'
         ];
       default:
         return [

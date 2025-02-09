@@ -35,12 +35,13 @@ interface ResumeDataWithSkills extends ResumeData {
 }
 
 interface ClassicTemplateProps {
-  data: ResumeDataWithSkills;
-  lang?: string;
+  data: ResumeData;
+  lang: string;
   isEditing?: boolean;
   onUpdate?: (field: string, value: any) => void;
   onDelete?: (section: string, index: number) => void;
-  onEdit?: (type: string, index: number) => void;
+  onEdit?: (type: string, index?: number) => void;
+  displayLang?: 'he' | 'en';
 }
 
 interface TransformedMilitary {
@@ -105,17 +106,17 @@ const translations = {
 };
 
 const ClassicTemplate: React.FC<ClassicTemplateProps> = ({ 
-  data, 
-  lang = 'he',
+  data,
+  lang,
   isEditing = false,
-  onUpdate = () => {},
-  onDelete = () => {},
-  onEdit = () => {}
+  onUpdate,
+  onDelete,
+  onEdit,
+  displayLang = 'he'
 }) => {
-  const cvLang = data.lang;
-  const t = translations[cvLang as keyof typeof translations];
+  const t = translations[displayLang as keyof typeof translations];
   const { personalInfo, experience, education, skills, military } = data;
-  const isRTL = cvLang === 'he';
+  const isRTL = displayLang === 'he';
 
   console.log('ClassicTemplate - Full data:', data);
   console.log('ClassicTemplate - Skills:', skills);
@@ -135,90 +136,79 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
     adjustTemplateSize('.classic-template');
   }, [data]);
 
+  const handleEdit = (type: string, index: number = 0) => {
+    if (onEdit) {
+      onEdit(type, index);
+    }
+  };
+
   return (
-    <div className={`${assistant.className} classic-template`}
-      data-cv-lang={cvLang}
-      dir={isRTL ? 'rtl' : 'ltr'}
-      style={{ position: 'relative', background: 'white', width: '210mm', minHeight: '297mm', padding: 0, margin: '0 auto' }}
+    <div 
+      className={cn(
+        assistant.className,
+        'classic-template',
+        displayLang === 'he' ? 'classic-template-he' : 'classic-template-en'
+      )}
+      dir={displayLang === 'he' ? 'rtl' : 'ltr'}
+      style={{
+        width: '210mm',
+        height: '297mm',
+        margin: '0 auto',
+        padding: '0',
+        background: 'white',
+        boxSizing: 'border-box',
+        position: 'relative',
+        overflow: 'hidden'
+      }}
     >
-      <div className="classic-header relative">
-        <Image
-          src="/design/classic/dec.svg"
-          alt="header decoration"
-          width={15}
-          height={15}
-          className="absolute top-1/2 -translate-y-1/2 right-12 header-corner-decoration"
-          priority={true}
-        />
+      <div className={cn(
+        "classic-header relative",
+        displayLang === 'he' ? 'classic-header-he' : 'classic-header-en'
+      )}>
         <div className="relative z-10">
-          <div className="header-name-wrapper section-container">
+          <div className={cn(
+            "header-name-wrapper",
+            displayLang === 'he' ? 'header-name-wrapper-he' : 'header-name-wrapper-en'
+          )}>
             <h1 className="header-name">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <span className="header-name-first">{firstName}</span>
-                  {lastName && <span className="header-name-last">{lastName}</span>}
-                </div>
-                {isEditing && (
-                  <button
-                    onClick={() => onEdit('personalInfo', 0)}
-                    className="edit-button mr-2"
-                    title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                )}
-              </div>
+              <span className={cn(
+                "header-name-first",
+                displayLang === 'he' ? 'header-name-first-he' : 'header-name-first-en'
+              )}>
+                {firstName}
+              </span>
+              {lastName && (
+                <span className={cn(
+                  "header-name-last",
+                  displayLang === 'he' ? 'header-name-last-he' : 'header-name-last-en'
+                )}>
+                  {lastName}
+                </span>
+              )}
             </h1>
+            <Image
+              src="/design/classic/dec.svg"
+              alt="header decoration"
+              width={40}
+              height={40}
+              className={cn(
+                "header-corner-decoration",
+                displayLang === 'he' ? 'header-corner-decoration-he' : 'header-corner-decoration-en'
+              )}
+              priority={true}
+            />
           </div>
-          <div className="classic-contact-info">
-            {personalInfo.email && (
-              <div className="contact-item">
-                <Image
-                  src="/design/classic/MailIcon.svg"
-                  alt="email"
-                  width={16}
-                  height={16}
-                  className="contact-icon"
-                />
-                <span>{personalInfo.email}</span>
-              </div>
-            )}
-            {personalInfo.phone && (
-              <div className="contact-item">
-                <Image
-                  src="/design/classic/PhoneIcon.svg"
-                  alt="phone"
-                  width={16}
-                  height={16}
-                  className="contact-icon"
-                />
-                <span>{personalInfo.phone}</span>
-              </div>
-            )}
-            {personalInfo.address && (
-              <div className="contact-item">
-                <Image
-                  src="/design/classic/LocIcon.svg"
-                  alt="address"
-                  width={16}
-                  height={16}
-                  className="contact-icon"
-                />
-                <span>{personalInfo.address}</span>
-              </div>
-            )}
-            {personalInfo.linkedin && (
-              <div className="contact-item">
-                <Image
-                  src="/design/classic/LinkedInIcon.svg"
-                  alt="linkedin"
-                  width={16}
-                  height={16}
-                  className="contact-icon"
-                />
-                <span>{personalInfo.linkedin.replace(/^https?:\/\//, '')}</span>
-              </div>
-            )}
+          <div className={cn(
+            "header-contact",
+            displayLang === 'he' ? 'header-contact-he' : 'header-contact-en'
+          )}>
+            {personalInfo.email && <span>{personalInfo.email}</span>}
+            {personalInfo.email && personalInfo.phone && <span className="contact-separator">|</span>}
+            {personalInfo.phone && <span>{personalInfo.phone}</span>}
+            {personalInfo.phone && personalInfo.address && <span className="contact-separator">|</span>}
+            {personalInfo.address && <span>{personalInfo.address}</span>}
+            {personalInfo.address && personalInfo.linkedin && <span className="contact-separator">|</span>}
+            {personalInfo.linkedin && <span>{personalInfo.linkedin}</span>}
           </div>
         </div>
       </div>
@@ -229,7 +219,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
           <section className="summary-section section-container relative">
             {isEditing && (
               <button
-                onClick={() => onEdit('professionalSummary', 0)}
+                onClick={() => handleEdit('professionalSummary')}
                 className="edit-button"
                 title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
               >
@@ -252,7 +242,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                 </div>
                 {isEditing && (
                   <button
-                    onClick={() => onEdit('experience', 0)}
+                    onClick={() => handleEdit('experience')}
                     className="edit-button mr-2"
                     title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                   >
@@ -276,7 +266,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                         )}
                       </div>
                       <div className="experience-date">
-                        {formatDate(exp.startDate, exp.endDate, cvLang)}
+                        {formatDate(exp.startDate, exp.endDate, displayLang)}
                       </div>
                     </div>
                     {exp.description && exp.description.length > 0 && (
@@ -303,7 +293,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                 </div>
                 {isEditing && (
                   <button
-                    onClick={() => onEdit('education', 0)}
+                    onClick={() => handleEdit('education')}
                     className="edit-button mr-2"
                     title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                   >
@@ -325,7 +315,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                         <span className="education-institution">{degree.institution}</span>
                       </div>
                       <div className="education-date">
-                        {formatDate(degree.startDate, degree.endDate, cvLang)}
+                        {formatDate(degree.startDate, degree.endDate, displayLang)}
                       </div>
                     </div>
                     {degree.specialization && (
@@ -350,7 +340,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                 </div>
                 {isEditing && (
                   <button
-                    onClick={() => onEdit('military', 0)}
+                    onClick={() => handleEdit('military')}
                     className="edit-button mr-2"
                     title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                   >
@@ -368,7 +358,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                     </div>
                   </div>
                   <div className="military-date">
-                    {formatDate(military.startDate, military.endDate, lang)}
+                    {formatDate(military.startDate, military.endDate, displayLang)}
                   </div>
                 </div>
                 {military.description && military.description.length > 0 && (
@@ -384,7 +374,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
         )}
 
         {/* כישורים */}
-        {skills && (
+        {skills && (skills.technical?.length > 0 || skills.soft?.length > 0) && (
           <section className="skills-section">
             <div className="section-container">
               <h2 className="section-title relative flex items-center justify-between">
@@ -393,7 +383,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                 </div>
                 {isEditing && (
                   <button
-                    onClick={() => onEdit('skills', 0)}
+                    onClick={() => handleEdit('skills')}
                     className="edit-button mr-2"
                     title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                   >
@@ -410,7 +400,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                       <span key={`tech-${index}`} className="skill-item relative">
                         <span className="skill-name">{skill.name}</span>
                         {" - "}
-                        <span className="skill-level">{getSkillLevel(skill.level, cvLang)}</span>
+                        <span className="skill-level">{getSkillLevel(skill.level, displayLang)}</span>
                         {index < skills.technical.length - 1 && " | "}
                       </span>
                     ))}
@@ -434,35 +424,47 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
           </section>
         )}
 
-        {/* שפות */}
-        {skills.languages && skills.languages.length > 0 && (
-          <section className="languages-section section-container">
-            <h2 className="section-title flex items-center justify-between">
-              <div className="flex items-center">
-                {t.languages}
+        {/* שפות - סקציה נפרדת */}
+        {(() => {
+          console.log('Languages data:', skills?.languages);
+          console.log('Display language:', displayLang);
+          return skills?.languages && Array.isArray(skills.languages) && skills.languages.length > 0 && (
+            <section className="languages-section">
+              <div className="section-container">
+                <h2 className="section-title relative flex items-center justify-between">
+                  <div className="flex items-center">
+                    {t.languages}
+                  </div>
+                  {isEditing && (
+                    <button
+                      onClick={() => handleEdit('languages')}
+                      className="edit-button mr-2"
+                      title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </h2>
+                <div className={cn(
+                  "languages-items",
+                  displayLang === 'he' ? 'text-right' : 'text-left'
+                )}>
+                  {skills.languages.map((langItem, index) => {
+                    console.log('Rendering language item:', langItem);
+                    return (
+                      <span key={`lang-${index}`} className="language-item">
+                        <span className="language-name">{langItem.language}</span>
+                        {" - "}
+                        <span className="language-level">{langItem.level}</span>
+                        {index < skills.languages.length - 1 && <span className="language-separator"> | </span>}
+                      </span>
+                    );
+                  })}
+                </div>
               </div>
-              {isEditing && (
-                <button
-                  onClick={() => onEdit('languages', 0)}
-                  className="edit-button mr-2"
-                  title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </button>
-              )}
-            </h2>
-            <div className="languages-items">
-              {skills.languages.map((langItem, index) => (
-                <span key={`lang-${index}`} className="skill-item relative">
-                  <span className="skill-name">{langItem.language}</span>
-                  {" - "}
-                  <span className="skill-level">{langItem.level}</span>
-                  {index < skills.languages.length - 1 && " | "}
-                </span>
-              ))}
-            </div>
-          </section>
-        )}
+            </section>
+          );
+        })()}
       </main>
 
       <div className="classic-footer">

@@ -18,6 +18,9 @@ export interface Dictionary {
     processing: string;
     sendSuccess: string;
     sendError: string;
+    translating: string;
+    translateSuccess: string;
+    translateError: string;
   };
   buttons: {
     save: string;
@@ -34,6 +37,9 @@ export interface Dictionary {
     select: string;
     selected: string;
     finish: string;
+    translate: string;
+    translateToHebrew: string;
+    translateToEnglish: string;
   };
   sections: {
     personalInfo: string;

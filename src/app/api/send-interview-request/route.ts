@@ -120,6 +120,12 @@ const createEmailTemplate = async (cvData: any, content: any, lang: string) => {
             background-color: #f4f4f1;
             color: #333;
             line-height: 1.6;
+            text-align: ${isHebrew ? 'right' : 'left'};
+            direction: ${isHebrew ? 'rtl' : 'ltr'};
+          }
+          * {
+            direction: ${isHebrew ? 'rtl' : 'ltr'};
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .container {
             max-width: 800px;
@@ -143,23 +149,27 @@ const createEmailTemplate = async (cvData: any, content: any, lang: string) => {
           }
           .section {
             margin-bottom: 20px;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .section-title {
             font-weight: bold;
             color: #4754D6;
             margin-bottom: 10px;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .highlight {
             background-color: #f0f2ff;
             padding: 12px;
             border-radius: 8px;
             margin: 8px 0;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .analysis-section {
             margin-bottom: 24px;
             padding: 16px;
             background-color: #f8f9ff;
             border-radius: 8px;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .analysis-title {
             color: #4754D6;
@@ -167,10 +177,16 @@ const createEmailTemplate = async (cvData: any, content: any, lang: string) => {
             margin-bottom: 12px;
             border-bottom: 1px solid #e0e4ff;
             padding-bottom: 8px;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .analysis-content p {
             margin: 8px 0;
             line-height: 1.6;
+            text-align: ${isHebrew ? 'right' : 'left'};
+          }
+          p, li, span {
+            text-align: ${isHebrew ? 'right' : 'left'};
+            direction: ${isHebrew ? 'rtl' : 'ltr'};
           }
         </style>
       </head>
@@ -257,6 +273,12 @@ const createCandidateEmailTemplate = async (cvData: any, content: any, lang: str
             background-color: #f4f4f1;
             color: #333;
             line-height: 1.6;
+            text-align: ${isHebrew ? 'right' : 'left'};
+            direction: ${isHebrew ? 'rtl' : 'ltr'};
+          }
+          * {
+            direction: ${isHebrew ? 'rtl' : 'ltr'};
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .container {
             max-width: 800px;
@@ -285,6 +307,7 @@ const createCandidateEmailTemplate = async (cvData: any, content: any, lang: str
             border-radius: 12px;
             padding: 24px;
             border: 1px solid #f0f2ff;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .section-title {
             font-weight: bold;
@@ -294,6 +317,7 @@ const createCandidateEmailTemplate = async (cvData: any, content: any, lang: str
             display: flex;
             align-items: center;
             gap: 8px;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .highlight {
             background-color: #f8f9ff;
@@ -301,79 +325,34 @@ const createCandidateEmailTemplate = async (cvData: any, content: any, lang: str
             border-radius: 12px;
             margin: 12px 0;
             border-right: 4px solid #4754D6;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
-          .motivation-quote {
-            font-style: italic;
-            color: #4754D6;
-            text-align: center;
-            font-size: 20px;
-            margin: 32px 0;
-            padding: 24px;
-            background: linear-gradient(135deg, #f0f2ff 0%, #ffffff 100%);
-            border-radius: 12px;
-            box-shadow: 0 2px 4px rgba(71, 84, 214, 0.1);
-          }
-          .tips-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-          }
-          .tip-card {
-            background: #f8f9ff;
-            padding: 16px;
-            border-radius: 8px;
-            border: 1px solid #e0e4ff;
-          }
-          .tip-title {
-            font-weight: bold;
-            color: #4754D6;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+          p, li, span {
+            text-align: ${isHebrew ? 'right' : 'left'};
+            direction: ${isHebrew ? 'rtl' : 'ltr'};
           }
           ul {
             padding-right: ${isHebrew ? '20px' : '0'};
             padding-left: ${isHebrew ? '0' : '20px'};
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           li {
-            margin-bottom: 12px;
-            position: relative;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
-          .footer {
-            text-align: center;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 2px solid #f0f2ff;
-            color: #666;
+          .tip-card {
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .star-model {
-            background: linear-gradient(135deg, #f0f2ff 0%, #ffffff 100%);
-            padding: 24px;
-            border-radius: 12px;
-            margin: 20px 0;
-            border-right: 4px solid #4754D6;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .star-step {
-            margin: 12px 0;
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(71, 84, 214, 0.1);
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .personal-tips {
-            background: #f8f9ff;
-            padding: 20px;
-            border-radius: 12px;
-            margin: 20px 0;
-            border-right: 4px solid #4754D6;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
           .personal-tip-item {
-            margin: 12px 0;
-            padding: 8px;
-            background: white;
-            border-radius: 8px;
+            text-align: ${isHebrew ? 'right' : 'left'};
           }
         </style>
       </head>

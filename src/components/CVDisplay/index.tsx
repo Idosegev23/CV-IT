@@ -60,69 +60,99 @@ const templateComponents = {
 };
 
 const transformResumeData = (rawData: any): ResumeData => {
-  return {
-    personalInfo: {
-      name: rawData?.personal_details?.name || '',
-      title: rawData?.personal_details?.title || rawData?.title || (rawData?.professional_summary?.split('.')[0] || ''),
-      email: rawData?.personal_details?.email || '',
-      phone: rawData?.personal_details?.phone || '',
-      address: rawData?.personal_details?.address || '',
-      linkedin: rawData?.personalInfo?.linkedin || rawData?.personal_details?.linkedin || '',
-      summary: rawData?.personal_details?.summary || rawData?.professional_summary || ''
-    },
-    experience: Array.isArray(rawData?.experience) ? rawData.experience.map((exp: any) => ({
-      position: exp.title || '',
-      company: exp.company || '',
-      location: '',
-      startDate: exp.years?.split('-')[0]?.trim() || '',
-      endDate: exp.years?.split('-')[1]?.trim() || '',
-      description: exp.achievements || []
-    })) : [],
-    education: {
-      degrees: Array.isArray(rawData?.education?.degrees) ? rawData.education.degrees.map((deg: any) => ({
-        type: deg.type || '',
-        degreeType: deg.degreeType || 'academic',
-        field: deg.field || '',
-        institution: deg.institution || '',
-        startDate: deg.years?.split('-')[0]?.trim() || deg.startDate || '',
-        endDate: deg.years?.split('-')[1]?.trim() || deg.endDate || '',
-        specialization: deg.specialization || '',
-        years: deg.years || `${deg.startDate || ''} - ${deg.endDate || ''}`
-      })) : []
-    },
-    skills: {
-      technical: Array.isArray(rawData?.skills?.technical) ? rawData.skills.technical.map((skill: any) => ({
-        name: skill.name || '',
-        level: skill.level
+  console.log('Raw data received:', rawData);
+  
+  if (!rawData) {
+    console.error('No data provided to transformResumeData');
+    throw new Error('No data provided to transform');
+  }
+
+  try {
+    // נשמור את השפות בצורה נכונה
+    const languages = Array.isArray(rawData?.skills?.languages) 
+      ? rawData.skills.languages 
+      : (rawData?.languages 
+        ? Object.entries(rawData.languages).map(([language, level]) => ({
+            language,
+            level: level as string
+          }))
+        : []);
+
+    console.log('Parsed languages:', languages);
+
+    const transformedData = {
+      personalInfo: {
+        name: rawData?.personal_details?.name || '',
+        title: rawData?.personal_details?.title || rawData?.title || (rawData?.professional_summary?.split('.')[0] || ''),
+        email: rawData?.personal_details?.email || '',
+        phone: rawData?.personal_details?.phone || '',
+        address: rawData?.personal_details?.address || '',
+        linkedin: rawData?.personalInfo?.linkedin || rawData?.personal_details?.linkedin || '',
+        summary: rawData?.personal_details?.summary || rawData?.professional_summary || ''
+      },
+      experience: Array.isArray(rawData?.experience) ? rawData.experience.map((exp: any) => ({
+        position: exp.title || exp.position || '',
+        company: exp.company || '',
+        location: exp.location || '',
+        startDate: exp.years?.split('-')[0]?.trim() || exp.startDate || '',
+        endDate: exp.years?.split('-')[1]?.trim() || exp.endDate || '',
+        description: Array.isArray(exp.achievements) ? exp.achievements : 
+                    Array.isArray(exp.description) ? exp.description : []
       })) : [],
-      soft: Array.isArray(rawData?.skills?.soft) ? rawData.skills.soft.map((skill: any) => ({
-        name: skill.name || '',
-        level: skill.level
-      })) : [],
-      languages: typeof rawData?.languages === 'object' ? Object.entries(rawData.languages || {}).map(([language, level]) => ({
-        language,
-        level: level as string
-      })) : []
-    },
-    military: rawData?.military_service ? {
-      role: rawData?.military_service?.role || '',
-      unit: rawData?.military_service?.unit || 'צה"ל',
-      startDate: rawData?.military_service?.years?.split('-')[0]?.trim() || '',
-      endDate: rawData?.military_service?.years?.split('-')[1]?.trim() || '',
-      description: rawData?.military_service?.achievements || []
-    } : undefined,
-    template: rawData?.template_id || 'classic',
-    references: [],
-    lang: rawData?.lang || 'he'
-  };
+      education: {
+        degrees: Array.isArray(rawData?.education?.degrees) ? rawData.education.degrees.map((deg: any) => ({
+          type: deg.type || '',
+          degreeType: deg.degreeType || 'academic',
+          field: deg.field || '',
+          institution: deg.institution || '',
+          startDate: deg.years?.split('-')[0]?.trim() || deg.startDate || '',
+          endDate: deg.years?.split('-')[1]?.trim() || deg.endDate || '',
+          specialization: deg.specialization || '',
+          years: deg.years || `${deg.startDate || ''} - ${deg.endDate || ''}`
+        })) : []
+      },
+      skills: {
+        technical: Array.isArray(rawData?.skills?.technical) ? rawData.skills.technical.map((skill: any) => ({
+          name: skill.name || '',
+          level: typeof skill.level === 'number' ? skill.level : 3
+        })) : [],
+        soft: Array.isArray(rawData?.skills?.soft) ? rawData.skills.soft.map((skill: any) => ({
+          name: skill.name || '',
+          level: typeof skill.level === 'number' ? skill.level : 3
+        })) : [],
+        languages: languages
+      },
+      military: rawData?.military_service ? {
+        role: rawData.military_service.role || '',
+        unit: rawData.military_service.unit || 'צה"ל',
+        startDate: rawData.military_service.years?.split('-')[0]?.trim() || '',
+        endDate: rawData.military_service.years?.split('-')[1]?.trim() || '',
+        description: Array.isArray(rawData.military_service.achievements) ? 
+          rawData.military_service.achievements : []
+      } : undefined,
+      template: rawData?.template_id || 'classic',
+      references: [],
+      lang: rawData?.lang || 'he'
+    };
+
+    console.log('Transformed data:', transformedData);
+    console.log('Transformed languages:', transformedData.skills.languages);
+    return transformedData;
+  } catch (error) {
+    console.error('Error transforming resume data:', error);
+    throw new Error('Failed to transform resume data');
+  }
 };
 
-const MobilePreview: React.FC<{ 
+interface MobilePreviewProps {
   data: ResumeData;
   lang: string;
   template: keyof typeof templateComponents;
   dictionary: Dictionary;
-}> = ({ data, lang, template, dictionary }) => {
+  displayLang: 'he' | 'en';
+}
+
+const MobilePreview: React.FC<MobilePreviewProps> = ({ data, lang, template, dictionary, displayLang }) => {
   const TemplateComponent = templateComponents[template];
   
   return (
@@ -171,6 +201,7 @@ const MobilePreview: React.FC<{
                 lang={lang}
                 isEditing={false}
                 onUpdate={() => {}}
+                displayLang={displayLang}
               />
             </div>
           </div>
@@ -225,6 +256,7 @@ interface TemplateProps {
   onUpdate: (field: EditableField, value: any) => void;
   onDelete: (section: EditableField, index: number) => void;
   onEdit: (type: EditableField, index?: number) => void;
+  displayLang?: string;
 }
 
 export const CVDisplay: React.FC<CVDisplayProps> = ({ 
@@ -283,11 +315,15 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   const [isEditable, setIsEditable] = useState(true);
   const [showTutorial, setShowTutorial] = useState(true);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
-  const [highlightedElement, setHighlightedElement] = useState<'edit' | 'preview' | 'download' | null>(null);
+  const [highlightedElement, setHighlightedElement] = useState<'edit' | 'preview' | 'download' | 'translate' | 'language-toggle' | null>(null);
   const [showScrollPopup, setShowScrollPopup] = useState(false);
   const [hasShownPopup, setHasShownPopup] = useState(false);
   const [hasInteractedWithEdit, setHasInteractedWithEdit] = useState(false);
   const [shouldShowPopupAfterTutorial, setShouldShowPopupAfterTutorial] = useState(true);
+
+  // הוספת סטייט חדש לשליטה בשפת התצוגה
+  const [displayLang, setDisplayLang] = useState<'he' | 'en'>(lang as 'he' | 'en');
+  const [hasTranslation, setHasTranslation] = useState(false);
 
   useEffect(() => {
     mounted.current = true;
@@ -320,46 +356,24 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     }
   }, [showTutorial, hasShownPopup, hasInteractedWithEdit, shouldShowPopupAfterTutorial]);
 
-  // יצירת מופע Supabase ללא קאש - נשתמש בו בכל הקריאות
-  const supabaseNoCache = createClientComponentClient({
-    options: {
-      global: {
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache',
-          'Expires': '0',
-        },
-      },
-    },
-  });
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // שליפת נתוני התבנית מטבלת sessions
-        const { data: sessionData, error: sessionError } = await supabaseNoCache
+        const { data: sessionData, error: sessionError } = await supabase
           .from('sessions')
           .select('template_id')
           .eq('id', sessionId)
-          .maybeSingle();
+          .single();
 
         if (sessionError) throw sessionError;
 
-        // שליפת נתוני הקורות חיים מטבלת cv_data
-        const { data: cvDataResult, error: cvError } = await supabaseNoCache
+        const { data: cvDataResult, error: cvError } = await supabase
           .from('cv_data')
-          .select('format_cv, language, package, is_editable')
+          .select('format_cv, language')
           .eq('session_id', sessionId)
-          .maybeSingle();
+          .single();
 
         if (cvError) throw cvError;
-
-        // עדכון הרשאות העריכה והחבילה
-        if (cvDataResult) {
-          setPackageType(cvDataResult.package as Package);
-          setIsEditable(true);
-          setSelectedPackage(cvDataResult.package as Package);
-        }
 
         const rawData = cvDataResult?.format_cv;
         rawData.language = cvDataResult?.language || 'he';
@@ -371,13 +385,13 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         const formattedData = transformResumeData(rawData);
         const dictionary = await getDictionary(lang);
         
-        // עדכון התבנית הנבחרת
-        const savedTemplate = sessionData?.template_id as keyof typeof templateComponents;
+        // עדכון התבנית הנבחרת בהתאם למה שנשמר בסופהבייס
+        const savedTemplate = sessionData.template_id as keyof typeof templateComponents;
         if (savedTemplate && templateComponents[savedTemplate]) {
           setSelectedTemplate(savedTemplate);
         }
         
-        setTemplate(sessionData?.template_id || 'modern');
+        setTemplate(sessionData.template_id || 'modern');
         setCvData(formattedData);
         setDictionary(dictionary);
         setIsLoading(false);
@@ -391,39 +405,46 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
     if (mounted.current) {
       fetchData();
-
-      // טעינה מחדש כשחוזרים לדף
-      const handleVisibilityChange = () => {
-        if (document.visibilityState === 'visible') {
-          fetchData();
         }
-      };
-
-      // טעינה מחדש כשחוזרים בהיסטוריה
-      const handlePopState = () => {
-        fetchData();
-      };
-
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      window.addEventListener('popstate', handlePopState);
-
-      return () => {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-        window.removeEventListener('popstate', handlePopState);
-        // ניקוי הזיכרון המקומי
-        setCvData(null);
-        setDictionary(null);
-        setTemplate('modern');
-        setSelectedTemplate('classic');
-      };
-    }
   }, [sessionId, lang, mounted]);
+
+  useEffect(() => {
+    const checkEditPermissions = async () => {
+      if (!sessionId) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('cv_data')
+          .select('package, is_editable')
+          .eq('session_id', sessionId)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          setPackageType(data.package as Package);
+          setIsEditable(true);
+          // עדכון ה-store
+          setSelectedPackage(data.package as Package);
+        }
+      } catch (error) {
+        console.error('Error checking permissions:', error);
+        toast.error(
+          lang === 'he' 
+            ? 'שגיאה בטעינת הרשאות'
+            : 'Error loading permissions'
+        );
+      }
+      };
+
+    checkEditPermissions();
+  }, [sessionId, supabase, setSelectedPackage]);
 
   const handleSave = async (editedData: ResumeData) => {
     try {
       const typedData = editedData as ResumeDataWithIndex;
       setCvData(editedData);
-      setHasChanges(true);
+      setHasChanges(true);  // מסמן שבוצעו שינויים
       
       const formattedForSave = {
         personal_details: {
@@ -469,8 +490,9 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         }), {})
       };
 
-      // שמירת הנתונים בסופהבייס ללא קאש
-      const { error } = await supabaseNoCache
+      console.log('Formatted Data for Save:', formattedForSave);
+
+      const { error } = await supabase
         .from('cv_data')
         .update({ format_cv: formattedForSave })
         .eq('session_id', sessionId);
@@ -1291,6 +1313,159 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
     }
   };
 
+  // פונקציה לתרגום הקורות חיים
+  const handleTranslate = async () => {
+    if (!sessionId || !cvData) {
+      toast.error(
+        lang === 'he'
+          ? 'שגיאה: נתונים חסרים'
+          : 'Error: Missing data'
+      );
+      return;
+    }
+
+    if (isTranslating || isDownloadingPdf || isEditing) {
+      return;
+    }
+
+    try {
+      setIsTranslating(true);
+      const targetLang = displayLang === 'he' ? 'en' : 'he';
+      
+      console.log('Starting translation to:', targetLang, 'with sessionId:', sessionId);
+      
+      const response = await fetch('/api/translate-cv', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          sessionId,
+          targetLang
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Translation response:', data);
+      
+      if (!data || !data.success || !data.cv) {
+        throw new Error('Invalid response format');
+      }
+
+      try {
+        const transformedData = transformResumeData(data.cv);
+        console.log('Transformed data:', transformedData);
+        
+        setCvData(transformedData);
+        setDisplayLang(data.currentLang || targetLang);
+        setHasTranslation(true);
+        
+        toast.success(
+          lang === 'he' 
+            ? 'התרגום הושלם בהצלחה'
+            : 'Translation completed successfully'
+        );
+      } catch (transformError) {
+        console.error('Error transforming data:', transformError);
+        throw new Error('Failed to process translated data');
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+      
+      let errorMessage = lang === 'he'
+        ? 'שגיאה בתרגום קורות החיים'
+        : 'Error translating CV';
+
+      if (error instanceof Error) {
+        if (error.message.includes('session')) {
+          errorMessage = lang === 'he'
+            ? 'שגיאה באימות המשתמש'
+            : 'User authentication error';
+        } else if (error.message.includes('network')) {
+          errorMessage = lang === 'he'
+            ? 'שגיאת תקשורת, אנא בדוק את החיבור לאינטרנט'
+            : 'Network error, please check your internet connection';
+        } else if (error.message.includes('Invalid response')) {
+          errorMessage = lang === 'he'
+            ? 'התקבלה תשובה לא תקינה מהשרת'
+            : 'Invalid response from server';
+        } else if (error.message.includes('process')) {
+          errorMessage = lang === 'he'
+            ? 'שגיאה בעיבוד התרגום'
+            : 'Error processing translation';
+        }
+      }
+
+      toast.error(errorMessage);
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  // פונקציה למעבר בין שפות
+  const toggleLanguage = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cv_data')
+        .select('format_cv, en_format_cv')
+        .eq('session_id', sessionId)
+        .single();
+
+      if (error) throw error;
+
+      const newLang = displayLang === 'he' ? 'en' : 'he';
+      const newData = newLang === 'he' ? data.format_cv : data.en_format_cv;
+
+      if (!newData) {
+        toast.error(
+          lang === 'he'
+            ? 'אין תרגום זמין'
+            : 'No translation available'
+        );
+        return;
+      }
+
+      const transformedData = transformResumeData(newData);
+      setCvData(transformedData);
+      setDisplayLang(newLang);
+
+    } catch (error) {
+      console.error('Error toggling language:', error);
+      toast.error(
+        lang === 'he'
+          ? 'שגיאה במעבר בין שפות'
+          : 'Error switching languages'
+      );
+    }
+  };
+
+  // בדיקה ראשונית אם יש תרגום
+  useEffect(() => {
+    const checkTranslation = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('cv_data')
+          .select('en_format_cv')
+          .eq('session_id', sessionId)
+          .single();
+
+        if (error) throw error;
+        setHasTranslation(!!data?.en_format_cv);
+      } catch (error) {
+        console.error('Error checking translation:', error);
+      }
+    };
+
+    if (sessionId) {
+      checkTranslation();
+    }
+  }, [sessionId, supabase]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -1413,6 +1588,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                 lang={lang}
                 template={selectedTemplate}
                 dictionary={dictionary}
+                displayLang={displayLang}
               />
             ) : (
               <div className="relative mx-auto flex justify-center">
@@ -1436,6 +1612,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
                     onUpdate={handleEdit}
                     onDelete={handleEdit}
                     onEdit={handleEdit}
+                    displayLang={displayLang}
                   />
                 </div>
               </div>
@@ -1449,30 +1626,30 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
           {/* כפתור צפייה - רק במובייל */}
           {isMobile && (
-            <div className="flex items-center gap-2">
-              <motion.div
+          <div className="flex items-center gap-2">
+            <motion.div
                 animate={highlightedElement === 'preview' ? pulseAnimation : {}}
-              >
-                <Button
+            >
+              <Button
                   onClick={handlePreviewPdf}
                   disabled={isGenerating}
-                  className={cn(
-                    "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
+                className={cn(
+                  "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
                     highlightedElement === 'preview' && "ring-4 ring-[#4856CD]/30"
-                  )}
+                )}
                   aria-label={lang === 'he' ? 'צפייה בקובץ' : 'View file'}
-                >
+              >
                   {isGenerating ? (
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                  ) : (
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                ) : (
                     <Eye className="h-6 w-6" />
-                  )}
-                </Button>
-              </motion.div>
-              <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                )}
+              </Button>
+            </motion.div>
+            <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
                 {lang === 'he' ? 'צפייה' : 'View'}
-              </div>
             </div>
+          </div>
           )}
 
           {/* כפתור הורדה והמשך */}
@@ -1542,6 +1719,79 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
               </div>
             </>
           )}
+
+          {/* כפתורי תרגום ומעבר בין שפות */}
+          <div className="flex flex-col gap-2">
+            {!hasTranslation ? (
+              // כפתור תרגום - מוצג רק אם אין תרגום
+              <div className="flex items-center gap-2">
+                <motion.div
+                  animate={highlightedElement === 'translate' ? pulseAnimation : {}}
+                >
+                  <Button
+                    onClick={handleTranslate}
+                    disabled={isTranslating || isDownloadingPdf || isEditing}
+                    className={cn(
+                      "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
+                      (isTranslating || isDownloadingPdf || isEditing) && "opacity-50 cursor-not-allowed",
+                      highlightedElement === 'translate' && "ring-4 ring-[#4856CD]/30"
+                    )}
+                    aria-label={lang === 'he' ? 'תרגום קורות חיים' : 'Translate CV'}
+                  >
+                    {isTranslating ? (
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    ) : (
+                      <Globe className="h-6 w-6" />
+                    )}
+                  </Button>
+                </motion.div>
+                <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                  {isTranslating 
+                    ? (lang === 'he' ? 'מתרגם...' : 'Translating...')
+                    : (lang === 'he' ? 'תרגם לאנגלית' : 'Translate to English')
+                  }
+                </div>
+              </div>
+            ) : (
+              // כפתור מעבר בין שפות - מוצג רק אם יש תרגום
+              <div className="flex items-center gap-2">
+                <motion.div
+                  animate={highlightedElement === 'language-toggle' ? pulseAnimation : {}}
+                >
+                  <Button
+                    onClick={toggleLanguage}
+                    disabled={isTranslating || isDownloadingPdf || isEditing}
+                    className={cn(
+                      "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
+                      (isTranslating || isDownloadingPdf || isEditing) && "opacity-50 cursor-not-allowed"
+                    )}
+                    aria-label={lang === 'he' ? 'החלף שפה' : 'Toggle Language'}
+                  >
+                    <div className="relative w-6 h-6">
+                      <span className={cn(
+                        "absolute inset-0 flex items-center justify-center transition-opacity duration-300",
+                        displayLang === 'he' ? 'opacity-100' : 'opacity-0'
+                      )}>
+                        EN
+                      </span>
+                      <span className={cn(
+                        "absolute inset-0 flex items-center justify-center transition-opacity duration-300",
+                        displayLang === 'en' ? 'opacity-100' : 'opacity-0'
+                      )}>
+                        עב
+                      </span>
+                    </div>
+                  </Button>
+                </motion.div>
+                <div className="bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-gray-700 shadow-sm">
+                  {displayLang === 'he'
+                    ? 'הצג באנגלית'
+                    : 'הצג בעברית'
+                  }
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <LoadingModal 
@@ -1684,6 +1934,14 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* מודל טעינה בזמן תרגום */}
+        <LoadingModal 
+          isOpen={isTranslating} 
+          lang={lang} 
+          dictionary={dictionary} 
+          action="translate-cv"
+        />
       </div>
     </div>
   );

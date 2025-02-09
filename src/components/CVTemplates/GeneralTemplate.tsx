@@ -82,6 +82,8 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
   onEdit = () => {}
 }) => {
   const cvLang = data.lang;
+  console.log('CV Language:', cvLang);
+
   const t = translations[cvLang as keyof typeof translations];
   const { personalInfo, experience, education, skills } = data;
   const military = data.military as MilitaryService | undefined;
@@ -134,17 +136,17 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
   }, [data.personalInfo.summary]);
 
   const getSkillLevel = (level: number) => {
-    if (typeof level !== 'number') return 'רמה טובה';
+    if (typeof level !== 'number') return cvLang === 'he' ? 'רמה טובה' : 'Good Level';
 
-    const levels: { [key: number]: string } = {
-      5: 'רמה גבוהה מאוד',
-      4: 'רמה גבוהה',
-      3: 'רמה טובה',
-      2: 'רמה מינונית',
-      1: 'רמה בסיסית'
+    const levels: { [key: number]: Record<'he' | 'en', string> } = {
+      5: { he: 'רמה גבוהה מאוד', en: 'Expert Level' },
+      4: { he: 'רמה גבוהה', en: 'Advanced Level' },
+      3: { he: 'רמה טובה', en: 'Intermediate Level' },
+      2: { he: 'רמה מינונית', en: 'Basic Level' },
+      1: { he: 'רמה בסיסית', en: 'Beginner Level' }
     };
 
-    return levels[level] || 'רמה טובה';
+    return levels[level]?.[cvLang as 'he' | 'en'] || (cvLang === 'he' ? 'רמה טובה' : 'Good Level');
   };
 
   const handleEdit = (type: string, index: number = 0) => {
@@ -152,12 +154,50 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
       onEdit(type, index);
     }
   };
+
+  const contactItems = [
+    data.personalInfo.email && (
+      <div key="email" className="general-contact-item">
+        <div className="general-contact-item-icon">
+          <Image src={MailIcon} alt="email" width={16} height={16} />
+        </div>
+        <span>{data.personalInfo.email}</span>
+      </div>
+    ),
+    data.personalInfo.phone && (
+      <div key="phone" className="general-contact-item">
+        <div className="general-contact-item-icon">
+          <Image src={PhoneIcon} alt="phone" width={16} height={16} />
+        </div>
+        <span>{data.personalInfo.phone}</span>
+      </div>
+    ),
+    data.personalInfo.address && (
+      <div key="address" className="general-contact-item">
+        <div className="general-contact-item-icon">
+          <Image src={LocIcon} alt="location" width={16} height={16} />
+        </div>
+        <span>{data.personalInfo.address}</span>
+      </div>
+    ),
+    data.personalInfo.linkedin && (
+      <div key="linkedin" className="general-contact-item">
+        <div className="general-contact-item-icon">
+          <Image src={LinkedInIcon} alt="linkedin" width={16} height={16} />
+        </div>
+        <span>{data.personalInfo.linkedin.replace(/^https?:\/\//, '')}</span>
+      </div>
+    )
+  ].filter(Boolean);
+
+  const orderedContactItems = cvLang === 'en' ? [...contactItems].reverse() : contactItems;
+
   return (
     <div className={`${assistant.className} general-template-wrapper`}>
       <div 
         className="general-template"
         data-cv-lang={cvLang}
-        dir={lang === 'he' ? 'rtl' : 'ltr'}
+        dir={cvLang === 'he' ? 'rtl' : 'ltr'}
       >
         {/* Header */}
         <header className="general-header">
@@ -178,39 +218,8 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               </h1>
             </div>
 
-            <div className="general-contact-info" dir={lang === 'he' ? 'rtl' : 'ltr'}>
-              {data.personalInfo.email && (
-                <div className="general-contact-item">
-                  <div className="general-contact-item-icon">
-                    <Image src={MailIcon} alt="email" width={16} height={16} />
-                  </div>
-                  <span>{data.personalInfo.email}</span>
-                </div>
-              )}
-              {data.personalInfo.phone && (
-                <div className="general-contact-item">
-                  <div className="general-contact-item-icon">
-                    <Image src={PhoneIcon} alt="phone" width={16} height={16} />
-                  </div>
-                  <span>{data.personalInfo.phone}</span>
-                </div>
-              )}
-              {data.personalInfo.address && (
-                <div className="general-contact-item">
-                  <div className="general-contact-item-icon">
-                    <Image src={LocIcon} alt="location" width={16} height={16} />
-                  </div>
-                  <span>{data.personalInfo.address}</span>
-                </div>
-              )}
-              {data.personalInfo.linkedin && (
-                <div className="general-contact-item">
-                  <div className="general-contact-item-icon">
-                    <Image src={LinkedInIcon} alt="linkedin" width={16} height={16} />
-                  </div>
-                  <span>{data.personalInfo.linkedin.replace(/^https?:\/\//, '')}</span>
-                </div>
-              )}
+            <div className="general-contact-info">
+              {orderedContactItems}
             </div>
           </div>
         </header>

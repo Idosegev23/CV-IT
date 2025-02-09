@@ -135,9 +135,9 @@
   font-weight: 200 !important;
 }
 
-/* עמודה ימנית */
+/* עמודה ימנית - ברירת מחדל (עברית) */
 .creative-right-column {
-  width: var(--right-column-width);
+  width: var(--right-column-width-rtl);
   height: 100%;
   background-color: var(--primary-blue);
   color: white;
@@ -149,17 +149,32 @@
   z-index: 2;
 }
 
-.creative-right-column::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 40px;
-  height: 40px;
-  background-color: var(--primary-blue);
-  z-index: 0;
+/* עמודה ימנית - אנגלית */
+.creative-template-en .creative-right-column {
+  width: var(--right-column-width-ltr);
+  background-color: var(--primary-grey);
+  text-align: left;
+  padding: 2rem 3rem;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 
+/* התאמת קישוטים באנגלית */
+.creative-template-en .creative-icon-decoration {
+  right: 1.5rem;
+  left: auto;
+  transform: none;
+}
+
+.creative-template-en .creative-grey-decoration {
+  right: -3rem;
+  left: auto;
+  transform: translateY(0.5rem);
+  top: 10rem;
+  scale:1.4;
+}
+
+/* קישוטי רקע */
 .creative-bg-top {
   position: absolute;
   top: 1rem;
@@ -173,7 +188,7 @@
   right: 0;
   opacity: 1;
   z-index: 1;
-  transform: scale(0.65);
+  transform: scale(1);
 }
 
 /* פרטים אישיים */
@@ -271,7 +286,7 @@
   align-items: flex-start;
   gap: 0.5rem;
   width: 100%;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .creative-skill-name {
@@ -303,6 +318,16 @@
   z-index: 1;
 }
 
+/* עמודה שמאלית - אנגלית */
+.creative-template-en .creative-left-column {
+  width: var(--left-column-width-ltr);
+  background-color: var(--primary-blue);
+  color: white;
+  text-align: left;
+  padding: 2rem 3rem;
+  border-bottom-right-radius: 40px;
+}
+
 .creative-icon-top {
   position: absolute;
   top: 2rem;
@@ -329,10 +354,11 @@
   z-index: 1;
   padding: 0;
   margin-left: -1.5rem;
+  margin-top: 1.5rem;
 }
 
 .creative-experience:first-of-type {
-  margin-top: 4rem;
+  margin-top: 1.5rem;
 }
 
 .creative-experience-items {
@@ -342,7 +368,7 @@
 }
 
 .creative-experience-item {
-  margin-bottom: 0.8rem;
+  margin-bottom: 1rem;
 }
 
 .creative-experience-header {
@@ -452,7 +478,7 @@
 
 /* הוספת סגנון לתקציר המקצועי */
 .creative-summary {
-  margin: 4rem 0 1rem;
+  margin: 1.5rem 0 1rem;
   padding: 0;
   position: relative;
   z-index: 2;
@@ -982,4 +1008,664 @@
 .creative-skills-legend-text {
   white-space: nowrap;
   min-width: 28px;
+}
+
+/* התאמות למצב אנגלית */
+.creative-template-en {
+  flex-direction: row-reverse;
+}
+
+.creative-template-en .creative-right-column {
+  width: var(--right-column-width-ltr);
+  background-color: var(--primary-grey);
+  text-align: left;
+  padding: 2rem 3rem;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.creative-template-en .creative-left-column {
+  width: var(--left-column-width-ltr);
+  background-color: var(--primary-blue);
+  color: white;
+  text-align: left;
+  padding: 2rem 3rem;
+  border-bottom-right-radius: 40px;
+}
+
+/* עדכון צבעי טקסט בעמודה השמאלית במצב אנגלית */
+.creative-template-en .creative-left-column .creative-section-title,
+.creative-template-en .creative-left-column .creative-experience-title,
+.creative-template-en .creative-left-column .creative-education-title,
+.creative-template-en .creative-left-column .creative-military-title,
+.creative-template-en .creative-left-column .creative-experience-company,
+.creative-template-en .creative-left-column .creative-education-institution,
+.creative-template-en .creative-left-column .creative-military-unit,
+.creative-template-en .creative-left-column .creative-experience-date,
+.creative-template-en .creative-left-column .creative-education-date,
+.creative-template-en .creative-left-column .creative-military-date,
+.creative-template-en .creative-left-column .creative-experience-description li,
+.creative-template-en .creative-left-column .creative-education-specialization,
+.creative-template-en .creative-left-column .creative-military-description {
+  color: white !important;
+  opacity: 0.9 !important;
+}
+
+/* עדכון צבעי טקסט בעמודה הימנית במצב אנגלית */
+.creative-template-en .creative-right-column .creative-section-title,
+.creative-template-en .creative-right-column .creative-name,
+.creative-template-en .creative-right-column .creative-contact,
+.creative-template-en .creative-right-column .creative-skill-name,
+.creative-template-en .creative-right-column .creative-skill-level {
+  color: #4B4553 !important;
+}
+
+/* התאמת כיוון הטקסט והמרווחים */
+.creative-template-en .creative-experience-description {
+  text-align: left;
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+.creative-template-en .creative-education-details {
+  text-align: left;
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+.creative-template-en .creative-military-details {
+  text-align: left;
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+/* התאמת כותרות */
+.creative-template-en .creative-section-title {
+  text-align: left;
+  padding-right: 0;
+  padding-left: 3rem;
+}
+
+/* התאמת פרטי קשר */
+.creative-template-en .creative-contact-info {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.creative-template-en .creative-contact-item {
+  flex-direction: row;
+}
+
+/* התאמת כישורים */
+.creative-template-en .creative-skills {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+
+.creative-template-en .creative-skill-content {
+  flex-direction: row-reverse;
+  justify-content: space-between;
+}
+
+.creative-template-en .creative-skill-level {
+  order: -1;
+  justify-content: flex-start;
+}
+
+/* התאמת שפות */
+.creative-template-en .creative-language-item {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.creative-template-en .creative-language {
+  text-align: right;
+}
+
+.creative-template-en .creative-level {
+  text-align: left;
+}
+
+/* התאמת קישוטים */
+.creative-template-en .creative-bg-top {
+  right: auto;
+  left: 0;
+  transform: scaleX(-1);
+}
+
+.creative-template-en .creative-bg-bottom {
+  right: auto;
+  left: 0;
+  transform: scale(-0.45, 0.45);
+}
+
+.creative-template-en .creative-icon-top {
+  left: auto;
+  right: 2rem;
+}
+
+.creative-template-en .creative-bg-grey {
+  left: auto;
+  right: 2rem;
+  transform: translateY(2rem) scaleX(-1);
+}
+
+/* התאמת כפתורי עריכה */
+.creative-template-en .creative-edit-button {
+  right: auto;
+  left: 1rem;
+}
+
+.creative-template-en .creative-edit-button::after {
+  right: auto;
+  left: calc(100% + 8px);
+}
+
+/* התאמת מרווחים בכותרות */
+.creative-template-en .creative-experience-header,
+.creative-template-en .creative-education-header,
+.creative-template-en .creative-military-header {
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.creative-template-en .creative-experience-title,
+.creative-template-en .creative-education-title,
+.creative-template-en .creative-military-title {
+  text-align: left;
+}
+
+/* התאמת רשימות */
+.creative-template-en .creative-experience-description li::before,
+.creative-template-en .creative-education-description li::before,
+.creative-template-en .creative-military-description li::before {
+  right: auto;
+  left: -1.2rem;
+}
+
+/* התאמת מפריד */
+.creative-template-en .creative-separator {
+  margin-left: auto;
+  margin-right: 0;
+}
+
+/* התאמת לגנדה של כישורים */
+.creative-template-en .creative-skills-legend {
+  flex-direction: row-reverse;
+  justify-content: flex-start;
+  padding-right: 0;
+  padding-left: 0.3rem;
+}
+
+.creative-template-en .creative-skills-legend-item {
+  flex-direction: row-reverse;
+}
+
+.creative-template-en .creative-skills-legend-dots {
+  justify-content: flex-start;
+}
+
+.creative-template-en .creative-skills-subtitle {
+  text-align: left;
+}
+
+.creative-template-en .creative-skill-name {
+  text-align: right;
+}
+
+/* התאמת תצוגת שפות */
+.creative-template-en .creative-languages {
+  text-align: left;
+}
+
+.creative-template-en .creative-language-item {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.creative-template-en .creative-language {
+  text-align: right;
+}
+
+.creative-template-en .creative-level {
+  text-align: left;
+}
+
+/* התאמת צבעים במצב אנגלית */
+.creative-template-en .creative-left-column .creative-skills-legend,
+.creative-template-en .creative-left-column .creative-skills-legend-text,
+.creative-template-en .creative-left-column .creative-skill-name,
+.creative-template-en .creative-left-column .creative-language,
+.creative-template-en .creative-left-column .creative-level {
+  color: white !important;
+}
+
+.creative-template-en .creative-right-column .creative-skills-legend,
+.creative-template-en .creative-right-column .creative-skills-legend-text,
+.creative-template-en .creative-right-column .creative-skill-name,
+.creative-template-en .creative-right-column .creative-language,
+.creative-template-en .creative-right-column .creative-level {
+  color: #4B4553 !important;
+}
+
+/* התאמת כישורים במצב אנגלית */
+.creative-template-en .creative-skills {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+
+/* כישורים טכניים במצב אנגלית */
+.creative-template-en .creative-skill-content {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.creative-template-en .creative-skill-name {
+  text-align: left;
+  order: 2;
+}
+
+.creative-template-en .creative-skill-level {
+  order: 1;
+  justify-content: flex-start;
+  min-width: 50px;
+}
+
+/* כישורים רכים במצב אנגלית */
+.creative-template-en .creative-skill-item.soft-skill .creative-skill-content {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.creative-template-en .creative-skill-item.soft-skill .creative-skill-name {
+  text-align: left;
+  order: 2;
+}
+
+/* התאמת רוחב הכישורים */
+.creative-template-en .creative-skill-name {
+  min-width: unset;
+  max-width: unset;
+  flex: 1;
+}
+
+/* עדכון מרווחים לתוכן באנגלית */
+.creative-template-en .creative-experience {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-summary {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience:first-of-type {
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience-header {
+  padding-right: 0;
+  margin-right: 0;
+}
+
+.creative-template-en .creative-education-header {
+  padding-right: 0;
+  margin-right: 0;
+}
+
+.creative-template-en .creative-military-header {
+  padding-right: 0;
+  margin-right: 0;
+}
+
+/* עדכון מרווח עליון לכל התוכן בעמודה הימנית באנגלית */
+.creative-template-en .creative-right-column > *:first-child {
+  margin-top: 1.5rem;
+}
+
+/* עדכון מרווח עליון לכל התוכן בעמודה השמאלית באנגלית */
+.creative-template-en .creative-left-column > *:first-child {
+  margin-top: 1.5rem;
+}
+
+/* עדכון מרווחים לתוכן בשתי השפות */
+.creative-right-column > *:first-child,
+.creative-left-column > *:first-child {
+  margin-top: 1.5rem;
+}
+
+.creative-experience {
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  margin-left: -1.5rem;
+  margin-top: 1.5rem;
+}
+
+.creative-summary {
+  margin: 1.5rem 0 1rem;
+  padding: 0;
+  position: relative;
+  z-index: 2;
+  margin-left: -1.5rem;
+}
+
+.creative-experience:first-of-type {
+  margin-top: 1.5rem;
+}
+
+/* עדכון מרווחים לתוכן באנגלית */
+.creative-template-en .creative-experience {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-summary {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience:first-of-type {
+  margin-top: 1.5rem;
+} 
+
+/* קישוטים - הגדרות בסיס */
+.creative-icon-decoration,
+.creative-grey-decoration {
+  content: '';
+  position: absolute;
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.8;
+  z-index: 1;
+}
+
+.creative-icon-decoration {
+  top: 2rem;
+  width: 60px;
+  height: 60px;
+  background-image: url('/design/creative/icon.svg');
+}
+
+.creative-grey-decoration {
+  width: 60%;
+  height: 200px;
+  background-image: url('/design/creative/greyBG.svg');
+  top: 10rem;
+  scale: 1.4;
+  transform: translateY(0.5rem);
+}
+
+/* מיקום הקישוטים בעברית - בעמודה השמאלית (אפורה) */
+.creative-template-he .creative-left-column .creative-icon-decoration {
+  left: 1.5rem;
+  right: auto;
+  transform: none;
+}
+
+.creative-template-he .creative-left-column .creative-grey-decoration {
+  left: 3rem;
+  right: auto;
+  transform: translateY(0.5rem);
+  top: 10rem;
+  scale: 1.4;
+}
+
+.creative-template-he .creative-right-column .creative-icon-decoration,
+.creative-template-he .creative-right-column .creative-grey-decoration {
+  display: none;
+}
+
+/* מיקום הקישוטים באנגלית - בעמודה הימנית (אפורה) */
+.creative-template-en .creative-right-column .creative-icon-decoration {
+  right: 1.5rem;
+}
+
+.creative-template-en .creative-right-column .creative-grey-decoration {
+  right: -3rem;
+}
+
+/* עדכון צבעי טקסט בעמודה השמאלית במצב אנגלית */
+.creative-template-en .creative-left-column .creative-section-title,
+.creative-template-en .creative-left-column .creative-experience-title,
+.creative-template-en .creative-left-column .creative-education-title,
+.creative-template-en .creative-left-column .creative-military-title,
+.creative-template-en .creative-left-column .creative-experience-company,
+.creative-template-en .creative-left-column .creative-education-institution,
+.creative-template-en .creative-left-column .creative-military-unit,
+.creative-template-en .creative-left-column .creative-experience-date,
+.creative-template-en .creative-left-column .creative-education-date,
+.creative-template-en .creative-left-column .creative-military-date,
+.creative-template-en .creative-left-column .creative-experience-description li,
+.creative-template-en .creative-left-column .creative-education-specialization,
+.creative-template-en .creative-left-column .creative-military-description {
+  color: white !important;
+  opacity: 0.9 !important;
+}
+
+/* עדכון צבעי טקסט בעמודה הימנית במצב אנגלית */
+.creative-template-en .creative-right-column .creative-section-title,
+.creative-template-en .creative-right-column .creative-name,
+.creative-template-en .creative-right-column .creative-contact,
+.creative-template-en .creative-right-column .creative-skill-name,
+.creative-template-en .creative-right-column .creative-skill-level {
+  color: #4B4553 !important;
+}
+
+/* התאמת כיוון הטקסט והמרווחים */
+.creative-template-en .creative-experience-description {
+  text-align: left;
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+.creative-template-en .creative-education-details {
+  text-align: left;
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+.creative-template-en .creative-military-details {
+  text-align: left;
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+/* התאמת כותרות */
+.creative-template-en .creative-section-title {
+  text-align: left;
+  padding-right: 0;
+  padding-left: 3rem;
+}
+
+/* התאמת פרטי קשר */
+.creative-template-en .creative-contact-info {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.creative-template-en .creative-contact-item {
+  flex-direction: row;
+}
+
+/* התאמת כישורים */
+.creative-template-en .creative-skills {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+
+.creative-template-en .creative-skill-content {
+  flex-direction: row-reverse;
+  justify-content: space-between;
+}
+
+.creative-template-en .creative-skill-level {
+  order: -1;
+  justify-content: flex-start;
+}
+
+/* התאמת שפות */
+.creative-template-en .creative-language-item {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.creative-template-en .creative-language {
+  text-align: right;
+}
+
+.creative-template-en .creative-level {
+  text-align: left;
+}
+
+/* התאמת צבעים במצב אנגלית */
+.creative-template-en .creative-left-column .creative-skills-legend,
+.creative-template-en .creative-left-column .creative-skills-legend-text,
+.creative-template-en .creative-left-column .creative-skill-name,
+.creative-template-en .creative-left-column .creative-language,
+.creative-template-en .creative-left-column .creative-level {
+  color: white !important;
+}
+
+.creative-template-en .creative-right-column .creative-skills-legend,
+.creative-template-en .creative-right-column .creative-skills-legend-text,
+.creative-template-en .creative-right-column .creative-skill-name,
+.creative-template-en .creative-right-column .creative-language,
+.creative-template-en .creative-right-column .creative-level {
+  color: #4B4553 !important;
+}
+
+/* התאמת כישורים במצב אנגלית */
+.creative-template-en .creative-skills {
+  padding-right: 0;
+  padding-left: 0.5rem;
+}
+
+/* כישורים טכניים במצב אנגלית */
+.creative-template-en .creative-skill-content {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 1rem;
+}
+
+.creative-template-en .creative-skill-name {
+  text-align: left;
+  order: 2;
+}
+
+.creative-template-en .creative-skill-level {
+  order: 1;
+  justify-content: flex-start;
+  min-width: 50px;
+}
+
+/* כישורים רכים במצב אנגלית */
+.creative-template-en .creative-skill-item.soft-skill .creative-skill-content {
+  flex-direction: row;
+  justify-content: flex-start;
+}
+
+.creative-template-en .creative-skill-item.soft-skill .creative-skill-name {
+  text-align: left;
+  order: 2;
+}
+
+/* התאמת רוחב הכישורים */
+.creative-template-en .creative-skill-name {
+  min-width: unset;
+  max-width: unset;
+  flex: 1;
+}
+
+/* עדכון מרווחים לתוכן באנגלית */
+.creative-template-en .creative-experience {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-summary {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience:first-of-type {
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience-header {
+  padding-right: 0;
+  margin-right: 0;
+}
+
+.creative-template-en .creative-education-header {
+  padding-right: 0;
+  margin-right: 0;
+}
+
+.creative-template-en .creative-military-header {
+  padding-right: 0;
+  margin-right: 0;
+}
+
+/* עדכון מרווח עליון לכל התוכן בעמודה הימנית באנגלית */
+.creative-template-en .creative-right-column > *:first-child {
+  margin-top: 1.5rem;
+}
+
+/* עדכון מרווח עליון לכל התוכן בעמודה השמאלית באנגלית */
+.creative-template-en .creative-left-column > *:first-child {
+  margin-top: 1.5rem;
+}
+
+/* עדכון מרווחים לתוכן בשתי השפות */
+.creative-right-column > *:first-child,
+.creative-left-column > *:first-child {
+  margin-top: 1.5rem;
+}
+
+.creative-experience {
+  margin-bottom: 1.5rem;
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  margin-left: -1.5rem;
+  margin-top: 1.5rem;
+}
+
+.creative-summary {
+  margin: 1.5rem 0 1rem;
+  padding: 0;
+  position: relative;
+  z-index: 2;
+  margin-left: -1.5rem;
+}
+
+.creative-experience:first-of-type {
+  margin-top: 1.5rem;
+}
+
+/* עדכון מרווחים לתוכן באנגלית */
+.creative-template-en .creative-experience {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-summary {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience:first-of-type {
+  margin-top: 1.5rem;
 } 
