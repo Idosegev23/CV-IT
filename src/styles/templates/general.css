@@ -760,49 +760,120 @@
 }
 
 /* כפתור עריכה - פרטים אישיים */
-.general-edit-button-personal {
-  right: -35rem !important;
-  top: -30% !important;
+/* עברית */
+[dir="rtl"] .general-edit-button-personal {
+  right: -2rem !important;
+  left: auto !important;
+  top: 50% !important;
+  transform: translateY(-40px) !important;
+}
+
+/* אנגלית */
+[dir="ltr"] .general-edit-button-personal {
+  left: -2rem !important;
+  right: auto !important;
+  top: 50% !important;
+  transform: translateY(-40px) !important;
 }
 
 /* כפתור עריכה - תקציר מקצועי */
-.general-edit-button-summary {
+/* עברית */
+[dir="rtl"] .general-edit-button-summary {
   right: 30px !important;
+  left: auto !important;
+  top: -30px !important;
+  transform: translateY(0) !important;
+}
+
+/* אנגלית */
+[dir="ltr"] .general-edit-button-summary {
+  left: 30px !important;
+  right: auto !important;
   top: -30px !important;
   transform: translateY(0) !important;
 }
 
 /* כפתור עריכה - ניסיון תעסוקתי */
-.general-edit-button-experience {
+/* עברית */
+[dir="rtl"] .general-edit-button-experience {
   right: 10rem !important;
+  left: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* אנגלית */
+[dir="ltr"] .general-edit-button-experience {
+  left: 10rem !important;
+  right: auto !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
 
 /* כפתור עריכה - השכלה */
-.general-edit-button-education {
+/* עברית */
+[dir="rtl"] .general-edit-button-education {
   right: 10rem !important;
+  left: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* אנגלית */
+[dir="ltr"] .general-edit-button-education {
+  left: 10rem !important;
+  right: auto !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
 
 /* כפתור עריכה - שירות צבאי */
-.general-edit-button-military {
+/* עברית */
+[dir="rtl"] .general-edit-button-military {
   right: 10rem !important;
+  left: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* אנגלית */
+[dir="ltr"] .general-edit-button-military {
+  left: 10rem !important;
+  right: auto !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
 
 /* כפתור עריכה - כישורים */
-.general-edit-button-skills {
+/* עברית */
+[dir="rtl"] .general-edit-button-skills {
   right: 10rem !important;
+  left: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* אנגלית */
+[dir="ltr"] .general-edit-button-skills {
+  left: 10rem !important;
+  right: auto !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
 
 /* כפתור עריכה - שפות */
-.general-edit-button-languages {
+/* עברית */
+[dir="rtl"] .general-edit-button-languages {
   right: 10rem !important;
+  left: auto !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* אנגלית */
+[dir="ltr"] .general-edit-button-languages {
+  left: 10rem !important;
+  right: auto !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
 }
@@ -815,7 +886,8 @@
 }
 
 /* טולטיפ */
-.general-edit-button::after {
+/* עברית */
+[dir="rtl"] .general-edit-button::after {
   content: attr(title) !important;
   position: absolute !important;
   background: rgba(72, 86, 205, 0.9) !important;
@@ -827,6 +899,23 @@
   opacity: 0 !important;
   pointer-events: none !important;
   right: calc(100% + 8px) !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+}
+
+/* אנגלית */
+[dir="ltr"] .general-edit-button::after {
+  content: attr(title) !important;
+  position: absolute !important;
+  background: rgba(72, 86, 205, 0.9) !important;
+  color: white !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  white-space: nowrap !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  left: calc(100% + 8px) !important;
   top: 50% !important;
   transform: translateY(-50%) !important;
 }

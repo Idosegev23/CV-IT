@@ -28,6 +28,7 @@ interface GeneralTemplateProps {
   onUpdate?: (field: string, value: any) => void;
   onDelete?: (section: string, index: number) => void;
   onEdit?: (type: string, index: number) => void;
+  displayLang?: 'he' | 'en';
 }
 
 const assistant = Assistant({ 
@@ -79,15 +80,15 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
   isEditing = false,
   onUpdate = () => {},
   onDelete = () => {},
-  onEdit = () => {}
+  onEdit = () => {},
+  displayLang = 'he'
 }) => {
-  const cvLang = data.lang;
-  console.log('CV Language:', cvLang);
-
-  const t = translations[cvLang as keyof typeof translations];
+  const t = translations[displayLang as keyof typeof translations];
   const { personalInfo, experience, education, skills } = data;
   const military = data.military as MilitaryService | undefined;
-  const isRTL = cvLang === 'he';
+  const isRTL = displayLang === 'he';
+
+  console.log('CV Language:', displayLang);
 
   const { firstName, lastName } = (() => {
     const nameParts = personalInfo.name.trim().split(/\s+/);
@@ -136,7 +137,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
   }, [data.personalInfo.summary]);
 
   const getSkillLevel = (level: number) => {
-    if (typeof level !== 'number') return cvLang === 'he' ? 'רמה טובה' : 'Good Level';
+    if (typeof level !== 'number') return displayLang === 'he' ? 'רמה טובה' : 'Good Level';
 
     const levels: { [key: number]: Record<'he' | 'en', string> } = {
       5: { he: 'רמה גבוהה מאוד', en: 'Expert Level' },
@@ -146,7 +147,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
       1: { he: 'רמה בסיסית', en: 'Beginner Level' }
     };
 
-    return levels[level]?.[cvLang as 'he' | 'en'] || (cvLang === 'he' ? 'רמה טובה' : 'Good Level');
+    return levels[level]?.[displayLang as 'he' | 'en'] || (displayLang === 'he' ? 'רמה טובה' : 'Good Level');
   };
 
   const handleEdit = (type: string, index: number = 0) => {
@@ -190,14 +191,14 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
     )
   ].filter(Boolean);
 
-  const orderedContactItems = cvLang === 'en' ? [...contactItems].reverse() : contactItems;
+  const orderedContactItems = displayLang === 'en' ? [...contactItems].reverse() : contactItems;
 
   return (
-    <div className={`${assistant.className} general-template-wrapper`}>
+    <div className={`${assistant.className} general-template-wrapper`} dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <div 
         className="general-template"
-        data-cv-lang={cvLang}
-        dir={cvLang === 'he' ? 'rtl' : 'ltr'}
+        data-cv-lang={displayLang}
+        dir={displayLang === 'he' ? 'rtl' : 'ltr'}
       >
         {/* Header */}
         <header className="general-header">
@@ -210,7 +211,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                   <button
                     onClick={() => handleEdit('personalInfo', 0)}
                     className="general-edit-button general-edit-button-personal"
-                    title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
+                    title={displayLang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -238,7 +239,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               <button
                 onClick={() => handleEdit('professionalSummary', 0)}
                 className="general-edit-button general-edit-button-summary"
-                title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
+                title={displayLang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
               >
                 <Edit2 className="w-4 h-4" />
               </button>
@@ -261,7 +262,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 <button
                   onClick={() => handleEdit('experience', 0)}
                   className="general-edit-button general-edit-button-experience"
-                  title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
+                  title={displayLang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
@@ -280,7 +281,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                       </span>
                     )}
                     <span className="general-experience-date">
-                      {formatDate(exp.startDate, exp.endDate, lang)}
+                      {formatDate(exp.startDate, exp.endDate, displayLang)}
                     </span>
                   </div>
                   {exp.description && exp.description.length > 0 && (
@@ -308,7 +309,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 <button
                   onClick={() => handleEdit('education', 0)}
                   className="general-edit-button general-edit-button-education"
-                  title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
+                  title={displayLang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
@@ -328,7 +329,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                       )}
                     </div>
                     <span className="general-timeline-date">
-                      {formatDate(degree.startDate, degree.endDate, lang)}
+                      {formatDate(degree.startDate, degree.endDate, displayLang)}
                     </span>
                   </div>
                   {degree.specialization && (
@@ -354,7 +355,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 <button
                   onClick={() => handleEdit('military', 0)}
                   className="general-edit-button general-edit-button-military"
-                  title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
+                  title={displayLang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
@@ -373,7 +374,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                     )}
                   </div>
                   <span className="general-timeline-date">
-                    {formatDate(data.military.startDate, data.military.endDate, lang)}
+                    {formatDate(data.military.startDate, data.military.endDate, displayLang)}
                   </span>
                 </div>
                 {data.military.description && data.military.description.length > 0 && (
@@ -403,7 +404,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 <button
                   onClick={() => handleEdit('skills', 0)}
                   className="general-edit-button general-edit-button-skills"
-                  title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
+                  title={displayLang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>
@@ -462,7 +463,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                 <button
                   onClick={() => handleEdit('language', 0)}
                   className="general-edit-button general-edit-button-languages"
-                  title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
+                  title={displayLang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >
                   <Edit2 className="w-4 h-4" />
                 </button>

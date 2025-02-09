@@ -357,9 +357,9 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
             )}
 
             {/* ניסיון תעסוקתי */}
-            {data.experience && data.experience.length > 0 && (
+            {experience && experience.length > 0 && (
               <div className="creative-experience">
-                <h2 className="creative-section-title dark relative">
+                <h2 className="creative-section-title dark">
                   {t.workExperience}
                   {isEditing && (
                     <button
@@ -372,7 +372,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                   )}
                 </h2>
                 <div className="creative-experience-items">
-                  {data.experience.map((exp, index) => (
+                  {experience.map((exp, index) => (
                     <div key={index} className="creative-experience-item">
                       <div className="creative-experience-header">
                         <h3 className="creative-experience-title">
@@ -401,9 +401,9 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
             )}
 
             {/* השכלה */}
-            {data.education?.degrees && data.education.degrees.length > 0 && (
+            {education?.degrees && education.degrees.length > 0 && (
               <div className="creative-experience">
-                <h2 className="creative-section-title dark relative">
+                <h2 className="creative-section-title dark">
                   {t.education}
                   {isEditing && (
                     <button
@@ -416,7 +416,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                   )}
                 </h2>
                 <div className="creative-experience-items">
-                  {data.education.degrees.map((degree, index) => (
+                  {education.degrees.map((degree, index) => (
                     <div key={index} className="creative-experience-item">
                       <div className="creative-experience-title-wrapper">
                         <div className="creative-education-header">
@@ -448,7 +448,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
             {/* שירות צבאי */}
             {data.military && (
               <div className="creative-experience">
-                <h2 className="creative-section-title dark relative">
+                <h2 className="creative-section-title dark">
                   {t.militaryService}
                   {isEditing && (
                     <button
@@ -500,7 +500,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     <button 
                       onClick={() => handleEdit('professionalSummary', 0)}
                       className="creative-edit-button creative-edit-button-summary"
-                      title="Edit Professional Summary"
+                      title={lang === 'he' ? 'ערוך תקציר מקצועי' : 'Edit Professional Summary'}
                     >
                       <Edit2 size={14} />
                     </button>
@@ -520,7 +520,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     <button
                       onClick={() => handleEdit('experience', 0)}
                       className="creative-edit-button creative-edit-button-experience"
-                      title="Edit Work Experience"
+                      title={lang === 'he' ? 'ערוך ניסיון תעסוקתי' : 'Edit Work Experience'}
                     >
                       <Edit2 size={14} />
                     </button>
@@ -563,7 +563,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     <button
                       onClick={() => handleEdit('education', 0)}
                       className="creative-edit-button creative-edit-button-education"
-                      title="Edit Education"
+                      title={lang === 'he' ? 'ערוך השכלה' : 'Edit Education'}
                     >
                       <Edit2 size={14} />
                     </button>
@@ -607,7 +607,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     <button
                       onClick={() => handleEdit('military', 0)}
                       className="creative-edit-button creative-edit-button-military"
-                      title="Edit Military Service"
+                      title={lang === 'he' ? 'ערוך שירות צבאי' : 'Edit Military Service'}
                     >
                       <Edit2 size={14} />
                     </button>
@@ -664,7 +664,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     <button
                       onClick={() => handleEdit('personalInfo', 0)}
                       className="creative-edit-button creative-edit-button-personal"
-                      title="Edit Personal Info"
+                      title={lang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
                     >
                       <Edit2 size={14} />
                     </button>
@@ -717,7 +717,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     <button
                       onClick={() => handleEdit('skills', 0)}
                       className="creative-edit-button creative-edit-button-skills"
-                      title="Edit Skills"
+                      title={lang === 'he' ? 'ערוך כישורים' : 'Edit Skills'}
                     >
                       <Edit2 size={14} />
                     </button>
@@ -800,7 +800,7 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                     <button
                       onClick={() => handleEdit('languages', 0)}
                       className="creative-edit-button creative-edit-button-languages"
-                      title="Edit Languages"
+                      title={lang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                     >
                       <Edit2 size={14} />
                     </button>

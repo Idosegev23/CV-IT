@@ -1173,12 +1173,12 @@
 
 /* התאמת שפות */
 .creative-template-en .creative-language-item {
-  flex-direction: row-reverse;
-  justify-content: flex-end;
+  flex-direction: row;
+  justify-content: flex-start;
 }
 
 .creative-template-en .creative-language {
-  text-align: right;
+  text-align: left;
 }
 
 .creative-template-en .creative-level {
@@ -1288,12 +1288,14 @@
 }
 
 .creative-template-en .creative-language-item {
-  flex-direction: row-reverse;
-  justify-content: flex-end;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 0.5rem;
 }
 
 .creative-template-en .creative-language {
-  text-align: right;
+  text-align: left;
+  min-width: 80px;
 }
 
 .creative-template-en .creative-level {
@@ -1538,149 +1540,27 @@
   margin-left: -2rem;
 } 
 
-/* עדכון מרווחים לתוכן באנגלית */
-.creative-template-en .creative-experience {
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 1.5rem;
+/* התאמת כפתורי עריכה באנגלית - עמודה אפורה */
+.creative-template-en .creative-right-column .creative-edit-button-experience,
+.creative-template-en .creative-right-column .creative-edit-button-education,
+.creative-template-en .creative-right-column .creative-edit-button-military {
+  right: 17rem !important;
+  left: auto !important;
 }
 
-.creative-template-en .creative-summary {
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 1.5rem;
+.creative-template-en .creative-right-column .creative-edit-button-summary {
+  right: 30rem !important;
+  left: auto !important;
 }
 
-.creative-template-en .creative-experience:first-of-type {
-  margin-top: 1.5rem;
-} 
-
-/* עדכון צבע התקציר המקצועי במצב אנגלית */
-.creative-template-en .creative-summary-content,
-.creative-template-en .creative-summary-content p {
-  color: #4B4553; /* צבע אפור כהה זהה לשאר הטקסט בצד האפור */
+/* התאמת כפתורי עריכה באנגלית - עמודה כחולה */
+.creative-template-en .creative-left-column .creative-edit-button-personal {
+  right: 12rem !important;
+  left: auto !important;
 }
 
-.creative-template-en .creative-summary-title {
-  color: #4B4553; /* גם הכותרת של התקציר */
-}
-
-/* התאמת מיקום התאריכים במצב אנגלית */
-.creative-template-en .creative-experience-header {
-  padding-right: 0;
-  margin-right: 0;
-  padding-left: 2rem;
-  margin-left: -2rem;
-}
-
-.creative-template-en .creative-experience-date {
-  text-align: right;
-  min-width: 120px;
-  margin-left: auto;
-}
-
-.creative-template-en .creative-education-header,
-.creative-template-en .creative-military-header {
-  padding-right: 0;
-  margin-right: 0;
-  padding-left: 2rem;
-  margin-left: -2rem;
-} 
-
-/* עדכון מרווחים לתוכן באנגלית */
-.creative-template-en .creative-experience {
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 1.5rem;
-}
-
-.creative-template-en .creative-summary {
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 1.5rem;
-}
-
-.creative-template-en .creative-experience:first-of-type {
-  margin-top: 1.5rem;
-} 
-
-/* עדכון צבע התקציר המקצועי במצב אנגלית */
-.creative-template-en .creative-summary-content,
-.creative-template-en .creative-summary-content p {
-  color: #4B4553; /* צבע אפור כהה זהה לשאר הטקסט בצד האפור */
-}
-
-.creative-template-en .creative-summary-title {
-  color: #4B4553; /* גם הכותרת של התקציר */
-}
-
-/* התאמת מיקום התאריכים במצב אנגלית */
-.creative-template-en .creative-experience-header {
-  padding-right: 0;
-  margin-right: 0;
-  padding-left: 2rem;
-  margin-left: -2rem;
-}
-
-.creative-template-en .creative-experience-date {
-  text-align: right;
-  min-width: 120px;
-  margin-left: auto;
-}
-
-.creative-template-en .creative-education-header,
-.creative-template-en .creative-military-header {
-  padding-right: 0;
-  margin-right: 0;
-  padding-left: 2rem;
-  margin-left: -2rem;
-} 
-
-/* עדכון מרווחים לתוכן באנגלית */
-.creative-template-en .creative-experience {
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 1.5rem;
-}
-
-.creative-template-en .creative-summary {
-  margin-left: 0;
-  margin-right: 0;
-  margin-top: 1.5rem;
-}
-
-.creative-template-en .creative-experience:first-of-type {
-  margin-top: 1.5rem;
-} 
-
-/* עדכון צבע התקציר המקצועי במצב אנגלית */
-.creative-template-en .creative-summary-content,
-.creative-template-en .creative-summary-content p {
-  color: #4B4553; /* צבע אפור כהה זהה לשאר הטקסט בצד האפור */
-}
-
-.creative-template-en .creative-summary-title {
-  color: #4B4553; /* גם הכותרת של התקציר */
-}
-
-/* התאמת מיקום התאריכים במצב אנגלית */
-.creative-template-en .creative-experience-header {
-  padding-right: 0;
-  margin-right: 0;
-  padding-left: 2rem;
-  margin-left: -2rem;
-}
-
-.creative-template-en .creative-experience-date {
-  text-align: right;
-  min-width: 120px;
-  margin-left: auto;
-}
-
-.creative-template-en .creative-education-header,
-.creative-template-en .creative-military-header {
-  padding-right: 0;
-  margin-right: 0;
-  padding-left: 2rem;
-  margin-left: -2rem;
+.creative-template-en .creative-left-column .creative-edit-button-skills,
+.creative-template-en .creative-left-column .creative-edit-button-languages {
+  right: auto !important;
+  left: 6rem !important;
 } 

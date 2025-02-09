@@ -89,6 +89,7 @@ export default function FinishPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [currentAction, setCurrentAction] = useState<ActionType>(undefined);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [userName, setUserName] = useState<string>('');
 
   const router = useRouter();
 
@@ -100,13 +101,18 @@ export default function FinishPage() {
 
         const { data: cvData, error } = await supabase
           .from('cv_data')
-          .select('package')
+          .select('package, format_cv')
           .eq('session_id', sessionId)
           .single();
 
         if (error) throw error;
         if (cvData?.package) {
           setCurrentPackage(cvData.package as Package);
+        }
+        if (cvData?.format_cv?.personal_details?.name) {
+          // מחלץ את השם הפרטי מהשם המלא
+          const firstName = cvData.format_cv.personal_details.name.split(' ')[0];
+          setUserName(firstName);
         }
       } catch (error) {
         console.error('Error loading data:', error);
@@ -151,13 +157,6 @@ export default function FinishPage() {
       requiredPackage: 'basic',
       route: '#'
     },
-    translate: {
-      icon: 'translate',
-      title: isRTL ? 'תרגום לאנגלית' : 'English Translation',
-      description: isRTL ? 'תרגם את קורות החיים שלך לאנגלית' : 'Translate your CV to English',
-      requiredPackage: 'advanced',
-      route: `/${lang}/cv/professional?sessionId=${sessionId}`
-    },
     linkedin: {
       icon: '/design/linkedin-logo.svg',
       title: isRTL ? 'פרופיל לינקדאין מקצועי' : 'Professional LinkedIn Profile',
@@ -184,15 +183,6 @@ export default function FinishPage() {
       description: isRTL ? 'קבל הכנה מקצועית לראיון העבודה' : 'Get professional interview preparation',
       requiredPackage: 'pro',
       route: '#'
-    },
-    taxi: {
-      icon: 'taxi',
-      title: isRTL ? 'מונית לראיון' : 'Interview Taxi',
-      description: isRTL ? 'הזמן מונית בחינם לראיון העבודה' : 'Get a free taxi ride to your interview',
-      requiredPackage: 'pro',
-      route: '#',
-      isLocked: true,
-      tag: isRTL ? 'בבנייה' : 'Coming Soon'
     }
   };
 
@@ -260,55 +250,6 @@ export default function FinishPage() {
       } catch (error) {
         console.error('Error downloading PDF:', error);
         toast.error(isRTL ? 'אירעה שגיאה בהורדת קורות החיים' : 'Error downloading CV');
-      } finally {
-        setShowLoadingModal(false);
-      }
-      return;
-    }
-    
-    if (featureKey === 'translate') {
-      setShowLoadingModal(true);
-      try {
-        console.log('Starting translation for session:', sessionId);
-        
-        const { data: sessionData, error: sessionError } = await supabase
-          .from('sessions')
-          .select('template_id')
-          .eq('id', sessionId)
-          .single();
-
-        if (sessionError) {
-          console.error('Error fetching template:', sessionError);
-          throw new Error('Failed to fetch template');
-        }
-
-        const response = await fetch('/api/translate-cv', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            sessionId,
-            sourceLang: lang,
-            targetLang: 'en'
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Translation failed');
-        }
-
-        const data = await response.json();
-        console.log('Translation response:', data);
-        
-        if (data.success) {
-          router.push(`/${lang}/cv/professional?sessionId=${sessionId}&contentLang=en`);
-        } else {
-          throw new Error(data.error || 'Translation process failed');
-        }
-      } catch (error) {
-        console.error('Translation error:', error);
-        toast.error(isRTL ? 'שגיאה בתרגום קורות החיים' : 'Error translating CV');
       } finally {
         setShowLoadingModal(false);
       }
@@ -586,7 +527,7 @@ export default function FinishPage() {
             className="text-center max-w-[800px] mx-auto mb-8"
           >
             <h1 className="text-3xl md:text-4xl font-bold text-gray-600 mb-3">
-              {isRTL ? 'סיימנו!' : 'We\'re Done!'}
+              {isRTL ? `סיימנו, ${userName}!` : `We're Done, ${userName}!`}
             </h1>
             <h2 className="text-lg md:text-xl text-[#4754D6] font-medium mb-2">
               {isRTL ? 'קורות החיים שלך מוכנים' : 'Your CV is Ready'}
