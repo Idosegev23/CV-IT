@@ -137,10 +137,6 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
       {isRTL ? (
         <>
           <div className="creative-right-column">
-            {/* קישוטים */}
-            <div className="creative-icon-decoration" />
-            <div className="creative-grey-decoration" />
-
             {/* רקע עליון */}
             <Image
               src="/design/creative/pink_on_blue.svg"
@@ -328,16 +324,20 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               </div>
             )}
 
-            {/* קישוט תחתון */}
+            {/* קישוט תחתון בעברית */}
             <Image
               src="/design/creative/on_blueD.svg"
               alt={t.bottomDecoration}
-              className="creative-bg-bottom"
+              className="creative-bg-bottom-he"
               width={200}
               height={200}
             />
           </div>
           <div className="creative-left-column">
+            {/* קישוטים */}
+            <div className="creative-icon-decoration" />
+            <div className="creative-grey-decoration" />
+            
             {/* תקציר מקצועי */}
             {data.personalInfo.summary && (
               <div className="creative-summary">
@@ -819,10 +819,11 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
               </div>
             )}
 
+            {/* קישוט תחתון באנגלית */}
             <Image
               src="/design/creative/on_blueD.svg"
               alt={t.bottomDecoration}
-              className="creative-bg-bottom"
+              className="creative-bg-bottom-en"
               width={200}
               height={200}
             />

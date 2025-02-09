@@ -161,17 +161,58 @@
 
 /* התאמת קישוטים באנגלית */
 .creative-template-en .creative-icon-decoration {
+  position: absolute;
+  top: 2rem;
   right: 1.5rem;
   left: auto;
-  transform: none;
+  width: 24px;
+  height: 70px;
+  background-image: url('/design/creative/icon.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  z-index: 1;
 }
 
 .creative-template-en .creative-grey-decoration {
-  right: -3rem;
-  left: auto;
-  transform: translateY(0.5rem);
+  position: absolute;
   top: 10rem;
-  scale:1.4;
+  left: 5rem;
+  right: auto;
+  width: 169px;
+  height: 318px;
+  background-image: url('/design/creative/greyBG.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  transform: translateY(0.5rem);
+  z-index: 0;
+}
+
+/* קישוטים בסיסיים - עברית */
+.creative-template-he .creative-left-column .creative-icon-decoration {
+  position: absolute;
+  top: 2rem;
+  left: 1.5rem;
+  width: 24px;
+  height: 70px;
+  opacity: 0.8;
+  background-image: url('/design/creative/icon.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  z-index: 1;
+}
+
+.creative-template-he .creative-left-column .creative-grey-decoration {
+  position: absolute;
+  top: 10rem;
+  left: 5rem;
+  width: 169px;
+  height: 318px;
+  opacity: 0.8;
+  background-image: url('/design/creative/greyBG.svg');
+  background-repeat: no-repeat;
+  background-size: contain;
+  transform: translateY(0.5rem);
+  z-index: 0;
 }
 
 /* קישוטי רקע */
@@ -184,11 +225,28 @@
 
 .creative-bg-bottom {
   position: absolute;
-  bottom: 1.5rem;
-  right: 0;
   opacity: 1;
   z-index: 1;
+  width: 200px;
+  height: 200px;
+  display: none; /* מוסתר כברירת מחדל */
+}
+
+/* קישוט תחתון - עברית */
+.creative-template-he .creative-bg-bottom {
+  display: block;
   transform: scale(1);
+  right: 0;
+  bottom: 0.4rem;
+}
+
+/* קישוט תחתון - אנגלית */
+.creative-template-en .creative-bg-bottom {
+  display: block;
+  right: auto;
+  transform: scale(1.4);
+  left: 0;
+  bottom: 0.4rem;
 }
 
 /* פרטים אישיים */
@@ -1143,12 +1201,22 @@
 .creative-template-en .creative-icon-top {
   left: auto;
   right: 2rem;
+  top: 2rem;
+  opacity: 0.8;
+  width: 60px;
+  height: 60px;
+  z-index: 1;
 }
 
 .creative-template-en .creative-bg-grey {
   left: auto;
   right: 2rem;
+  top: 5rem;
+  width: 60%;
   transform: translateY(2rem) scaleX(-1);
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+  z-index: 0;
 }
 
 /* התאמת כפתורי עריכה */
@@ -1371,6 +1439,202 @@
 .creative-experience:first-of-type {
   margin-top: 1.5rem;
 }
+
+/* עדכון מרווחים לתוכן באנגלית */
+.creative-template-en .creative-experience {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-summary {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience:first-of-type {
+  margin-top: 1.5rem;
+} 
+
+/* עדכון צבע התקציר המקצועי במצב אנגלית */
+.creative-template-en .creative-summary-content,
+.creative-template-en .creative-summary-content p {
+  color: #4B4553; /* צבע אפור כהה זהה לשאר הטקסט בצד האפור */
+}
+
+.creative-template-en .creative-summary-title {
+  color: #4B4553; /* גם הכותרת של התקציר */
+}
+
+/* התאמת מיקום התאריכים במצב אנגלית */
+.creative-template-en .creative-experience-header {
+  padding-right: 0;
+  margin-right: 0;
+  padding-left: 2rem;
+  margin-left: -2rem;
+}
+
+.creative-template-en .creative-experience-date {
+  text-align: right;
+  min-width: 120px;
+  margin-left: auto;
+}
+
+.creative-template-en .creative-education-header,
+.creative-template-en .creative-military-header {
+  padding-right: 0;
+  margin-right: 0;
+  padding-left: 2rem;
+  margin-left: -2rem;
+} 
+
+/* עדכון מרווחים לתוכן באנגלית */
+.creative-template-en .creative-experience {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-summary {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience:first-of-type {
+  margin-top: 1.5rem;
+} 
+
+/* עדכון צבע התקציר המקצועי במצב אנגלית */
+.creative-template-en .creative-summary-content,
+.creative-template-en .creative-summary-content p {
+  color: #4B4553; /* צבע אפור כהה זהה לשאר הטקסט בצד האפור */
+}
+
+.creative-template-en .creative-summary-title {
+  color: #4B4553; /* גם הכותרת של התקציר */
+}
+
+/* התאמת מיקום התאריכים במצב אנגלית */
+.creative-template-en .creative-experience-header {
+  padding-right: 0;
+  margin-right: 0;
+  padding-left: 2rem;
+  margin-left: -2rem;
+}
+
+.creative-template-en .creative-experience-date {
+  text-align: right;
+  min-width: 120px;
+  margin-left: auto;
+}
+
+.creative-template-en .creative-education-header,
+.creative-template-en .creative-military-header {
+  padding-right: 0;
+  margin-right: 0;
+  padding-left: 2rem;
+  margin-left: -2rem;
+} 
+
+/* עדכון מרווחים לתוכן באנגלית */
+.creative-template-en .creative-experience {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-summary {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience:first-of-type {
+  margin-top: 1.5rem;
+} 
+
+/* עדכון צבע התקציר המקצועי במצב אנגלית */
+.creative-template-en .creative-summary-content,
+.creative-template-en .creative-summary-content p {
+  color: #4B4553; /* צבע אפור כהה זהה לשאר הטקסט בצד האפור */
+}
+
+.creative-template-en .creative-summary-title {
+  color: #4B4553; /* גם הכותרת של התקציר */
+}
+
+/* התאמת מיקום התאריכים במצב אנגלית */
+.creative-template-en .creative-experience-header {
+  padding-right: 0;
+  margin-right: 0;
+  padding-left: 2rem;
+  margin-left: -2rem;
+}
+
+.creative-template-en .creative-experience-date {
+  text-align: right;
+  min-width: 120px;
+  margin-left: auto;
+}
+
+.creative-template-en .creative-education-header,
+.creative-template-en .creative-military-header {
+  padding-right: 0;
+  margin-right: 0;
+  padding-left: 2rem;
+  margin-left: -2rem;
+} 
+
+/* עדכון מרווחים לתוכן באנגלית */
+.creative-template-en .creative-experience {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-summary {
+  margin-left: 0;
+  margin-right: 0;
+  margin-top: 1.5rem;
+}
+
+.creative-template-en .creative-experience:first-of-type {
+  margin-top: 1.5rem;
+} 
+
+/* עדכון צבע התקציר המקצועי במצב אנגלית */
+.creative-template-en .creative-summary-content,
+.creative-template-en .creative-summary-content p {
+  color: #4B4553; /* צבע אפור כהה זהה לשאר הטקסט בצד האפור */
+}
+
+.creative-template-en .creative-summary-title {
+  color: #4B4553; /* גם הכותרת של התקציר */
+}
+
+/* התאמת מיקום התאריכים במצב אנגלית */
+.creative-template-en .creative-experience-header {
+  padding-right: 0;
+  margin-right: 0;
+  padding-left: 2rem;
+  margin-left: -2rem;
+}
+
+.creative-template-en .creative-experience-date {
+  text-align: right;
+  min-width: 120px;
+  margin-left: auto;
+}
+
+.creative-template-en .creative-education-header,
+.creative-template-en .creative-military-header {
+  padding-right: 0;
+  margin-right: 0;
+  padding-left: 2rem;
+  margin-left: -2rem;
+} 
 
 /* עדכון מרווחים לתוכן באנגלית */
 .creative-template-en .creative-experience {
