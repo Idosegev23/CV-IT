@@ -16,7 +16,7 @@ import {
 import { AnimatePresence, motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Skills, Skill } from '@/types/resume';
-import { Wrench, Brain, Languages, Trash2, Plus } from 'lucide-react';
+import { Wrench, Brain, Languages, Trash2, Plus, AlertCircle } from 'lucide-react';
 
 interface SkillsEditProps {
   isOpen: boolean;
@@ -51,6 +51,9 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
     level: 1
   });
 
+  const [showWarning, setShowWarning] = useState(false);
+  const [warningMessage, setWarningMessage] = useState('');
+
   useEffect(() => {
     if (isOpen && data) {
       setFormData({
@@ -63,6 +66,16 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
 
   const handleAddSkill = (type: 'technical' | 'soft') => {
     if (!newSkill.name.trim()) return;
+
+    const totalSkills = formData.technical.length + formData.soft.length;
+    if (totalSkills >= 10) {
+      setWarningMessage(isRTL ? 
+        'לא מומלץ להוסיף יותר מ-10 כישורים כדי לשמור על מסמך מסודר בדף אחד' :
+        'It is not recommended to add more than 10 skills to keep the document organized on one page'
+      );
+      setShowWarning(true);
+      return;
+    }
 
     setFormData(prev => ({
       ...prev,
@@ -264,8 +277,8 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
         <Dialog open={isOpen} onOpenChange={onClose}>
           <DialogContent className={cn(
             "!fixed !top-[50%] !left-[50%] !transform !-translate-x-1/2 !-translate-y-1/2",
-            "!w-[900px] !max-w-[92vw]",
-            "!p-0 !m-0 !gap-0 !overflow-hidden",
+            "!w-[900px] !max-w-[92vw] !max-h-[90vh]",
+            "!p-0 !m-0 !gap-0",
             "!bg-gradient-to-br !from-white !via-white !to-gray-50/80",
             "!rounded-2xl !shadow-[0_20px_70px_-10px_rgba(0,0,0,0.15)] !border !border-gray-100",
             isRTL ? "!rtl" : "!ltr",
@@ -273,7 +286,7 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
             template === 'creative' && "!font-heebo",
             template === 'general' && "!font-opensans",
             template === 'classic' && "!font-assistant",
-            "!block"
+            "!block !overflow-auto"
           )}
           style={{
             width: '900px',
@@ -290,13 +303,30 @@ export const SkillsEdit: React.FC<SkillsEditProps> = ({
               </DialogHeader>
             </div>
 
+            {showWarning && (
+              <div className={cn(
+                "!flex !items-center !gap-2 !px-8 !py-3",
+                "!bg-yellow-50 !border-b !border-yellow-100",
+                "!text-yellow-800 !text-sm"
+              )}>
+                <AlertCircle className="!w-5 !h-5 !text-yellow-600" />
+                <span>{warningMessage}</span>
+                <button 
+                  onClick={() => setShowWarning(false)}
+                  className="!ml-auto !text-yellow-600 hover:!text-yellow-800"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
             <div className="!px-8 !py-6 !space-y-8">
               <div className="!grid !grid-cols-2 !gap-6">
                 {renderSkillList('technical')}
                 {renderSkillList('soft')}
               </div>
 
-              <div className="!flex !gap-3 !mt-6">
+              <div className="!flex !gap-3 !mt-6 !sticky !bottom-0 !bg-white !py-4 !border-t !border-gray-100">
                 <button
                   onClick={onClose}
                   className={cn(

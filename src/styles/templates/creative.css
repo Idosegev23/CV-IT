@@ -318,37 +318,37 @@
 .creative-skills {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.4rem;
   max-width: 100%;
   padding-right: 0.5rem;
 }
 
 .creative-skills-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   color: white;
   font-weight: 500 !important;
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
+  margin-top: 0.6rem;
+  margin-bottom: 0.3rem;
   opacity: 0.9;
 }
 
 .creative-skills-group {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.4rem;
 }
 
 .creative-skill-item {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.3rem;
   width: 100%;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
 }
 
 .creative-skill-name {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   color: white;
   min-width: 80px;
   max-width: calc(100% - 70px);
@@ -510,7 +510,7 @@
 
 /* כישורים ארוכים */
 .creative-skill-name.small {
-  font-size: 0.8rem;
+  font-size: 0.7rem;
 }
 
 .creative-skill-name.smaller {
@@ -1043,9 +1043,9 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 2rem;
-  margin-bottom: 0.8rem;
-  font-size: 0.75rem;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+  font-size: 0.7rem;
   color: white;
   opacity: 0.9;
   padding-right: 0.3rem;

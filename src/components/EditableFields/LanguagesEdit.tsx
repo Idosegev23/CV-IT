@@ -89,7 +89,6 @@ export const LanguagesEdit: React.FC<LanguagesEditProps> = ({
 
     console.log('Adding language:', updatedLanguages);
     setLanguages(updatedLanguages);
-    onSave(updatedLanguages);
 
     setNewLanguage({
       language: '',

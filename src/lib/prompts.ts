@@ -119,11 +119,17 @@ Content Enhancement Guidelines:
      * Focus on most relevant abilities
      * Highlight key expertise areas
      * Keep skills directly related to target position
-   - Extract ALL skills mentioned throughout the CV content, including:
+   - Extract skills mentioned throughout the CV content, including:
      * Skills directly mentioned in the skills section
      * Technologies and tools mentioned in work experiences
      * Skills implied by achievements and responsibilities
      * Software, methodologies, or processes mentioned anywhere
+   - Important limitations on skills:
+     * Maximum total of 10 skills combined
+     * Technical skills: 3-5 most relevant skills
+     * Soft skills: 3-5 most important skills
+     * Prioritize skills most relevant to target position
+     * Remove less relevant skills to stay within limits
    - Categorize extracted skills into technical and soft skills
    - Assign numerical levels (1-5) based on the following criteria:
      * 5 = מומחה / רמה גבוהה מאוד / מצוין

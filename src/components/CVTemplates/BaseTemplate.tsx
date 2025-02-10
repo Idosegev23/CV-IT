@@ -22,25 +22,12 @@ const BaseTemplate: React.FC<BaseTemplateProps> = ({ children, lang, data }) => 
       const container = containerRef.current;
       if (!container) return;
 
-      const maxHeight = A4_HEIGHT_MM * MM_TO_PX;
-      const maxWidth = A4_WIDTH_MM * MM_TO_PX;
+      container.style.transform = 'none';
+      container.style.transformOrigin = 'initial';
       
-      let scale = 1;
-      let currentFontSize = 16;
-      
-      while (
-        (container.scrollHeight > maxHeight || container.scrollWidth > maxWidth) && 
-        currentFontSize > 8
-      ) {
-        currentFontSize -= 0.5;
-        container.style.fontSize = `${currentFontSize}px`;
-      }
-
-      if (container.scrollHeight > maxHeight) {
-        scale = maxHeight / container.scrollHeight;
-        container.style.transform = `scale(${scale})`;
-        container.style.transformOrigin = 'top left';
-      }
+      container.style.width = `${A4_WIDTH_MM}mm`;
+      container.style.minHeight = `${A4_HEIGHT_MM}mm`;
+      container.style.height = 'auto';
     };
 
     adjustSize();

@@ -461,7 +461,7 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
               {t.languages}
               {isEditing && (
                 <button
-                  onClick={() => handleEdit('language', 0)}
+                  onClick={() => handleEdit('languages', 0)}
                   className="general-edit-button general-edit-button-languages"
                   title={displayLang === 'he' ? 'ערוך שפות' : 'Edit Languages'}
                 >

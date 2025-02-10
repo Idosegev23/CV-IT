@@ -255,22 +255,19 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
         <Dialog open={isOpen} onOpenChange={onClose}>
           <DialogContent className={cn(
             "!fixed !top-[50%] !left-[50%] !transform !-translate-x-1/2 !-translate-y-1/2",
-            "!w-[600px] !max-w-[92vw]",
-            "!p-0 !m-0 !gap-0 !overflow-hidden",
-            "!bg-gradient-to-br !from-white !via-white !to-gray-50/80",
-            "!rounded-2xl !shadow-[0_20px_70px_-10px_rgba(0,0,0,0.15)] !border !border-gray-100",
+            "!w-[90vw] md:!w-[600px]",
+            "!h-[85vh]",
+            "!p-0 !m-0",
+            "!bg-white",
+            "!rounded-2xl !shadow-xl",
             isRTL ? "!rtl" : "!ltr",
             template === 'professional' && "!font-rubik",
             template === 'creative' && "!font-heebo",
             template === 'general' && "!font-opensans",
             template === 'classic' && "!font-assistant",
-            "!block"
-          )}
-          style={{
-            width: '600px',
-            maxWidth: '92vw'
-          }}>
-            <div className="px-6 py-5 border-b border-[#4856CD]/5 bg-gradient-to-r from-[#4856CD]/[0.03] to-transparent">
+            "!flex !flex-col !overflow-hidden"
+          )}>
+            <div className="shrink-0 px-6 py-5 border-b bg-gradient-to-r from-[#4856CD]/[0.03] to-transparent">
               <DialogHeader>
                 <DialogTitle className={cn(
                   "text-center text-[22px] font-bold",
@@ -281,123 +278,54 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
               </DialogHeader>
             </div>
 
-            <form onSubmit={handleSubmit} className="px-8 py-6 space-y-6 max-h-[80vh] overflow-y-auto">
-              <Accordion
-                type="single"
-                collapsible
-                value={expandedItem}
-                onValueChange={setExpandedItem}
-                className="space-y-4"
-              >
-                {experiences.map((item, index) => (
-                  <AccordionItem
-                    key={index}
-                    value={index.toString()}
-                    className={cn(
-                      "border border-gray-200/80 rounded-xl overflow-hidden",
-                      "hover:border-[#4856CD]/30 transition-colors duration-200",
-                      expandedItem === index.toString() && "border-[#4856CD]/30"
-                    )}
-                  >
-                    <AccordionTrigger className="px-4 py-3 hover:no-underline">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg !bg-[#4856CD]/5 flex items-center justify-center">
-                          <Briefcase className="w-4 h-4 !text-[#4856CD]" />
-                        </div>
-                        <div className="!text-right">
-                          <h3 className="font-medium !text-[15px] !text-gray-900">
-                            {item.position || (isRTL ? 'תפקיד חדש' : 'New Position')}
-                          </h3>
-                          <p className="!text-[13px] !text-gray-500">
-                            {item.company || (isRTL ? 'שם החברה' : 'Company Name')}
-                          </p>
-                        </div>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-4 pb-4">
-                      <div className="space-y-4">
-                        <div className="group">
-                          <label className={cn(
-                            "block text-[13px] font-medium mb-2",
-                            "text-gray-700 group-hover:text-[#4856CD]",
-                            "transition-colors duration-200"
-                          )}>
-                            {isRTL ? 'תפקיד' : 'Position'}
-                          </label>
-                          <div className="relative w-full">
-                            <Input
-                              value={item.position}
-                              onChange={(e) => handleExperienceChange(index, 'position', e.target.value)}
-                              className={cn(
-                                "w-full h-11 bg-white text-[14px] text-gray-900",
-                                "rounded-lg border border-gray-200/80",
-                                "shadow-sm shadow-gray-100/50",
-                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
-                                "focus:ring-2 focus:ring-[#4856CD]/10",
-                                "transition duration-200",
-                                isRTL ? "pr-11" : "pl-11"
-                              )}
-                              placeholder={isRTL ? 'הכנס תפקיד' : 'Enter position'}
-                              dir="auto"
-                            />
-                            <Briefcase className={cn(
-                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
-                              "text-gray-400 group-hover:text-[#4856CD]/70",
-                              "transition-colors duration-200",
-                              isRTL ? "right-4" : "left-4"
-                            )} />
+            <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+              <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+                <Accordion
+                  type="single"
+                  collapsible
+                  value={expandedItem}
+                  onValueChange={setExpandedItem}
+                  className="space-y-4"
+                >
+                  {experiences.map((item, index) => (
+                    <AccordionItem
+                      key={index}
+                      value={index.toString()}
+                      className={cn(
+                        "border border-gray-200/80 rounded-xl overflow-hidden",
+                        "hover:border-[#4856CD]/30 transition-colors duration-200",
+                        expandedItem === index.toString() && "border-[#4856CD]/30"
+                      )}
+                    >
+                      <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-lg !bg-[#4856CD]/5 flex items-center justify-center">
+                            <Briefcase className="w-4 h-4 !text-[#4856CD]" />
+                          </div>
+                          <div className="!text-right">
+                            <h3 className="font-medium !text-[15px] !text-gray-900">
+                              {item.position || (isRTL ? 'תפקיד חדש' : 'New Position')}
+                            </h3>
+                            <p className="!text-[13px] !text-gray-500">
+                              {item.company || (isRTL ? 'שם החברה' : 'Company Name')}
+                            </p>
                           </div>
                         </div>
-
-                        <div className="group">
-                          <label className={cn(
-                            "block text-[13px] font-medium mb-2",
-                            "text-gray-700 group-hover:text-[#4856CD]",
-                            "transition-colors duration-200"
-                          )}>
-                            {isRTL ? 'חברה' : 'Company'}
-                          </label>
-                          <div className="relative w-full">
-                            <Input
-                              value={item.company}
-                              onChange={(e) => handleExperienceChange(index, 'company', e.target.value)}
-                              className={cn(
-                                "w-full h-11 bg-white text-[14px] text-gray-900",
-                                "rounded-lg border border-gray-200/80",
-                                "shadow-sm shadow-gray-100/50",
-                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
-                                "focus:ring-2 focus:ring-[#4856CD]/10",
-                                "transition duration-200",
-                                isRTL ? "pr-11" : "pl-11"
-                              )}
-                              placeholder={isRTL ? 'הכנס שם חברה' : 'Enter company name'}
-                              dir="auto"
-                            />
-                            <Building2 className={cn(
-                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
-                              "text-gray-400 group-hover:text-[#4856CD]/70",
-                              "transition-colors duration-200",
-                              isRTL ? "right-4" : "left-4"
-                            )} />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
+                      </AccordionTrigger>
+                      <AccordionContent className="px-4 pb-4">
+                        <div className="space-y-4">
                           <div className="group">
                             <label className={cn(
                               "block text-[13px] font-medium mb-2",
                               "text-gray-700 group-hover:text-[#4856CD]",
                               "transition-colors duration-200"
                             )}>
-                              {isRTL ? 'תאריך התחלה' : 'Start Date'}
+                              {isRTL ? 'תפקיד' : 'Position'}
                             </label>
                             <div className="relative w-full">
-                              <DatePicker
-                                selected={item.startDate ? parseDateString(item.startDate) : null}
-                                onChange={(date: Date | null) => date && handleDateSelect(index, 'startDate', date)}
-                                dateFormat="MM/yyyy"
-                                showMonthYearPicker
-                                maxDate={item.endDate ? parseDateString(item.endDate) ?? undefined : undefined}
+                              <Input
+                                value={item.position}
+                                onChange={(e) => handleExperienceChange(index, 'position', e.target.value)}
                                 className={cn(
                                   "w-full h-11 bg-white text-[14px] text-gray-900",
                                   "rounded-lg border border-gray-200/80",
@@ -405,13 +333,12 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
                                   "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
                                   "focus:ring-2 focus:ring-[#4856CD]/10",
                                   "transition duration-200",
-                                  isRTL ? "pr-11 text-right" : "pl-11",
-                                  !item.startDate && "text-gray-400"
+                                  isRTL ? "pr-11" : "pl-11"
                                 )}
-                                placeholderText={isRTL ? 'בחר תאריך' : 'Select date'}
-                                locale={isRTL ? he : enUS}
+                                placeholder={isRTL ? 'הכנס תפקיד' : 'Enter position'}
+                                dir="auto"
                               />
-                              <Calendar className={cn(
+                              <Briefcase className={cn(
                                 "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
                                 "text-gray-400 group-hover:text-[#4856CD]/70",
                                 "transition-colors duration-200",
@@ -426,15 +353,12 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
                               "text-gray-700 group-hover:text-[#4856CD]",
                               "transition-colors duration-200"
                             )}>
-                              {isRTL ? 'תאריך סיום' : 'End Date'}
+                              {isRTL ? 'חברה' : 'Company'}
                             </label>
                             <div className="relative w-full">
-                              <DatePicker
-                                selected={item.endDate ? parseDateString(item.endDate) : null}
-                                onChange={(date: Date | null) => date && handleDateSelect(index, 'endDate', date)}
-                                dateFormat="MM/yyyy"
-                                showMonthYearPicker
-                                minDate={item.startDate ? parseDateString(item.startDate) ?? undefined : undefined}
+                              <Input
+                                value={item.company}
+                                onChange={(e) => handleExperienceChange(index, 'company', e.target.value)}
                                 className={cn(
                                   "w-full h-11 bg-white text-[14px] text-gray-900",
                                   "rounded-lg border border-gray-200/80",
@@ -442,13 +366,12 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
                                   "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
                                   "focus:ring-2 focus:ring-[#4856CD]/10",
                                   "transition duration-200",
-                                  isRTL ? "pr-11 text-right" : "pl-11",
-                                  !item.endDate && "text-gray-400"
+                                  isRTL ? "pr-11" : "pl-11"
                                 )}
-                                placeholderText={isRTL ? 'בחר תאריך' : 'Select date'}
-                                locale={isRTL ? he : enUS}
+                                placeholder={isRTL ? 'הכנס שם חברה' : 'Enter company name'}
+                                dir="auto"
                               />
-                              <Calendar className={cn(
+                              <Building2 className={cn(
                                 "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
                                 "text-gray-400 group-hover:text-[#4856CD]/70",
                                 "transition-colors duration-200",
@@ -456,26 +379,23 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
                               )} />
                             </div>
                           </div>
-                        </div>
 
-                        <div className="group">
-                          <label className={cn(
-                            "block text-[13px] font-medium mb-2",
-                            "text-gray-700 group-hover:text-[#4856CD]",
-                            "transition-colors duration-200"
-                          )}>
-                            {isRTL ? 'תיאור התפקיד' : 'Job Description'}
-                          </label>
-                          <div className="space-y-2">
-                            {Array.isArray(item.description) ? item.description.map((line: string, lineIndex: number) => (
-                              <div key={lineIndex} className="relative w-full flex items-center gap-2">
-                                <Input
-                                  value={line}
-                                  onChange={(e) => {
-                                    const newLines = [...item.description];
-                                    newLines[lineIndex] = e.target.value;
-                                    handleExperienceChange(index, 'description', newLines);
-                                  }}
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="group">
+                              <label className={cn(
+                                "block text-[13px] font-medium mb-2",
+                                "text-gray-700 group-hover:text-[#4856CD]",
+                                "transition-colors duration-200"
+                              )}>
+                                {isRTL ? 'תאריך התחלה' : 'Start Date'}
+                              </label>
+                              <div className="relative w-full">
+                                <DatePicker
+                                  selected={item.startDate ? parseDateString(item.startDate) : null}
+                                  onChange={(date: Date | null) => date && handleDateSelect(index, 'startDate', date)}
+                                  dateFormat="MM/yyyy"
+                                  showMonthYearPicker
+                                  maxDate={item.endDate ? parseDateString(item.endDate) ?? undefined : undefined}
                                   className={cn(
                                     "w-full h-11 bg-white text-[14px] text-gray-900",
                                     "rounded-lg border border-gray-200/80",
@@ -483,153 +403,232 @@ export const ExperienceEdit: React.FC<ExperienceEditProps> = ({
                                     "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
                                     "focus:ring-2 focus:ring-[#4856CD]/10",
                                     "transition duration-200",
-                                    isRTL ? "pr-11" : "pl-11"
+                                    isRTL ? "pr-11 text-right" : "pl-11",
+                                    !item.startDate && "text-gray-400"
                                   )}
-                                  placeholder={isRTL ? 'הכנס תיאור' : 'Enter description'}
-                                  dir="auto"
+                                  placeholderText={isRTL ? 'בחר תאריך' : 'Select date'}
+                                  locale={isRTL ? he : enUS}
                                 />
-                                <FileText className={cn(
+                                <Calendar className={cn(
                                   "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
                                   "text-gray-400 group-hover:text-[#4856CD]/70",
                                   "transition-colors duration-200",
                                   isRTL ? "right-4" : "left-4"
                                 )} />
-                                <div className="flex gap-1">
-                                  {lineIndex > 0 && (
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-11 w-11 rounded-lg hover:bg-[#4856CD]/5"
-                                      onClick={() => {
-                                        const newLines = [...item.description];
-                                        const temp = newLines[lineIndex];
-                                        newLines[lineIndex] = newLines[lineIndex - 1];
-                                        newLines[lineIndex - 1] = temp;
-                                        handleExperienceChange(index, 'description', newLines);
-                                      }}
-                                    >
-                                      <ArrowUp className="w-4 h-4 text-gray-500" />
-                                    </Button>
+                              </div>
+                            </div>
+
+                            <div className="group">
+                              <label className={cn(
+                                "block text-[13px] font-medium mb-2",
+                                "text-gray-700 group-hover:text-[#4856CD]",
+                                "transition-colors duration-200"
+                              )}>
+                                {isRTL ? 'תאריך סיום' : 'End Date'}
+                              </label>
+                              <div className="relative w-full">
+                                <DatePicker
+                                  selected={item.endDate ? parseDateString(item.endDate) : null}
+                                  onChange={(date: Date | null) => date && handleDateSelect(index, 'endDate', date)}
+                                  dateFormat="MM/yyyy"
+                                  showMonthYearPicker
+                                  minDate={item.startDate ? parseDateString(item.startDate) ?? undefined : undefined}
+                                  className={cn(
+                                    "w-full h-11 bg-white text-[14px] text-gray-900",
+                                    "rounded-lg border border-gray-200/80",
+                                    "shadow-sm shadow-gray-100/50",
+                                    "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                    "focus:ring-2 focus:ring-[#4856CD]/10",
+                                    "transition duration-200",
+                                    isRTL ? "pr-11 text-right" : "pl-11",
+                                    !item.endDate && "text-gray-400"
                                   )}
-                                  {lineIndex < item.description.length - 1 && (
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-11 w-11 rounded-lg hover:bg-[#4856CD]/5"
-                                      onClick={() => {
-                                        const newLines = [...item.description];
-                                        const temp = newLines[lineIndex];
-                                        newLines[lineIndex] = newLines[lineIndex + 1];
-                                        newLines[lineIndex + 1] = temp;
-                                        handleExperienceChange(index, 'description', newLines);
-                                      }}
-                                    >
-                                      <ArrowDown className="w-4 h-4 text-gray-500" />
-                                    </Button>
-                                  )}
-                                  <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-11 w-11 rounded-lg hover:bg-red-50"
-                                    onClick={() => {
+                                  placeholderText={isRTL ? 'בחר תאריך' : 'Select date'}
+                                  locale={isRTL ? he : enUS}
+                                />
+                                <Calendar className={cn(
+                                  "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                  "text-gray-400 group-hover:text-[#4856CD]/70",
+                                  "transition-colors duration-200",
+                                  isRTL ? "right-4" : "left-4"
+                                )} />
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="group">
+                            <label className={cn(
+                              "block text-[13px] font-medium mb-2",
+                              "text-gray-700 group-hover:text-[#4856CD]",
+                              "transition-colors duration-200"
+                            )}>
+                              {isRTL ? 'תיאור התפקיד' : 'Job Description'}
+                            </label>
+                            <div className="space-y-2">
+                              {Array.isArray(item.description) ? item.description.map((line: string, lineIndex: number) => (
+                                <div key={lineIndex} className="relative w-full flex items-center gap-2">
+                                  <Input
+                                    value={line}
+                                    onChange={(e) => {
                                       const newLines = [...item.description];
-                                      newLines.splice(lineIndex, 1);
+                                      newLines[lineIndex] = e.target.value;
                                       handleExperienceChange(index, 'description', newLines);
                                     }}
-                                  >
-                                    <Trash2 className="w-4 h-4 text-red-500" />
-                                  </Button>
+                                    className={cn(
+                                      "w-full h-11 bg-white text-[14px] text-gray-900",
+                                      "rounded-lg border border-gray-200/80",
+                                      "shadow-sm shadow-gray-100/50",
+                                      "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                      "focus:ring-2 focus:ring-[#4856CD]/10",
+                                      "transition duration-200",
+                                      isRTL ? "pr-11" : "pl-11"
+                                    )}
+                                    placeholder={isRTL ? 'הכנס תיאור' : 'Enter description'}
+                                    dir="auto"
+                                  />
+                                  <FileText className={cn(
+                                    "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                    "text-gray-400 group-hover:text-[#4856CD]/70",
+                                    "transition-colors duration-200",
+                                    isRTL ? "right-4" : "left-4"
+                                  )} />
+                                  <div className="flex gap-1">
+                                    {lineIndex > 0 && (
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-11 w-11 rounded-lg hover:bg-[#4856CD]/5"
+                                        onClick={() => {
+                                          const newLines = [...item.description];
+                                          const temp = newLines[lineIndex];
+                                          newLines[lineIndex] = newLines[lineIndex - 1];
+                                          newLines[lineIndex - 1] = temp;
+                                          handleExperienceChange(index, 'description', newLines);
+                                        }}
+                                      >
+                                        <ArrowUp className="w-4 h-4 text-gray-500" />
+                                      </Button>
+                                    )}
+                                    {lineIndex < item.description.length - 1 && (
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-11 w-11 rounded-lg hover:bg-[#4856CD]/5"
+                                        onClick={() => {
+                                          const newLines = [...item.description];
+                                          const temp = newLines[lineIndex];
+                                          newLines[lineIndex] = newLines[lineIndex + 1];
+                                          newLines[lineIndex + 1] = temp;
+                                          handleExperienceChange(index, 'description', newLines);
+                                        }}
+                                      >
+                                        <ArrowDown className="w-4 h-4 text-gray-500" />
+                                      </Button>
+                                    )}
+                                    <Button
+                                      type="button"
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-11 w-11 rounded-lg hover:bg-red-50"
+                                      onClick={() => {
+                                        const newLines = [...item.description];
+                                        newLines.splice(lineIndex, 1);
+                                        handleExperienceChange(index, 'description', newLines);
+                                      }}
+                                    >
+                                      <Trash2 className="w-4 h-4 text-red-500" />
+                                    </Button>
+                                  </div>
                                 </div>
-                              </div>
-                            )) : null}
+                              )) : null}
+                              <Button
+                                type="button"
+                                variant="outline"
+                                className={cn(
+                                  "w-full h-11",
+                                  "rounded-lg border border-dashed border-gray-200",
+                                  "text-[14px] text-gray-500",
+                                  "hover:border-[#4856CD]/30 hover:text-[#4856CD]",
+                                  "transition-colors duration-200"
+                                )}
+                                onClick={() => {
+                                  const currentDescription = Array.isArray(item.description) ? item.description : [];
+                                  handleExperienceChange(
+                                    index,
+                                    'description',
+                                    [...currentDescription, '']
+                                  );
+                                }}
+                              >
+                                <Plus className="w-4 h-4 mr-2" />
+                                {isRTL ? 'הוסף שורה' : 'Add Line'}
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex justify-end pt-2">
                             <Button
                               type="button"
-                              variant="outline"
-                              className={cn(
-                                "w-full h-11",
-                                "rounded-lg border border-dashed border-gray-200",
-                                "text-[14px] text-gray-500",
-                                "hover:border-[#4856CD]/30 hover:text-[#4856CD]",
-                                "transition-colors duration-200"
-                              )}
-                              onClick={() => {
-                                const currentDescription = Array.isArray(item.description) ? item.description : [];
-                                handleExperienceChange(
-                                  index,
-                                  'description',
-                                  [...currentDescription, '']
-                                );
-                              }}
+                              variant="ghost"
+                              className="h-11 px-4 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600"
+                              onClick={() => handleRemoveExperience(index)}
                             >
-                              <Plus className="w-4 h-4 mr-2" />
-                              {isRTL ? 'הוסף שורה' : 'Add Line'}
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              {isRTL ? 'מחק משרה' : 'Delete Position'}
                             </Button>
                           </div>
                         </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
 
-                        <div className="flex justify-end pt-2">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            className="h-11 px-4 rounded-lg text-red-500 hover:bg-red-50 hover:text-red-600"
-                            onClick={() => handleRemoveExperience(index)}
-                          >
-                            <Trash2 className="w-4 h-4 mr-2" />
-                            {isRTL ? 'מחק משרה' : 'Delete Position'}
-                          </Button>
-                        </div>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-
-              <Button
-                type="button"
-                onClick={handleAddNewExperience}
-                className={cn(
-                  "!w-full !p-4 !mt-4",
-                  "!bg-white !text-[#4856CD]",
-                  "!rounded-xl !border !border-[#4856CD]/30",
-                  "hover:!bg-[#4856CD] hover:!text-white",
-                  "!transition-all",
-                  "!flex !items-center !justify-center !gap-2"
-                )}
-              >
-                <Plus className="!w-4 !h-4" />
-                {isRTL ? 'הוסף עיסוק' : 'Add Position'}
-              </Button>
-
-              <div className="flex gap-3 pt-2">
-                <button
+                <Button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleAddNewExperience}
                   className={cn(
-                    "flex-1 h-11",
-                    "rounded-lg border-2 border-[#4856CD]",
-                    "text-[#4856CD] text-[14px] hover:bg-[#4856CD]/[0.02]",
-                    "active:scale-[0.98]",
-                    "transition-all duration-200 font-medium"
+                    "!w-full !p-4 !mt-4",
+                    "!bg-white !text-[#4856CD]",
+                    "!rounded-xl !border !border-[#4856CD]/30",
+                    "hover:!bg-[#4856CD] hover:!text-white",
+                    "!transition-all",
+                    "!flex !items-center !justify-center !gap-2"
                   )}
                 >
-                  {isRTL ? 'ביטול' : 'Cancel'}
-                </button>
-                <button
-                  type="submit"
-                  className={cn(
-                    "flex-1 h-11",
-                    "rounded-lg bg-[#4856CD]",
-                    "text-white text-[14px] hover:bg-[#4856CD]/95",
-                    "active:scale-[0.98]",
-                    "transition-all duration-200 font-medium",
-                    "shadow-md shadow-[#4856CD]/10"
-                  )}
-                >
-                  {isRTL ? 'שמירה' : 'Save'}
-                </button>
+                  <Plus className="!w-4 !h-4" />
+                  {isRTL ? 'הוסף עיסוק' : 'Add Position'}
+                </Button>
+
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={cn(
+                      "flex-1 h-11",
+                      "rounded-lg border-2 border-[#4856CD]",
+                      "text-[#4856CD] text-[14px] hover:bg-[#4856CD]/[0.02]",
+                      "active:scale-[0.98]",
+                      "transition-all duration-200 font-medium"
+                    )}
+                  >
+                    {isRTL ? 'ביטול' : 'Cancel'}
+                  </button>
+                  <button
+                    type="submit"
+                    className={cn(
+                      "flex-1 h-11",
+                      "rounded-lg bg-[#4856CD]",
+                      "text-white text-[14px] hover:bg-[#4856CD]/95",
+                      "active:scale-[0.98]",
+                      "transition-all duration-200 font-medium",
+                      "shadow-md shadow-[#4856CD]/10"
+                    )}
+                  >
+                    {isRTL ? 'שמירה' : 'Save'}
+                  </button>
+                </div>
               </div>
             </form>
           </DialogContent>

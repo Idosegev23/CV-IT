@@ -8,8 +8,8 @@
   --header-height: 90px;
   --content-height: calc(var(--a4-height) - var(--header-height));
   --font-family: 'Assistant', sans-serif;
-  --section-spacing: 1.2rem; /* הגדלת המרווח בין סקציות */
-  --item-spacing: 0.3rem; /* משאיר את המרווח בין פריטים קטן */
+  --section-spacing: 0.8rem; /* הקטנת המרווח בין סקציות */
+  --item-spacing: 0.2rem; /* הקטנת המרווח בין פריטים */
 }
 
 /* הגדרות בסיס */
@@ -205,7 +205,7 @@
 /* סקציות */
 .section {
   width: 100%;
-  margin-bottom: var(--section-spacing); /* שימוש במרווח המוגדל */
+  margin-bottom: var(--section-spacing);
   position: relative;
 }
 
@@ -401,7 +401,7 @@
 /* שפות */
 .languages-section {
   width: 100%;
-  margin: var(--section-spacing) 0;
+  margin: 0.6rem 0; /* הקטנת המרווח מסביב לשפות */
   position: relative;
   display: block !important;
 }
@@ -469,7 +469,7 @@
 /* תקציר */
 .summary-section {
   width: 100%;
-  margin: var(--section-spacing) 0;
+  margin: 0.6rem 0; /* הקטנת המרווח מסביב לתקציר */
   padding: 0 1.5rem;
   text-align: right;
   position: relative;
@@ -634,7 +634,7 @@
 /* השכלה */
 .education-section {
   width: 100%;
-  margin: var(--section-spacing) 0;
+  margin: 0.6rem 0; /* הקטנת המרווח מסביב להשכלה */
   position: relative;
 }
 
