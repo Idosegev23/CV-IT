@@ -131,15 +131,86 @@ export default function CreateCV() {
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full bg-[#4856CD] text-white py-3 rounded-lg font-medium
-                ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[#3A45C0]'}
-                transition-colors duration-200`}
-            >
-              {loading ? 'מעבד...' : 'השלמת התהליך'}
-            </button>
+            <div className="space-y-4">
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!sessionId?.trim()) {
+                    toast.error('נא להזין Session ID');
+                    return;
+                  }
+                  setLoading(true);
+                  try {
+                    const generateResponse = await fetch('/api/generate-cv', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ 
+                        sessionId: sessionId.trim(),
+                        lang: 'he'
+                      }),
+                    });
+
+                    if (!generateResponse.ok) {
+                      throw new Error('Failed to regenerate CV format');
+                    }
+
+                    setShowLinks(true);
+                    toast.success('התהליך המלא הופעל מחדש בהצלחה!');
+                  } catch (error: any) {
+                    console.error('Error:', error);
+                    toast.error(error?.message || 'שגיאה בהפעלת התהליך המלא');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors duration-200"
+                disabled={loading}
+              >
+                {loading ? 'מעבד...' : 'יצירת קורות חיים מחדש'}
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!sessionId?.trim()) {
+                    toast.error('נא להזין Session ID');
+                    return;
+                  }
+                  setLoading(true);
+                  try {
+                    const generateResponse = await fetch('/api/generate-pdf', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify({ 
+                        sessionId: sessionId.trim(),
+                        lang: 'he',
+                        useExistingFormat: true
+                      }),
+                    });
+
+                    if (!generateResponse.ok) {
+                      throw new Error('Failed to generate CV from existing format');
+                    }
+
+                    setShowLinks(true);
+                    toast.success('קורות החיים אורגנו מחדש בתבנית!');
+                  } catch (error: any) {
+                    console.error('Error:', error);
+                    toast.error(error?.message || 'שגיאה בארגון מחדש של קורות החיים');
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
+                className="w-full bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 transition-colors duration-200"
+                disabled={loading}
+              >
+                {loading ? 'מעבד...' : 'ארגון מחדש בתבנית קיימת'}
+              </button>
+            </div>
           </form>
 
           {/* הצגת הקישורים */}
@@ -152,14 +223,14 @@ export default function CreateCV() {
                   <h3 className="font-medium text-gray-700">קישור ליצירת קורות חיים</h3>
                   <div className="flex gap-2">
                     <button
-                      onClick={() => handleCopyLink(`${window.location.origin}/he/cv/classic?sessionId=${sessionId}`)}
+                      onClick={() => handleCopyLink(`${window.location.origin}/he/create/template/${sessionId}/preview`)}
                       className="p-2 hover:bg-gray-100 rounded-full transition-colors"
                       title="העתק קישור"
                     >
                       <Copy className="w-5 h-5 text-gray-600" />
                     </button>
                     <a
-                      href={`${window.location.origin}/he/cv/classic?sessionId=${sessionId}`}
+                      href={`${window.location.origin}/he/create/template/${sessionId}/preview`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -169,7 +240,7 @@ export default function CreateCV() {
                     </a>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 break-all">{`${window.location.origin}/he/cv/classic?sessionId=${sessionId}`}</p>
+                <p className="text-sm text-gray-500 break-all">{`${window.location.origin}/he/create/template/${sessionId}/preview`}</p>
               </div>
             </div>
           )}
