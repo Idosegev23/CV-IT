@@ -1,5 +1,5 @@
 'use client';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ResumeData, Degree } from '@/types/resume';
 import '../../styles/templates/classic.css';
 import Image from 'next/image';
@@ -7,6 +7,7 @@ import { Assistant } from 'next/font/google';
 import { adjustTemplateSize, formatDescription, formatDate, getSkillLevel } from './utils';
 import { Edit2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { PersonalInfoEdit } from '../EditableFields/PersonalInfoEdit';
 
 // הגדרת טיפוסים
 interface TechnicalSkill {
@@ -117,6 +118,7 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
   const t = translations[displayLang as keyof typeof translations];
   const { personalInfo, experience, education, skills, military } = data;
   const isRTL = displayLang === 'he';
+  const [isPersonalInfoOpen, setIsPersonalInfoOpen] = useState(false);
 
   console.log('ClassicTemplate - Full data:', data);
   console.log('ClassicTemplate - Skills:', skills);
@@ -139,6 +141,12 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
   const handleEdit = (type: string, index: number = 0) => {
     if (onEdit) {
       onEdit(type, index);
+    }
+  };
+
+  const handlePersonalInfoSave = (newData: any) => {
+    if (onUpdate) {
+      onUpdate('personalInfo', newData);
     }
   };
 
@@ -170,6 +178,15 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
             "header-name-wrapper",
             displayLang === 'he' ? 'header-name-wrapper-he' : 'header-name-wrapper-en'
           )}>
+            {isEditing && (
+              <button
+                onClick={() => setIsPersonalInfoOpen(true)}
+                className="edit-button"
+                title={displayLang === 'he' ? 'ערוך פרטים אישיים' : 'Edit Personal Info'}
+              >
+                <Edit2 className="w-4 h-4" />
+              </button>
+            )}
             <h1 className="header-name">
               <span className={cn(
                 "header-name-first",
@@ -212,6 +229,15 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
           </div>
         </div>
       </div>
+
+      <PersonalInfoEdit
+        isOpen={isPersonalInfoOpen}
+        onClose={() => setIsPersonalInfoOpen(false)}
+        data={data.personalInfo}
+        onSave={handlePersonalInfoSave}
+        isRTL={displayLang === 'he'}
+        template="classic"
+      />
 
       <main className="classic-content">
         {/* תקציר */}
