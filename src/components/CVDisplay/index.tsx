@@ -108,6 +108,7 @@ const transformResumeData = (rawData: any): ResumeData => {
           startDate: deg.years?.split('-')[0]?.trim() || deg.startDate || '',
           endDate: deg.years?.split('-')[1]?.trim() || deg.endDate || '',
           specialization: deg.specialization || '',
+          grade: deg.grade || '',
           years: deg.years || `${deg.startDate || ''} - ${deg.endDate || ''}`
         })) : []
       },
@@ -467,7 +468,10 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
             institution: degree.institution,
             specialization: degree.specialization,
             years: `${degree.startDate} - ${degree.endDate}`,
-            degreeType: degree.degreeType || 'academic'
+            degreeType: degree.degreeType || 'academic',
+            grade: degree.grade || '',
+            startDate: degree.startDate,
+            endDate: degree.endDate
           }))
         },
         military_service: editedData.military && {

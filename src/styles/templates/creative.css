@@ -961,13 +961,16 @@
 
 .creative-education-details {
   font-size: 0.9rem;
-  color: #4B4553;
-  font-weight: 300;
-  line-height: 1.4;
-  margin-top: 0.2rem;
-  padding-right: 0;
-  width: 100%;
-  max-width: 100%;
+  color: #666;
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.creative-education-details > div {
+  font-size: 0.9rem;
+  color: #666;
 }
 
 /* התאמות LTR להשכלה */
@@ -1882,13 +1885,16 @@
 
 .creative-education-details {
   font-size: 0.9rem;
-  color: #4B4553;
-  font-weight: 300;
-  line-height: 1.4;
-  margin-top: 0.2rem;
-  padding-right: 0;
-  width: 100%;
-  max-width: 100%;
+  color: #666;
+  margin-top: 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.creative-education-details > div {
+  font-size: 0.9rem;
+  color: #666;
 }
 
 /* התאמות LTR להשכלה */
@@ -2292,11 +2298,11 @@
 .creative-template-en .creative-summary {
   margin-left: 0;
   margin-right: 0;
-  margin-top: 1.5rem;
+  margin-top: 0rem !important;
 }
 
 .creative-template-en .creative-experience:first-of-type {
-  margin-top: 1.5rem;
+  margin-top: 0.5rem!important;
 }
 
 .creative-template-en .creative-experience-header {

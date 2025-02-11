@@ -44,11 +44,13 @@ const translations = {
     workExperience: 'ניסיון תעסוקתי',
     education: 'השכלה',
     militaryService: 'שירות צבאי',
+    nationalService: 'שירות לאומי',
     professionalSummary: 'תקציר מקצועי',
     email: 'דוא"ל',
     phone: 'טלפון',
     address: 'כתובת',
     specialization: 'התמחות',
+    grade: 'ממוצע ציונים',
     to: 'עד',
     present: 'היום',
     technicalSkills: 'כישורים טכניים',
@@ -61,11 +63,13 @@ const translations = {
     workExperience: 'Work Experience',
     education: 'Education',
     militaryService: 'Military Service',
+    nationalService: 'National Service',
     professionalSummary: 'Professional Summary',
     email: 'Email',
     phone: 'Phone',
     address: 'Address',
     specialization: 'Specialization',
+    grade: 'GPA',
     to: 'to',
     present: 'Present',
     technicalSkills: 'Technical Skills',
@@ -335,6 +339,11 @@ const GeneralTemplate: React.FC<GeneralTemplateProps> = ({
                   {degree.specialization && (
                     <div className="general-timeline-description">
                       <li>{`${t.specialization}: ${degree.specialization}`}</li>
+                    </div>
+                  )}
+                  {degree.grade && (
+                    <div className="general-timeline-description">
+                      <li>{`${t.grade}: ${degree.grade}`}</li>
                     </div>
                   )}
                 </div>

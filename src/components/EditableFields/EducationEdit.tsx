@@ -128,6 +128,7 @@ const EducationEdit: React.FC<EducationEditProps> = ({
       startDate: '',
       endDate: '',
       specialization: '',
+      grade: ''
     };
     setDegrees(prev => [newDegree, ...prev]);
     setExpandedItem('0');
@@ -155,7 +156,8 @@ const EducationEdit: React.FC<EducationEditProps> = ({
       startDate: degree.startDate.trim(),
       endDate: degree.endDate.trim(),
       specialization: degree.specialization ? degree.specialization.trim() : '',
-      years: `${degree.startDate.trim()} - ${degree.endDate.trim()}`
+      years: `${degree.startDate.trim()} - ${degree.endDate.trim()}`,
+      grade: degree.grade || ''
     }));
     
     onSave(validDegrees);
@@ -492,6 +494,44 @@ const EducationEdit: React.FC<EducationEditProps> = ({
                               placeholder={isRTL ? 'לדוגמה: הנדסת חשמל' : 'e.g. Electrical Engineering'}
                             />
                             <BookOpen className={cn(
+                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                              "text-gray-400 group-hover:text-[#4856CD]/70",
+                              "transition-colors duration-200",
+                              isRTL ? "right-4" : "left-4"
+                            )} />
+                          </div>
+                        </div>
+
+                        {/* ממוצע ציונים */}
+                        <div className="group">
+                          <label className={cn(
+                            "block text-[13px] font-medium mb-2",
+                            "text-gray-700 group-hover:text-[#4856CD]",
+                            "transition-colors duration-200"
+                          )}>
+                            {isRTL ? 'ממוצע ציונים (אופציונלי)' : 'GPA (Optional)'}
+                          </label>
+                          <div className="relative">
+                            <Input
+                              value={degree.grade || ''}
+                              onChange={(e) => handleDegreeChange(index, 'grade', e.target.value)}
+                              className={cn(
+                                "w-full h-11 bg-white text-[14px] text-gray-900",
+                                "rounded-lg border border-gray-200/80",
+                                "shadow-sm shadow-gray-100/50",
+                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                "focus:ring-2 focus:ring-[#4856CD]/10",
+                                "transition duration-200",
+                                isRTL ? "pr-11" : "pl-11"
+                              )}
+                              dir={isRTL ? 'rtl' : 'ltr'}
+                              placeholder={isRTL ? 'לדוגמה: 85' : 'e.g. 85'}
+                              type="number"
+                              min="0"
+                              max="100"
+                              step="0.1"
+                            />
+                            <GraduationCap className={cn(
                               "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
                               "text-gray-400 group-hover:text-[#4856CD]/70",
                               "transition-colors duration-200",

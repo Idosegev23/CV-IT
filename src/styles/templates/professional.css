@@ -1101,4 +1101,16 @@
 .professional-template-en .professional-right-column .professional-experience-description li::before {
   color: #333 !important;
   opacity: 0.7 !important;
+}
+
+.professional-education-specialization {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.professional-education-grade {
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.25rem;
 } 

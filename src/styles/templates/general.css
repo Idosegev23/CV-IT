@@ -527,25 +527,14 @@
 }
 
 .general-timeline-description {
-  margin-top: 0.5rem;
-  padding-right: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+  margin-top: 0.25rem;
   list-style-type: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
 }
 
 .general-timeline-description li {
-  font-size: 0.9rem;
-  font-weight: 300;
-  display: inline;
-}
-
-.general-timeline-description li:not(:last-child)::after {
-  content: " | ";
-  margin: 0 0.5rem;
-  opacity: 0.7;
-  font-weight: 200;
+  margin-bottom: 0.25rem;
 }
 
 .general-timeline-separator {

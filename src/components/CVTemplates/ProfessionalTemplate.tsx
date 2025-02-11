@@ -50,11 +50,13 @@ const translations: Record<DisplayLanguage, {
   workExperience: string;
   education: string;
   militaryService: string;
+  nationalService: string;
   professionalSummary: string;
   email: string;
   phone: string;
   address: string;
   specialization: string;
+  grade: string;
   to: string;
   present: string;
   technicalSkills: string;
@@ -67,11 +69,13 @@ const translations: Record<DisplayLanguage, {
     workExperience: 'ניסיון תעסוקתי',
     education: 'השכלה',
     militaryService: 'שירות צבאי',
+    nationalService: 'שירות לאומי',
     professionalSummary: 'תקציר מקצועי',
     email: 'דוא"ל',
     phone: 'טלפון',
     address: 'כתובת',
     specialization: 'התמחות',
+    grade: 'ממוצע ציונים',
     to: 'עד',
     present: 'היום',
     technicalSkills: 'כישורים טכניים',
@@ -84,11 +88,13 @@ const translations: Record<DisplayLanguage, {
     workExperience: 'Work Experience',
     education: 'Education',
     militaryService: 'Military Service',
+    nationalService: 'National Service',
     professionalSummary: 'Professional Summary',
     email: 'Email',
     phone: 'Phone',
     address: 'Address',
     specialization: 'Specialization',
+    grade: 'GPA',
     to: 'to',
     present: 'Present',
     technicalSkills: 'Technical Skills',
@@ -452,7 +458,12 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
                   </div>
                   {degree.specialization && (
                     <div className="professional-education-specialization">
-                      התמחות: {degree.specialization}
+                      {`${t.specialization}: ${degree.specialization}`}
+                    </div>
+                  )}
+                  {degree.grade && (
+                    <div className="professional-education-grade">
+                      {`${t.grade}: ${degree.grade}`}
                     </div>
                   )}
                 </div>
@@ -621,7 +632,12 @@ const ProfessionalTemplate: React.FC<ProfessionalTemplateProps> = ({
               </div>
               {degree.specialization && (
                 <div className="professional-education-specialization">
-                  התמחות: {degree.specialization}
+                  {`${t.specialization}: ${degree.specialization}`}
+                </div>
+              )}
+              {degree.grade && (
+                <div className="professional-education-grade">
+                  {`${t.grade}: ${degree.grade}`}
                 </div>
               )}
             </div>

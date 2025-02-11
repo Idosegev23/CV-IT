@@ -80,6 +80,7 @@ const translations = {
     phone: 'טלפון',
     address: 'כתובת',
     specialization: 'התמחות',
+    grade: 'ממוצע ציונים',
     to: 'עד',
     present: 'היום',
     technicalSkills: 'כישורים טכניים',
@@ -98,6 +99,7 @@ const translations = {
     phone: 'Phone',
     address: 'Address',
     specialization: 'Specialization',
+    grade: 'GPA',
     to: 'to',
     present: 'Present',
     technicalSkills: 'Technical Skills',
@@ -346,7 +348,12 @@ const ClassicTemplate: React.FC<ClassicTemplateProps> = ({
                     </div>
                     {degree.specialization && (
                       <div className="education-specialization">
-                        התמחות: {degree.specialization}
+                        {`${t.specialization}: ${degree.specialization}`}
+                      </div>
+                    )}
+                    {degree.grade && (
+                      <div className="education-grade">
+                        {`${t.grade}: ${degree.grade}`}
                       </div>
                     )}
                   </div>

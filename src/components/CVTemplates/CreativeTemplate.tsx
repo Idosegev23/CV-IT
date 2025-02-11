@@ -30,6 +30,7 @@ const translations = {
     phone: 'טלפון',
     address: 'כתובת',
     specialization: 'התמחות',
+    grade: 'ממוצע ציונים',
     to: 'עד',
     present: 'היום',
     technicalSkills: 'כישורים טכניים',
@@ -54,6 +55,7 @@ const translations = {
     phone: 'Phone',
     address: 'Address',
     specialization: 'Specialization',
+    grade: 'GPA',
     to: 'to',
     present: 'Present',
     technicalSkills: 'Technical Skills',
@@ -436,6 +438,9 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                             {degree.specialization && (
                               <div>{`${t.specialization}: ${degree.specialization}`}</div>
                             )}
+                            {degree.grade && (
+                              <div>{`${t.grade}: ${degree.grade}`}</div>
+                            )}
                           </div>
                         )}
                       </div>
@@ -589,6 +594,9 @@ const CreativeTemplate: React.FC<CreativeTemplateProps> = ({
                             {degree.field && <div>{degree.field}</div>}
                             {degree.specialization && (
                               <div>{`${t.specialization}: ${degree.specialization}`}</div>
+                            )}
+                            {degree.grade && (
+                              <div>{`${t.grade}: ${degree.grade}`}</div>
                             )}
                           </div>
                         )}
