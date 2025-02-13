@@ -223,7 +223,7 @@ export default function TemplatesPage() {
               onAnimationComplete={handleAnimationComplete}
               className="text-center relative"
             >
-              <div className={`absolute ${isRTL ? 'right-0' : 'left-0'} top-0`}>
+              <div className={`absolute ${isRTL ? 'right-0' : 'left-0'} -top-8`}>
                 <BackButton isRTL={isRTL} />
               </div>
 
@@ -237,7 +237,7 @@ export default function TemplatesPage() {
                 />
               </div>
 
-              <h1 className="text-3xl md:text-4xl font-bold mb-2 font-rubik text-[#1A1A1A]">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2 font-rubik text-[#1A1A1A] mt-16">
                 {isRTL ? 'בואו נבנה קו״ח מנצחים' : 'Let\'s Build a Winning CV'}
               </h1>
               
@@ -250,7 +250,7 @@ export default function TemplatesPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-4">
           {currentTemplates.map((template, index) => (
             <motion.div
               key={template.id}

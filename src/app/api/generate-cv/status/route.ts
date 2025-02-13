@@ -11,36 +11,48 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('sessionId');
-
+    
     if (!sessionId) {
-      return NextResponse.json(
-        { error: 'Session ID is required' },
-        { status: 400 }
-      );
+      throw new Error('Session ID is required');
     }
 
-    const { data, error } = await supabase
+    const { data: cvData, error } = await supabase
       .from('cv_data')
-      .select('status, format_cv, en_format_cv, level, market, cv_info, error_message')
+      .select('*')
       .eq('session_id', sessionId)
       .single();
 
     if (error) throw error;
 
-    return NextResponse.json({
-      status: data.status,
-      cv: data.status === 'completed' ? data.format_cv : null,
-      en_cv: data.status === 'completed' ? data.en_format_cv : null,
-      level: data.level,
-      market: data.market,
-      cv_info: data.cv_info,
-      error: data.error_message
-    });
+    // בדיקת תקיעות בתהליך
+    if (cvData.status === 'processing') {
+      const processStartTime = new Date(cvData.process_started_at).getTime();
+      const currentTime = new Date().getTime();
+      const processingTime = currentTime - processStartTime;
+      
+      // אם התהליך תקוע יותר מ-5 דקות
+      if (processingTime > 5 * 60 * 1000) {
+        // ניסיון אוטומטי לאתחול מחדש
+        await fetch('/api/generate-cv', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            sessionId,
+            retryFromContent: true,
+            isAutoRecovery: true
+          })
+        });
+        
+        return NextResponse.json({ status: 'restarted' });
+      }
+    }
 
+    return NextResponse.json({ status: cvData.status });
+    
   } catch (error) {
-    console.error('❌ [API] Error checking CV status:', error);
+    console.error('Status check error:', error);
     return NextResponse.json(
-      { error: 'Failed to check CV status' },
+      { error: 'Failed to check status' },
       { status: 500 }
     );
   }

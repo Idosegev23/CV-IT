@@ -63,6 +63,7 @@ export default function GalleryPage() {
   const lang = (params?.lang ?? 'he') as 'he' | 'en';
   const isRTL = lang === 'he';
   const [currentTemplate, setCurrentTemplate] = useState('pro');
+  const [isFullScreen, setIsFullScreen] = useState(false);
   
   const handleStart = () => {
     router.push(`/${lang}/packages`);
@@ -84,6 +85,14 @@ export default function GalleryPage() {
     });
   };
 
+  const handleTemplateClick = () => {
+    setIsFullScreen(true);
+  };
+
+  const closeFullScreen = () => {
+    setIsFullScreen(false);
+  };
+
   return (
     <main 
       className={cn(
@@ -101,29 +110,67 @@ export default function GalleryPage() {
         </h1>
 
         <div className="relative max-w-[350px] sm:max-w-2xl md:max-w-4xl mx-auto">
-          <button
-            onClick={isRTL ? handleNextTemplate : handlePrevTemplate}
-            className="absolute left-[-40px] top-1/2 transform -translate-y-1/2 z-10
-                     w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center
-                     hover:bg-gray-50 transition-colors duration-300
-                     focus:outline-none focus:ring-2 focus:ring-[#4856CD]"
-            aria-label={isRTL ? 'תבנית הבאה' : 'Previous template'}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+          {!isFullScreen && (
+            <button
+              onClick={isRTL ? handleNextTemplate : handlePrevTemplate}
+              className="absolute left-[-40px] top-1/2 transform -translate-y-1/2 z-10
+                       w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center
+                       hover:bg-gray-50 transition-colors duration-300
+                       focus:outline-none focus:ring-2 focus:ring-[#4856CD]"
+              aria-label={isRTL ? 'תבנית הבאה' : 'Previous template'}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
 
           <AnimatePresence mode="wait">
+            {isFullScreen && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+                onClick={closeFullScreen}
+              >
+                <motion.div
+                  initial={{ scale: 0.5 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0.5 }}
+                  className="relative w-full max-w-3xl aspect-[210/297] bg-white rounded-lg overflow-hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Image
+                    src={templates[currentTemplate as keyof typeof templates][lang].image}
+                    alt=""
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </motion.div>
+                <button
+                  onClick={closeFullScreen}
+                  className="absolute bottom-8 left-1/2 transform -translate-x-1/2 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors duration-300"
+                  aria-label="סגור תצוגה מלאה"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </motion.div>
+            )}
+
             <motion.div
               key={currentTemplate}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="relative aspect-[210/297] rounded-2xl overflow-hidden shadow-2xl bg-white"
+              className="relative aspect-[210/297] rounded-2xl overflow-hidden shadow-2xl bg-white cursor-pointer"
               role="img"
               aria-label={templates[currentTemplate as keyof typeof templates][lang].title}
+              onClick={handleTemplateClick}
             >
               <Image
                 src={templates[currentTemplate as keyof typeof templates][lang].image}
@@ -136,18 +183,20 @@ export default function GalleryPage() {
             </motion.div>
           </AnimatePresence>
 
-          <button
-            onClick={isRTL ? handlePrevTemplate : handleNextTemplate}
-            className="absolute right-[-40px] top-1/2 transform -translate-y-1/2 z-10
-                     w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center
-                     hover:bg-gray-50 transition-colors duration-300
-                     focus:outline-none focus:ring-2 focus:ring-[#4856CD]"
-            aria-label={isRTL ? 'תבנית קודמת' : 'Next template'}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          {!isFullScreen && (
+            <button
+              onClick={isRTL ? handlePrevTemplate : handleNextTemplate}
+              className="absolute right-[-40px] top-1/2 transform -translate-y-1/2 z-10
+                       w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center
+                       hover:bg-gray-50 transition-colors duration-300
+                       focus:outline-none focus:ring-2 focus:ring-[#4856CD]"
+              aria-label={isRTL ? 'תבנית קודמת' : 'Next template'}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          )}
 
           <div className="text-center mt-8 sm:mt-10">
             <h2 className="text-2xl sm:text-3xl font-bold mb-2 font-rubik text-[#4856CD]">

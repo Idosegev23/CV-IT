@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import Anthropic from '@anthropic-ai/sdk';
 import { CV_CREATION_SYSTEM_PROMPT, CV_ANALYSIS_SYSTEM_PROMPT } from '@/lib/prompts';
+import { reportError } from '@/lib/services/errorReporting';
 
 // יצירת חיבור ל-Supabase
 const supabase = createClient(
@@ -18,9 +19,11 @@ export const maxDuration = 300; // 5 דקות מקסימום
 
 export async function POST(request: Request) {
   let sessionId: string = '';
+  let cvData: any = null;
+  let body: any = null;  // הוספת משתנה לשמירת ה-body
 
   try {
-    const body = await request.json();
+    body = await request.json();  // שמירת ה-body במשתנה
     sessionId = body.sessionId;
     const { lang } = body;
     
@@ -28,17 +31,19 @@ export async function POST(request: Request) {
       throw new Error('Session ID is required');
     }
     
-    // 1. קבלת הנתונים מ-cv_data
-    const { data: cvDataResults, error: fetchError } = await supabase
+    // קבלת נתוני ה-CV
+    const { data, error: fetchError } = await supabase
       .from('cv_data')
-      .select('*, sessions!inner(*)')  // מוסיף join עם טבלת sessions
-      .eq('session_id', sessionId);
+      .select('*, sessions!inner(*)')
+      .eq('session_id', sessionId)
+      .single();
 
-    if (fetchError || !cvDataResults?.length) {
+    if (fetchError || !data) {
       throw new Error('Failed to fetch CV data');
     }
 
-    const cvData = cvDataResults[cvDataResults.length - 1];
+    cvData = data;
+
     const isPro = cvData.sessions?.package === 'pro';
 
     // 2. ניתוח הקורות חיים
@@ -151,6 +156,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
 
   } catch (error) {
+    await reportError({
+      error,
+      sessionId,
+      context: {
+        location: 'generate-cv/process',
+        action: 'generateCV',
+        timestamp: Date.now(),
+        additionalData: {
+          isPro: cvData?.sessions?.package === 'pro',
+          lang: body?.lang || 'he'  // עכשיו יש לנו גישה ל-body
+        }
+      }
+    });
+    
     console.error('❌ [API] Error in CV generation process:', error);
     
     // עדכון בדאטהבייס רק אם יש sessionId תקין

@@ -65,10 +65,14 @@ export const ProfessionalSummaryEdit: React.FC<ProfessionalSummaryEditProps> = (
     setIsLoading(true);
 
     try {
+      // זיהוי השפה של התקציר הנוכחי
+      const isHebrewContent = /[\u0590-\u05FF]/.test(summary);
+      const targetLanguage = isHebrewContent ? 'hebrew' : 'english';
+
       let prompt = '';
       
       if (action === 'longer') {
-        prompt = isRTL ? 
+        prompt = targetLanguage === 'hebrew' ? 
         `אתה מומחה לכתיבת קורות חיים עם יכולת לנתח ולהרחיב תקצירים מקצועיים.
         
 המידע הקיים:
@@ -122,7 +126,7 @@ IMPORTANT: Use ONLY the provided information. Do not invent or add information t
 Please return only the new summary, without additional explanations.`;
 
       } else if (action === 'shorter') {
-        prompt = isRTL ?
+        prompt = targetLanguage === 'hebrew' ?
         `אתה מומחה לכתיבת קורות חיים עם יכולת לנתח ולתמצת תקצירים מקצועיים.
         
 המידע הקיים:
@@ -176,7 +180,7 @@ IMPORTANT: Use ONLY the provided information. Do not invent or add information t
 Please return only the new summary, without additional explanations.`;
 
       } else {
-        prompt = isRTL ? 
+        prompt = targetLanguage === 'hebrew' ? 
         `אתה מומחה לכתיבת קורות חיים עם יכולת לנתח ולשכתב תקצירים מקצועיים באופן יצירתי.
         
 המידע הקיים:
@@ -231,6 +235,11 @@ IMPORTANT: Use ONLY the provided information. Do not invent or add information t
 
 Please return only the new summary, without additional explanations.`;
       }
+
+      // הוספת הנחיה ברורה לגבי שפת הפלט
+      prompt += targetLanguage === 'hebrew' ?
+        '\n\nחשוב: יש להחזיר את התשובה בעברית בלבד.' :
+        '\n\nIMPORTANT: Return the response in English only.';
 
       try {
         const response = await fetch('/api/summaryeditor', {
