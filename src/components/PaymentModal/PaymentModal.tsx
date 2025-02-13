@@ -12,7 +12,6 @@ import { useAppStore } from '@/lib/store';
 import { ReservistCouponPopup } from './ReservistCouponPopup';
 import Link from 'next/link';
 import styles from './PaymentModal.module.css';
-import { reportError } from '@/lib/services/errorReporting';
 
 interface PaymentModalProps {
   isOpen: boolean;
@@ -94,72 +93,30 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         
         if (currentSessionId) {
           try {
-            // הוספת ניסיונות חוזרים
-            let attempts = 0;
-            const maxAttempts = 3;
-            
-            while (attempts < maxAttempts) {
-              try {
-                const generateResponse = await fetch('/api/generate-cv', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ 
-                    sessionId: currentSessionId,
-                    lang
-                  }),
-                });
+            const generateResponse = await fetch('/api/generate-cv', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ 
+                sessionId: currentSessionId,
+                lang
+              }),
+            });
 
-                if (!generateResponse.ok) {
-                  throw new Error(`Failed to start CV generation: ${generateResponse.status}`);
-                }
-
-                console.log('Started CV generation process');
-                checkCVStatus(currentSessionId);
-                break; // יציאה מהלולאה אם הצליח
-                
-              } catch (error) {
-                attempts++;
-                if (attempts === maxAttempts) {
-                  throw error; // זריקת השגיאה רק אם כל הניסיונות נכשלו
-                }
-                // המתנה לפני ניסיון נוסף
-                await new Promise(resolve => setTimeout(resolve, 2000));
-              }
+            if (!generateResponse.ok) {
+              throw new Error('Failed to start CV generation');
             }
 
+            console.log('Started CV generation process');
+            checkCVStatus(currentSessionId);
           } catch (error) {
-            await reportError({
-              error,
-              sessionId: currentSessionId || undefined,
-              context: {
-                location: 'PaymentModal',
-                action: 'startCVGeneration',
-                previousState: { paymentStatus, cvStatus },
-                currentState: { paymentStatus: 'error', cvStatus: 'error' },
-                timestamp: Date.now(),
-                paymentStage: paymentStatus,
-                lastSuccessfulStep: cvStatus,
-                route: window.location.pathname
-              },
-              request: {
-                url: '/api/generate-cv',
-                method: 'POST',
-                body: { sessionId: currentSessionId, lang }
-              }
-            });
-            
+            console.error('Failed to start CV generation:', error);
             toast.error(
               isRTL 
-                ? 'אירעה שגיאה בהתחלת תהליך יצירת קורות החיים. מנסה שוב...' 
-                : 'Error starting CV generation. Retrying...'
+                ? 'אירעה שגיאה בהתחלת תהליך יצירת קורות החיים' 
+                : 'Error starting CV generation'
             );
-            
-            // שמירת הסשן ID למקרה של כישלון
-            localStorage.setItem('failedSessionId', currentSessionId);
-            localStorage.setItem('failedLang', lang);
-            
             setPaymentStatus('idle');
           }
         }
@@ -167,128 +124,52 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
     }
   }, []);
 
-  // הוספת פונקציה לבדיקת סשן שנכשל בטעינה קודמת
-  useEffect(() => {
-    const failedSessionId = localStorage.getItem('failedSessionId');
-    const failedLang = localStorage.getItem('failedLang');
-    
-    if (failedSessionId && failedLang) {
-      toast.info(
-        isRTL 
-          ? 'מנסה להשלים תהליך קודם שנכשל...' 
-          : 'Attempting to complete previous failed process...'
-      );
-      
-      checkCVStatus(failedSessionId);
-      
-      // ניקוי הנתונים מה-localStorage
-      localStorage.removeItem('failedSessionId');
-      localStorage.removeItem('failedLang');
-    }
-  }, []);
-
   const checkCVStatus = async (sessionId: string) => {
     try {
-      // בדיקת הנתונים ב-Supabase
-      const { data: cvData, error: cvError } = await supabase
-        .from('cv_data')
-        .select(`
-          *,
-          sessions!inner(*),
-          process_steps,
-          error_details
-        `)
-        .eq('session_id', sessionId)
-        .single();
-
-      if (cvError) throw new Error('Failed to fetch CV data');
-
-      // בדיקת שגיאות קודמות
-      if (cvData.status === 'error') {
-        console.error('Previous error:', cvData.error_details);
-        
-        // בדיקה אם יש את כל המידע הנדרש לניסיון חוזר
-        if (cvData.content && Object.keys(cvData.content).length > 0) {
-          // ניסיון חוזר אוטומטי
-          const retryResponse = await fetch('/api/generate-cv', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              sessionId,
-              lang,
-              retryFromContent: true,
-              previousError: cvData.error_details // שליחת פרטי השגיאה הקודמת
-            })
-          });
-
-          if (!retryResponse.ok) {
-            throw new Error('Retry attempt failed');
-          }
-
-          // המשך בדיקת סטטוס
+      const response = await fetch(`/api/generate-cv/status?sessionId=${sessionId}`);
+      const data = await response.json();
+      
+      console.log('CV Status:', data.status);
+      
+      switch(data.status) {
+        case 'completed':
+          setCvStatus('completed');
+          // ניווט לדף התצוגה המקדימה רק כשקורות החיים מוכנים
+          toast.success(
+            isRTL 
+              ? 'קורות החיים שלך מוכנים!' 
+              : 'Your CV is ready!',
+            {
+              duration: 2000,
+            }
+          );
+          setTimeout(() => {
+            window.location.href = `/${lang}/create/template/${sessionId}/preview`;
+          }, 1000);
+          break;
+        case 'error':
+          setCvStatus('error');
+          setCvError(data.error);
+          toast.error(isRTL ? 'אירעה שגיאה ביצירת קורות החיים' : 'Error generating CV');
+          break;
+        case 'processing':
+        case 'pending':
+        default:
+          // המשך לבדוק את הסטטוס כל 3 שניות
+          console.log('CV still processing, checking again in 3 seconds...');
           setTimeout(() => checkCVStatus(sessionId), 3000);
-          return;
-        }
+          break;
       }
-
-      // בדיקת התקדמות התהליך
-      if (cvData.process_steps) {
-        const { started, analysis_completed, formatting_completed, completed } = cvData.process_steps;
-        
-        let statusMessage = '';
-        if (completed) {
-          statusMessage = isRTL ? 'קורות החיים מוכנים!' : 'CV is ready!';
-        } else if (formatting_completed) {
-          statusMessage = isRTL ? 'מסיים עיבוד...' : 'Finalizing...';
-        } else if (analysis_completed) {
-          statusMessage = isRTL ? 'מעצב את קורות החיים...' : 'Formatting CV...';
-        } else if (started) {
-          statusMessage = isRTL ? 'מנתח את המידע...' : 'Analyzing data...';
-        }
-        
-        toast.info(statusMessage);
-      }
-
-      // המשך הלוגיקה הקיימת...
     } catch (error) {
-      await reportError({
-        error,
-        sessionId,
-        context: {
-          location: 'PaymentModal',
-          action: 'checkCVStatus',
-          previousState: { cvStatus },
-          currentState: { cvStatus: 'error' },
-          timestamp: Date.now()
-        },
-        request: {
-          url: '/api/cv-status',
-          method: 'POST',
-          body: { sessionId }
-        }
-      });
-      
-      console.error('Status check error:', error);
-      
-      // שמירת פרטי השגיאה
-      await supabase
-        .from('cv_data')
-        .update({
-          status: 'error',
-          error_details: {
-            message: error instanceof Error ? error.message : 'Unknown error',
-            timestamp: new Date().toISOString(),
-            location: 'status_check'
-          }
-        })
-        .eq('session_id', sessionId);
-
+      console.error('Error checking CV status:', error);
+      setCvStatus('error');
+      setCvError('Failed to check CV status');
       toast.error(
         isRTL 
-          ? 'אירעה שגיאה בבדיקת הסטטוס. מנסה שוב...' 
-          : 'Error checking status. Retrying...'
+          ? 'אירעה שגיאה בבדיקת סטטוס קורות החיים' 
+          : 'Error checking CV status'
       );
-      
+      // נסה שוב בעוד 3 שניות במקרה של שגיאה
       setTimeout(() => checkCVStatus(sessionId), 3000);
     }
   };
@@ -357,26 +238,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
             console.log('Started CV generation process');
             checkCVStatus(currentSessionId);
           } catch (error) {
-            await reportError({
-              error,
-              sessionId: currentSessionId || undefined,
-              context: {
-                location: 'PaymentModal',
-                action: 'startCVGeneration',
-                previousState: { paymentStatus, cvStatus },
-                currentState: { paymentStatus: 'error', cvStatus: 'error' },
-                timestamp: Date.now(),
-                paymentStage: paymentStatus,
-                lastSuccessfulStep: cvStatus,
-                route: window.location.pathname
-              },
-              request: {
-                url: '/api/generate-cv',
-                method: 'POST',
-                body: { sessionId: currentSessionId, lang }
-              }
-            });
-            
+            console.error('Failed to start CV generation:', error);
             toast.error(
               isRTL 
                 ? 'אירעה שגיאה בהתחלת תהליך יצירת קורות החיים' 
@@ -543,26 +405,7 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
                   console.log('Started CV generation process');
                   checkCVStatus(currentSessionId);
                 } catch (error) {
-                  await reportError({
-                    error,
-                    sessionId: currentSessionId || undefined,
-                    context: {
-                      location: 'PaymentModal',
-                      action: 'startCVGeneration',
-                      previousState: { paymentStatus, cvStatus },
-                      currentState: { paymentStatus: 'error', cvStatus: 'error' },
-                      timestamp: Date.now(),
-                      paymentStage: paymentStatus,
-                      lastSuccessfulStep: cvStatus,
-                      route: window.location.pathname
-                    },
-                    request: {
-                      url: '/api/generate-cv',
-                      method: 'POST',
-                      body: { sessionId: currentSessionId, lang }
-                    }
-                  });
-                  
+                  console.error('Failed to start CV generation:', error);
                   toast.error(
                     isRTL 
                       ? 'אירעה שגיאה בהתחלת תהליך יצירת קורות החיים' 
@@ -582,35 +425,6 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
       return () => window.removeEventListener('message', messageHandler);
 
     } catch (error) {
-      await reportError({
-        error,
-        sessionId: currentSessionId || undefined,
-        context: {
-          location: 'PaymentModal',
-          action: 'handlePayment',
-          previousState: { paymentStatus, cvStatus },
-          currentState: { paymentStatus: 'error', cvStatus: 'error' },
-          timestamp: Date.now()
-        },
-        request: {
-          url: '/api/payment/green-invoice',
-          method: 'POST',
-          body: {
-            sessionId: currentSessionId,
-            amount: finalPrice,
-            lang,
-            packageType: selectedPackage,
-            client: {
-              name: formData.name,
-              emails: [formData.email],
-              phone: formData.phone,
-              taxId: formData.id,
-              country: 'IL'
-            }
-          }
-        }
-      });
-      
       console.error('Process failed:', error);
       toast.error(
         isRTL 
@@ -736,23 +550,6 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
         toast.error(isRTL ? 'קוד קופון לא תקין' : 'Invalid coupon code');
       }
     } catch (error) {
-      await reportError({
-        error,
-        sessionId: currentSessionId || undefined,
-        context: {
-          location: 'PaymentModal',
-          action: 'validateCoupon',
-          previousState: { couponCode, isValidatingCoupon },
-          currentState: { isValidatingCoupon: false },
-          timestamp: Date.now()
-        },
-        request: {
-          url: '/api/reservist-coupons',
-          method: 'POST',
-          body: { code }
-        }
-      });
-      
       console.error('Error validating coupon:', error);
       toast.error(isRTL ? 'אירעה שגיאה בבדיקת הקופון' : 'Error validating coupon');
     } finally {

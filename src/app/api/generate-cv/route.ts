@@ -57,6 +57,8 @@ export async function POST(request: Request) {
             3. Enhance and expand the information professionally
             4. Add quantitative achievements where possible
             5. Language should be ${lang === 'he' ? 'Hebrew' : 'English'}
+            6. If education field is empty, equals 'NO_EDUCATION', or contains no valid education data, DO NOT include the education section at all in the final CV
+            7. If education field contains valid data, make sure to include it properly formatted in the education section
           `
         }
       ],
@@ -69,6 +71,25 @@ export async function POST(request: Request) {
 
     if (!formattedCV) {
       throw new Error('Invalid response from AI');
+    }
+
+    // מחיקת סעיף ההשכלה אם אין השכלה או אם זה NO_EDUCATION
+    if (cvData.content.education === 'NO_EDUCATION' || 
+        !cvData.content.education || 
+        cvData.content.education.trim() === '') {
+      delete formattedCV.education;
+    }
+
+    // וידוא שאם יש תוכן בשדה ההשכלה, הוא מופיע בקורות החיים
+    if (cvData.content.education && 
+        cvData.content.education !== 'NO_EDUCATION' && 
+        cvData.content.education.trim() !== '' && 
+        !formattedCV.education) {
+      formattedCV.education = {
+        items: [{
+          title: cvData.content.education
+        }]
+      };
     }
 
     // עדכון התוצאה

@@ -20,21 +20,21 @@ export const maxDuration = 300; // 5 דקות מקסימום
 export async function POST(request: Request) {
   let sessionId: string = '';
   let cvData: any = null;
-  let body: any = null;  // הוספת משתנה לשמירת ה-body
+  let body: any = null;
 
   try {
-    body = await request.json();  // שמירת ה-body במשתנה
+    body = await request.json();
     sessionId = body.sessionId;
-    const { lang } = body;
+    const { lang, retryFromContent } = body;
     
     if (!sessionId) {
       throw new Error('Session ID is required');
     }
     
-    // קבלת נתוני ה-CV
+    // בדיקת סטטוס התוכן לפני התחלת התהליך
     const { data, error: fetchError } = await supabase
       .from('cv_data')
-      .select('*, sessions!inner(*)')
+      .select('*, sessions(*)')
       .eq('session_id', sessionId)
       .single();
 
@@ -42,11 +42,30 @@ export async function POST(request: Request) {
       throw new Error('Failed to fetch CV data');
     }
 
+    // אם זה ניסיון חוזר, נאפשר להתחיל מחדש גם אם הסטטוס הוא error
+    if (!retryFromContent && data.status !== 'pending') {
+      throw new Error('Invalid CV data status');
+    }
+
     cvData = data;
+
+    // עדכון סטטוס להתחלת עיבוד
+    const { error: updateError } = await supabase
+      .from('cv_data')
+      .update({
+        status: 'processing',
+        error_message: null,
+        updated_at: new Date().toISOString()
+      })
+      .eq('session_id', sessionId);
+
+    if (updateError) {
+      throw new Error('Failed to update processing status');
+    }
 
     const isPro = cvData.sessions?.package === 'pro';
 
-    // 2. ניתוח הקורות חיים
+    // המשך התהליך כרגיל...
     const analysisCompletion = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 4096,
@@ -63,7 +82,16 @@ export async function POST(request: Request) {
       ? JSON.parse(analysisCompletion.content[0].text)
       : null;
 
-    // 3. יצירת קורות חיים בשפה המבוקשת
+    // עדכון סטטוס לאחר ניתוח
+    await supabase
+      .from('cv_data')
+      .update({
+        status: 'analyzed',
+        updated_at: new Date().toISOString()
+      })
+      .eq('session_id', sessionId);
+
+    // המשך התהליך...
     const completion = await anthropic.messages.create({
       model: 'claude-3-5-sonnet-20241022',
       max_tokens: 8192,
@@ -83,7 +111,15 @@ export async function POST(request: Request) {
       ? JSON.parse(completion.content[0].text)
       : null;
 
-    // ולידציה של התוכן שהתקבל
+    // עדכון סטטוס לפני עיבוד סופי
+    await supabase
+      .from('cv_data')
+      .update({
+        status: 'formatting',
+        updated_at: new Date().toISOString()
+      })
+      .eq('session_id', sessionId);
+
     if (!formattedCV || Object.keys(formattedCV).length === 0) {
       throw new Error('Generated CV content is empty or invalid');
     }
@@ -95,7 +131,6 @@ export async function POST(request: Request) {
           delete obj[key];
         } else if (typeof obj[key] === 'object') {
           validateContent(obj[key]);
-          // מחיקת אובייקטים ריקים
           if (Object.keys(obj[key]).length === 0) {
             delete obj[key];
           }
@@ -105,7 +140,7 @@ export async function POST(request: Request) {
 
     validateContent(formattedCV);
 
-    // בדיקה דומה לגרסה האנגלית אם קיימת
+    // טיפול בגרסה האנגלית אם נדרש
     let englishCV = null;
     if (isPro && lang === 'he') {
       const englishCompletion = await anthropic.messages.create({
@@ -132,13 +167,14 @@ export async function POST(request: Request) {
       }
     }
 
-    // 5. עדכון כל הנתונים בדאטהבייס
+    // עדכון סופי של הנתונים
     const updateData: any = {
       format_cv: formattedCV,
       level: analysis.level,
       market: analysis.market,
       cv_info: analysis.cv_info,
       status: 'completed',
+      error_message: null,
       updated_at: new Date().toISOString()
     };
 
@@ -146,12 +182,12 @@ export async function POST(request: Request) {
       updateData.en_format_cv = englishCV;
     }
 
-    const { error: updateError } = await supabase
+    const { error: finalUpdateError } = await supabase
       .from('cv_data')
       .update(updateData)
       .eq('session_id', sessionId);
 
-    if (updateError) throw updateError;
+    if (finalUpdateError) throw finalUpdateError;
 
     return NextResponse.json({ success: true });
 
@@ -165,14 +201,14 @@ export async function POST(request: Request) {
         timestamp: Date.now(),
         additionalData: {
           isPro: cvData?.sessions?.package === 'pro',
-          lang: body?.lang || 'he'  // עכשיו יש לנו גישה ל-body
+          lang: body?.lang || 'he'
         }
       }
     });
     
     console.error('❌ [API] Error in CV generation process:', error);
     
-    // עדכון בדאטהבייס רק אם יש sessionId תקין
+    // עדכון סטטוס שגיאה בדאטהבייס
     if (sessionId) {
       await supabase
         .from('cv_data')

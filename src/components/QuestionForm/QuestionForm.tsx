@@ -43,9 +43,23 @@ export interface Question {
   validationId: string;
 }
 
+// שינוי הגדרת הטיפוס כך שיתמוך בגישה דינמית
+type AnswerKeys = 'personal_details' | 'professional_summary' | 'experience' | 'education' | 'skills' | 'languages' | 'military_service';
+
+// שינוי הגדרת הטיפוס כך שיתמוך בגישה דינמית
+interface Answers extends Record<string, string> {
+  personal_details: string;
+  professional_summary: string;
+  experience: string;
+  education: string;
+  skills: string;
+  languages: string;
+  military_service: string;
+}
+
 export interface QuestionFormProps {
   questions: Question[];
-  onComplete: (answers: Record<string, string>) => Promise<void>;
+  onComplete: (answers: Answers) => Promise<void>;
   lang: 'he' | 'en';
   sessionId: string;
 }
@@ -242,13 +256,29 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
   const router = useRouter();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, string>>(() => {
-    // טעינת התשובות מה-localStorage בעת האתחול
+  const [answers, setAnswers] = useState<Answers>(() => {
     if (typeof window !== 'undefined') {
       const savedAnswers = localStorage.getItem('cvit_form_answers');
-      return savedAnswers ? JSON.parse(savedAnswers) : {};
+      const defaultAnswers: Answers = {
+        personal_details: '',
+        professional_summary: '',
+        experience: '',
+        education: '',
+        skills: '',
+        languages: '',
+        military_service: ''
+      };
+      return savedAnswers ? { ...defaultAnswers, ...JSON.parse(savedAnswers) } : defaultAnswers;
     }
-    return {};
+    return {
+      personal_details: '',
+      professional_summary: '',
+      experience: '',
+      education: '',
+      skills: '',
+      languages: '',
+      military_service: ''
+    };
   });
   const [currentAnswer, setCurrentAnswer] = useState(() => {
     // טעינת התשובה הנוכחית מהתשובות השמורות
@@ -322,7 +352,7 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
   const handleComplete = async (answers: Record<string, string>) => {
     try {
       setIsLoading(true);
-      await onComplete(answers);
+      await onComplete(answers as Answers);
     } catch (error) {
       console.error('Error:', error);
       toast.error(
@@ -352,8 +382,16 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
     return true;
   };
 
+  // עזרה בטיפוסים - וידוא שהטיפוס של currentQuestion.type הוא תקין
+  const getCurrentQuestionType = (index: number): AnswerKeys => {
+    const type = questions[index]?.type;
+    return (type as AnswerKeys) || 'personal_details';
+  };
+
   const handleNext = async () => {
     if (!currentQuestion) return;
+
+    const questionType = getCurrentQuestionType(currentQuestionIndex);
 
     // בדיקת ולידציה לפני המעבר לשאלה הבאה
     if (!validateCriticalFields(currentQuestion, currentAnswer)) {
@@ -361,26 +399,51 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       return;
     }
 
-    if (!currentAnswer?.trim()) {
+    // טיפול בשדה השכלה
+    if (questionType === 'education') {
+      const educationContent = currentAnswer?.trim() || '';
+      
+      // אם אין תוכן או שזה כבר מסומן כ-NO_EDUCATION
+      if (!educationContent || 
+          educationContent === 'NO_EDUCATION' || 
+          educationContent === 'NO_EDUCATION\nNO_EDUCATION' ||
+          answers.education === 'NO_EDUCATION') {
+        
+        const updatedAnswers = {
+          ...answers,
+          education: 'NO_EDUCATION'
+        };
+        
+        localStorage.setItem('cvit_form_answers', JSON.stringify(updatedAnswers));
+        setAnswers(updatedAnswers);
+        
+        if (currentQuestionIndex < questions.length - 1) {
+          setCurrentQuestionIndex(prev => prev + 1);
+          const nextType = getCurrentQuestionType(currentQuestionIndex + 1);
+          setCurrentAnswer(updatedAnswers[nextType] || '');
+          setError(null);
+          return;
+        }
+      }
+    }
+
+    if (!currentAnswer?.trim() && questionType !== 'education') {
       setError(lang === 'he' ? 'נא למלא תשובה' : 'Please fill in an answer');
       return;
     }
 
     const updatedAnswers = {
       ...answers,
-      [currentQuestion.type]: currentAnswer
-    };
-    
-    // שמירת התשובות המעודכנות ב-localStorage
-    localStorage.setItem('cvit_form_answers', JSON.stringify(updatedAnswers));
+      [questionType]: currentAnswer?.trim()
+    } as Answers;
 
-    // אם זו לא השאלה האחרונה
+    localStorage.setItem('cvit_form_answers', JSON.stringify(updatedAnswers));
+    setAnswers(updatedAnswers);
+
     if (currentQuestionIndex < questions.length - 1) {
-      setAnswers(updatedAnswers);
       setCurrentQuestionIndex(prev => prev + 1);
-      // טעינת התשובה הקודמת לשאלה הבאה אם קיימת
-      const nextQuestionType = questions[currentQuestionIndex + 1].type;
-      setCurrentAnswer(updatedAnswers[nextQuestionType] || '');
+      const nextType = getCurrentQuestionType(currentQuestionIndex + 1);
+      setCurrentAnswer(updatedAnswers[nextType] || '');
       setError(null);
       return;
     }
@@ -447,7 +510,7 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       // שמירת התשובה הנוכחית לפני המעבר אחורה
       const updatedAnswers = {
         ...answers,
-        [currentQuestion.type]: currentAnswer
+        [questions[currentQuestionIndex].type]: currentAnswer
       };
       localStorage.setItem('cvit_form_answers', JSON.stringify(updatedAnswers));
       setAnswers(updatedAnswers);
@@ -463,17 +526,29 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
     const newAnswer = e.target.value;
     setCurrentAnswer(newAnswer);
     
-    // עדכון התשובות בזיכרון המקומי בכל שינוי
+    const questionType = getCurrentQuestionType(currentQuestionIndex);
+    
     setAnswers(prev => {
       const updated = {
         ...prev,
-        [questions[currentQuestionIndex].type]: newAnswer
-      };
+        [questionType]: newAnswer.trim()
+      } as Answers;
+      
+      // אם זה שדה השכלה, נטפל במקרים מיוחדים
+      if (questionType === 'education') {
+        const educationContent = newAnswer.trim();
+        if (educationContent === 'NO_EDUCATION\nNO_EDUCATION') {
+          updated.education = 'NO_EDUCATION';
+        } else if (educationContent && educationContent !== 'NO_EDUCATION') {
+          // אם יש תוכן חדש שהוא לא NO_EDUCATION, נשתמש בו
+          updated.education = educationContent;
+        }
+      }
+      
       localStorage.setItem('cvit_form_answers', JSON.stringify(updated));
       return updated;
     });
     
-    // בדיקת ולידציה בזמן אמת לשדות קריטיים
     if (currentQuestion) {
       validateCriticalFields(currentQuestion, newAnswer);
     }
@@ -652,6 +727,15 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
                 lineHeight: '1.6'
               }}
             />
+
+            {/* הודעה מתחת לשדה ההשכלה */}
+            {currentQuestion.type === 'education' && (
+              <div className="mt-2 text-sm text-gray-500">
+                {lang === 'he'
+                  ? 'אם אין לך השכלה פורמלית, תוכל לדלג על שדה זה בשלב מאוחר יותר.'
+                  : 'If you have no formal education, you can skip this field later.'}
+              </div>
+            )}
             
             {/* כפתורי ניווט */}
             <div className="flex justify-center gap-4 mt-8">

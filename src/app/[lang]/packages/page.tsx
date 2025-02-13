@@ -273,12 +273,74 @@ export default function PackagesPage() {
 
         {/* קורטיינר החבילות עם סדר מותאם למובייל */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-[1200px] mx-auto mb-6">
+          {/* Advanced Package - חבילה המומלצת */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white/50 backdrop-blur-sm rounded-[44px] p-6 border-2 border-[#4754D6] flex flex-col relative transform md:-translate-y-4 md:scale-105 shadow-lg order-first md:order-2"
+          >
+            {/* תג "מומלץ" */}
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#4754D6] text-white px-4 py-1 rounded-full text-sm font-medium z-10">
+              {currentContent.recommended}
+            </div>
+
+            <div className="flex-grow">
+              <div className="text-center">
+                <h3 className="text-2xl font-light text-gray-600 mb-2 mt-3">
+                  {currentContent.packages.advanced.title}
+                </h3>
+                <div className="w-80 h-[1px] bg-[#4754D6] mx-auto mb-4" />
+              </div>
+              
+              {/* מחיר */}
+              <div className="text-center mb-4">
+                <div className="relative inline-block">
+                  <span className="text-8xl font-extralight text-gray-600 font-['Rubik']">85</span>
+                  <span className="absolute -right-4 bottom-1.5 text-base font-extralight text-gray-600 font-['Rubik']">₪</span>
+                </div>
+              </div>
+
+              {/* רשימת תכונות */}
+              <div className="space-y-2 mb-4">
+                {currentContent.packages.advanced.features.map((feature, index) => (
+                  <div 
+                    key={index} 
+                    className={`flex items-center gap-2 ${isRTL ? 'mr-auto pl-6' : 'ml-auto pr-6'} relative`}
+                    style={{ direction: isRTL ? 'rtl' : 'ltr' }}
+                  >
+                    <Image
+                      src={feature.included ? '/design/check.svg' : '/design/nocheck.svg'}
+                      alt={feature.included ? 'included' : 'not included'}
+                      width={20}
+                      height={20}
+                      className="flex-shrink-0"
+                    />
+                    <span className="text-base text-gray-600">{feature.text}</span>
+                    {feature.tag && (
+                      <span className="absolute -top-2 -right-2 bg-[#4754D6] text-white text-[10px] px-2 py-0.5 rounded-full transform rotate-12 whitespace-nowrap">
+                        {feature.tag}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <button 
+              onClick={() => handlePackageSelection('advanced')}
+              className="w-[180px] mx-auto bg-[#4754D6] hover:bg-[#4754D6]/90 text-white rounded-[50px] py-2 px-6 text-sm font-medium transition-colors"
+            >
+              {currentContent.cta}
+            </button>
+          </motion.div>
+
           {/* Basic Package */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white/40 backdrop-blur-sm rounded-[44px] p-6 border border-white flex flex-col"
+            className="bg-white/40 backdrop-blur-sm rounded-[44px] p-6 border border-white flex flex-col order-2 md:order-1"
           >
             <div className="flex-grow">
               <div className="text-center">
@@ -330,69 +392,12 @@ export default function PackagesPage() {
             </button>
           </motion.div>
 
-          {/* Advanced Package - חבילה המומלצת */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white/50 backdrop-blur-sm rounded-[44px] p-6 border-2 border-[#4754D6] flex flex-col relative transform md:-translate-y-4 md:scale-105 shadow-lg"
-          >
-            <div className="flex-grow">
-              <div className="text-center">
-                <h3 className="text-2xl font-light text-gray-600 mb-2">
-                  {currentContent.packages.advanced.title}
-                </h3>
-                <div className="w-80 h-[1px] bg-[#4754D6] mx-auto mb-4" />
-              </div>
-              
-              {/* מחיר */}
-              <div className="text-center mb-4">
-                <div className="relative inline-block">
-                  <span className="text-8xl font-extralight text-gray-600 font-['Rubik']">85</span>
-                  <span className="absolute -right-4 bottom-1.5 text-base font-extralight text-gray-600 font-['Rubik']">₪</span>
-                </div>
-              </div>
-
-              {/* רשימת תכונות */}
-              <div className="space-y-2 mb-4">
-                {currentContent.packages.advanced.features.map((feature, index) => (
-                  <div 
-                    key={index} 
-                    className={`flex items-center gap-2 ${isRTL ? 'mr-auto pl-6' : 'ml-auto pr-6'} relative`}
-                    style={{ direction: isRTL ? 'rtl' : 'ltr' }}
-                  >
-                    <Image
-                      src={feature.included ? '/design/check.svg' : '/design/nocheck.svg'}
-                      alt={feature.included ? 'included' : 'not included'}
-                      width={20}
-                      height={20}
-                      className="flex-shrink-0"
-                    />
-                    <span className="text-base text-gray-600">{feature.text}</span>
-                    {feature.tag && (
-                      <span className="absolute -top-2 -right-2 bg-[#4754D6] text-white text-[10px] px-2 py-0.5 rounded-full transform rotate-12 whitespace-nowrap">
-                        {feature.tag}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <button 
-              onClick={() => handlePackageSelection('advanced')}
-              className="w-[180px] mx-auto bg-[#4754D6] hover:bg-[#4754D6]/90 text-white rounded-[50px] py-2 px-6 text-sm font-medium transition-colors"
-            >
-              {currentContent.cta}
-            </button>
-          </motion.div>
-
           {/* Pro Package */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white/40 backdrop-blur-sm rounded-[44px] p-6 border border-white flex flex-col"
+            className="bg-white/40 backdrop-blur-sm rounded-[44px] p-6 border border-white flex flex-col order-3"
           >
             <div className="flex-grow">
               <div className="text-center">

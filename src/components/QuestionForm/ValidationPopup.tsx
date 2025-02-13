@@ -30,11 +30,17 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
   const [currentIssueIndex, setCurrentIssueIndex] = React.useState(0);
   const [answer, setAnswer] = React.useState('');
   const [validationError, setValidationError] = React.useState<string | null>(null);
+  const [showSkipEducation, setShowSkipEducation] = React.useState(false);
 
   React.useEffect(() => {
     if (issues[currentIssueIndex]) {
       const currentField = issues[currentIssueIndex].field;
-      setAnswer(answers[currentField] || '');
+      if (currentField === 'education' && answers[currentField] === 'NO_EDUCATION') {
+        setAnswer('');
+      } else {
+        setAnswer(answers[currentField] || '');
+      }
+      setShowSkipEducation(currentField === 'education');
     }
   }, [currentIssueIndex, issues, answers]);
 
@@ -47,6 +53,17 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
   const existingContent = answers[currentIssue.field] || '';
 
   const validateAnswer = (text: string): boolean => {
+    if (currentIssue.field === 'education') {
+      const educationContent = text.trim();
+      if (educationContent === 'NO_EDUCATION' || answers.education === 'NO_EDUCATION') {
+        return true;
+      }
+      if (educationContent === 'NO_EDUCATION\nNO_EDUCATION') {
+        onUpdateAnswer('education', 'NO_EDUCATION');
+        return true;
+      }
+    }
+
     const rules = validationRules[currentIssue.field as keyof typeof validationRules];
     if (!rules) return true;
 
@@ -61,6 +78,22 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
   };
 
   const handleNext = () => {
+    if (currentIssue.field === 'education') {
+      const educationContent = answer.trim();
+      if (educationContent === 'NO_EDUCATION' || 
+          answers.education === 'NO_EDUCATION' || 
+          educationContent === 'NO_EDUCATION\nNO_EDUCATION') {
+        onUpdateAnswer('education', 'NO_EDUCATION');
+        if (currentIssueIndex < issues.length - 1) {
+          setCurrentIssueIndex(prev => prev + 1);
+        } else {
+          onClose();
+          setCurrentIssueIndex(0);
+        }
+        return;
+      }
+    }
+
     if (answer.trim() && validateAnswer(answer)) {
       onUpdateAnswer(currentIssue.field, answer);
       setAnswer('');
@@ -128,6 +161,30 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
               <p className="text-lg text-gray-600">
                 {currentIssue.message}
               </p>
+              {showSkipEducation && (
+                <div className="bg-yellow-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-700">
+                    {lang === 'he'
+                      ? 'אין לך השכלה פורמלית? אין בעיה! לחץ על הכפתור למטה כדי להמשיך.'
+                      : 'No formal education? No problem! Click the button below to continue.'}
+                  </p>
+                  <button
+                    onClick={() => {
+                      onUpdateAnswer('education', 'NO_EDUCATION');
+                      if (currentIssueIndex < issues.length - 1) {
+                        setCurrentIssueIndex(prev => prev + 1);
+                      } else {
+                        onClose();
+                      }
+                    }}
+                    className="mt-2 px-4 py-2 bg-[#4856CD] text-white rounded-lg text-sm"
+                  >
+                    {lang === 'he'
+                      ? 'המשך ללא השכלה'
+                      : 'Continue without education'}
+                  </button>
+                </div>
+              )}
               {getFormatGuidance() && (
                 <p className="text-sm text-gray-500 bg-yellow-50 p-2 rounded">
                   {getFormatGuidance()}

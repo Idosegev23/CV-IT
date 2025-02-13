@@ -115,13 +115,25 @@ const analyzeWithGPT = async (text: string, field: ValidationSchemaKey, lang: 'h
       2. תואר/תעודה
       3. שנות לימוד (פורמט YYYY או YY)
       4. תחום לימודים
-      זהה אילו רשומות חסרות מידע מהנ"ל.` :
+
+      הערות חשובות:
+      - אם הטקסט הוא 'NO_EDUCATION' - זה תקין לחלוטין ואין צורך בבדיקות נוספות
+      - אם אין השכלה פורמלית - זה בסדר גמור
+      - רק אם יש תוכן שאינו 'NO_EDUCATION' - יש לבדוק את הפרטים הנ"ל
+
+      זהה אילו רשומות חסרות מידע מהנ"ל רק אם יש תוכן שאינו 'NO_EDUCATION'.` :
       `Check if each education entry includes:
       1. Institution name
       2. Degree/certification
       3. Years of study (YYYY or YY format)
       4. Field of study
-      Identify which entries are missing any of these elements.`,
+
+      Important notes:
+      - If the text is 'NO_EDUCATION' - it's perfectly valid and no further checks needed
+      - If there's no formal education - that's completely fine
+      - Only if there's content other than 'NO_EDUCATION' - check for the above details
+
+      Identify which entries are missing any of these elements only if there's content other than 'NO_EDUCATION'.`,
     
     military_service: lang === 'he' ?
       `בדוק אם הטקסט כולל:
@@ -186,10 +198,12 @@ const analyzeWithGPT = async (text: string, field: ValidationSchemaKey, lang: 'h
           ${lang === 'he' ? 
             `1. רשימה של מידע חסר (באופן מדויק ומעשי)
              2. אם מוזכרים תאריכים, וודא שהם בפורמט: YYYY-YYYY, YY-YY, או שנה בודדת
-             3. בדוק שלמות ומקצועיות של התוכן` :
+             3. בדוק שלמות ומקצועיות של התוכן
+             4. אם זה שדה השכלה וכתוב NO_EDUCATION - זה תקין לחלוטין` :
             `1. A list of specific missing information (be precise and actionable)
              2. If dates are mentioned, verify they follow the format: YYYY-YYYY, YY-YY, or single year
-             3. Check for completeness and professionalism of the content`}
+             3. Check for completeness and professionalism of the content
+             4. If this is education field and it says NO_EDUCATION - that's perfectly valid`}
 
           Text to analyze:
           ${text}
@@ -208,14 +222,14 @@ const analyzeWithGPT = async (text: string, field: ValidationSchemaKey, lang: 'h
           }
 
           Note: ${lang === 'he' ? 
-            'אם הטקסט מציין שמשהו לא רלוונטי (כמו שירות צבאי), סמן אותו כתקין.' :
-            'If the text indicates something is not applicable (like military service), mark it as valid.'}`
+            'אם הטקסט מציין שמשהו לא רלוונטי (כמו שירות צבאי או השכלה), סמן אותו כתקין.' :
+            'If the text indicates something is not applicable (like military service or education), mark it as valid.'}`
         }
       ],
       temperature: 0,
       system: lang === 'he' ?
-        "אתה עוזר לבדיקת קורות חיים מקצועי. ספק משוב ספציפי ובונה בפורמט JSON. היה מדויק אך בונה במשוב שלך." :
-        "You are a professional CV validation assistant. Provide specific, actionable feedback in JSON format. Be precise but constructive in your feedback."
+        "אתה עוזר לבדיקת קורות חיים מקצועי. ספק משוב ספציפי ובונה בפורמט JSON. היה מדויק אך בונה במשוב שלך. אם מדובר בשדה השכלה וכתוב NO_EDUCATION - זה תקין לחלוטין." :
+        "You are a professional CV validation assistant. Provide specific, actionable feedback in JSON format. Be precise but constructive in your feedback. If it's an education field and it says NO_EDUCATION - that's perfectly valid."
     });
 
     if (!completion.content || completion.content.length === 0) {
@@ -228,6 +242,12 @@ const analyzeWithGPT = async (text: string, field: ValidationSchemaKey, lang: 'h
     }
 
     const response = JSON.parse(content);
+    
+    // אם זה שדה השכלה וכתוב NO_EDUCATION - נחזיר רשימה ריקה
+    if (field === 'education' && text.trim() === 'NO_EDUCATION') {
+      return [];
+    }
+
     return response.missing_elements || [];
   } catch (error) {
     console.error('Error analyzing with Claude:', error);
@@ -277,8 +297,11 @@ export async function POST(request: Request) {
       });
     }
 
-    // בדיקת השכלה - רק תאריכים
-    if (content.education && !containsYear(content.education)) {
+    // בדיקת השכלה - רק אם יש תוכן ולא NO_EDUCATION
+    if (content.education && 
+        content.education !== 'NO_EDUCATION' && 
+        content.education.trim() !== 'NO_EDUCATION\nNO_EDUCATION' && 
+        !containsYear(content.education)) {
       issues.push({
         field: 'education',
         message: lang === 'he'
@@ -312,6 +335,11 @@ export async function POST(request: Request) {
           ]
         });
       }
+    }
+
+    // בדיקה נוספת לשדה השכלה - לנקות כפילויות של NO_EDUCATION
+    if (content.education === 'NO_EDUCATION\nNO_EDUCATION') {
+      content.education = 'NO_EDUCATION';
     }
 
     return NextResponse.json({ issues });

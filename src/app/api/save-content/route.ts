@@ -30,16 +30,17 @@ export async function POST(request: Request) {
       );
     }
 
-    // עדכון הנתונים בטבלת cv_data
+    // עדכון הנתונים בטבלת cv_data עם סטטוס pending
     const { data, error: updateError } = await supabaseAdmin
       .from('cv_data')
       .update({
         content: content,
         last_updated: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        status: 'completed'
+        status: 'pending',
+        error_message: null
       })
-      .eq('session_id', sessionId)  // שימוש ב-session_id במקום id
+      .eq('session_id', sessionId)
       .select()
       .single();
 
