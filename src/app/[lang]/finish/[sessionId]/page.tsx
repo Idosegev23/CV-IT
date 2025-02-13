@@ -69,6 +69,68 @@ type ActionType = 'send-interview-request' | 'send-cv' | 'generate-pdf' | 'trans
 
 const supabase = createClientComponentClient();
 
+const SendCVModal = ({ isOpen, onClose, onSend, isRTL }: { isOpen: boolean; onClose: () => void; onSend: () => void; isRTL: boolean }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="send-cv-title"
+    >
+      <div className="bg-white rounded-[32px] overflow-hidden w-full max-w-4xl relative flex flex-col md:flex-row">
+        {/* תמונה - מוסתרת במובייל */}
+        <div className="hidden md:block w-full md:w-1/2 bg-[#F3F4F1] p-8 flex items-center justify-center">
+          <div className="relative w-full aspect-square">
+            <Image
+              src="/sendcv.png"
+              alt=""
+              fill
+              className="object-contain"
+              role="presentation"
+            />
+          </div>
+        </div>
+        
+        {/* תוכן */}
+        <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center">
+          <div className="space-y-4 md:space-y-6">
+            <h2 
+              id="send-cv-title"
+              className="text-2xl md:text-3xl font-bold text-gray-800 leading-tight"
+            >
+              {isRTL ? 'נמצא לך עבודה!' : "Let's Find You a Job!"}
+            </h2>
+            <p className="text-gray-600 text-base md:text-lg leading-relaxed">
+              {isRTL 
+                ? 'בלחיצה אחת אנחנו משגרים את קורות החיים שלך לחברות ההשמה המובילות בארץ ויתחילו לעבוד על הקורות חיים שלך'
+                : 'With one click, we will send your CV to the leading recruitment companies in Israel and they will start working on your CV'}
+            </p>
+            
+            <div className="flex flex-col md:flex-row gap-3 md:gap-4 pt-4">
+              <button
+                onClick={onSend}
+                className="w-full px-4 md:px-6 py-3 md:py-4 bg-[#4754D6] text-white rounded-full font-medium hover:bg-[#3A45C0] transition-colors text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-[#4754D6] focus:ring-offset-2"
+                aria-label={isRTL ? 'שלח קורות חיים' : 'Send CV'}
+              >
+                {isRTL ? 'יאללה' : "Let's Go"}
+              </button>
+              <button
+                onClick={onClose}
+                className="w-full px-4 md:px-6 py-3 md:py-4 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors text-base md:text-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                aria-label={isRTL ? 'סגור חלון' : 'Close window'}
+              >
+                {isRTL ? 'לא עכשיו' : 'Not Now'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function FinishPage() {
   const params = useParams();
   const lang = (params?.lang ?? 'he') as 'he' | 'en';
@@ -416,123 +478,47 @@ export default function FinishPage() {
     setShowLoadingModal(false);
   };
 
-  const renderFeatureButton = (featureKey: string, feature: FeatureConfig) => (
-    <motion.div
-      key={featureKey}
-      className={cn(
-        "relative bg-white rounded-[32px] p-6 transition-all",
-        feature.isLocked 
-          ? "opacity-70 pointer-events-none"
-          : "hover:shadow-lg cursor-pointer"
-      )}
-      whileHover={feature.isLocked ? {} : { scale: 1.02 }}
-      onClick={() => !feature.isLocked && handleFeatureClick(featureKey)}
-    >
-      {feature.tag && (
-        <div className="absolute top-4 right-4 bg-[#4856CD] text-white px-3 py-1 rounded-full text-sm">
-          {feature.tag}
-        </div>
-      )}
-      <div className="flex flex-col items-center gap-4">
-        {featureKey === 'linkedin' ? (
-          <Linkedin size={48} className="text-[#0A66C2]" />
-        ) : (
-          <Image
-            src={`/design/${feature.icon}.svg`}
-            alt={feature.title}
-            width={48}
-            height={48}
-            className={feature.isLocked ? "opacity-50" : ""}
-          />
-        )}
-        <div className="text-center">
-          <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-          <p className="text-sm text-gray-600">{feature.description}</p>
-        </div>
-      </div>
-    </motion.div>
-  );
-
   if (!dictionary) return null;
 
   return (
     <div className="min-h-screen bg-[#EAEAE7]">
-      {showSendCVModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-[32px] overflow-hidden max-w-4xl w-full relative flex">
-            {/* צד שמאל - תמונה */}
-            <div className="w-1/2 bg-[#F3F4F1] p-8 flex items-center justify-center">
-              <div className="relative w-full aspect-square">
-                <Image
-                  src="/sendcv.png"
-                  alt="Send CV"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-            </div>
-            
-            {/* צד ימין - תוכן */}
-            <div className="w-1/2 p-8 flex flex-col justify-center">
-              <div className="space-y-6">
-                <h2 className="text-3xl font-bold text-gray-800 leading-tight">
-                  {isRTL ? 'נמצא לך עבודה!' : "Let's Find You a Job!"}
-                </h2>
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  {isRTL 
-                    ? 'בלחיצה אחת אנחנו משגרים את קורות החיים שלך לחברות ההשמה המובילות בארץ ויתחילו לעבוד על הקורות חיים שלך'
-                    : 'With one click, we will send your CV to the leading recruitment companies in Israel and they will start working on your CV'}
-                </p>
-                
-                <div className="flex gap-4 pt-4">
-                  <button
-                    onClick={handleSendCV}
-                    className="flex-1 px-6 py-4 bg-[#4754D6] text-white rounded-full font-medium hover:bg-[#3A45C0] transition-colors text-lg"
-                  >
-                    {isRTL ? 'יאללה' : "Let's Go"}
-                  </button>
-                  <button
-                    onClick={handleCloseSendCVModal}
-                    className="flex-1 px-6 py-4 bg-gray-100 text-gray-700 rounded-full font-medium hover:bg-gray-200 transition-colors text-lg"
-                  >
-                    {isRTL ? 'לא עכשיו' : 'Not Now'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <SendCVModal 
+        isOpen={showSendCVModal}
+        onClose={handleCloseSendCVModal}
+        onSend={handleSendCV}
+        isRTL={isRTL}
+      />
 
-      <div className="container mx-auto px-4 py-12">
-        <motion.div className="max-w-4xl mx-auto text-center space-y-8">
+      <div className="container mx-auto px-4 py-8 md:py-12">
+        <motion.div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mb-8"
+            className="mb-6 md:mb-8"
           >
             <Image
               src="/design/finish.svg"
-              alt="Success"
-              width={200}
-              height={200}
-              className="mx-auto"
+              alt=""
+              width={150}
+              height={150}
+              className="mx-auto w-32 md:w-[200px]"
               priority
+              role="presentation"
             />
           </motion.div>
 
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center max-w-[800px] mx-auto mb-8"
+            className="text-center max-w-[800px] mx-auto mb-6 md:mb-8 px-4"
           >
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-600 mb-3">
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-600 mb-2 md:mb-3">
               {isRTL ? `סיימנו, ${userName}!` : `We're Done, ${userName}!`}
             </h1>
-            <h2 className="text-lg md:text-xl text-[#4754D6] font-medium mb-2">
+            <h2 className="text-base md:text-xl text-[#4754D6] font-medium mb-2">
               {isRTL ? 'קורות החיים שלך מוכנים' : 'Your CV is Ready'}
             </h2>
-            <p className="text-base md:text-lg text-gray-600 leading-relaxed">
+            <p className="text-sm md:text-lg text-gray-600 leading-relaxed">
               {isRTL 
                 ? 'בחר מה תרצה לעשות עם קורות החיים שלך' 
                 : 'Choose what you\'d like to do with your CV'
@@ -540,9 +526,57 @@ export default function FinishPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {Object.entries(features).map(([key, feature]) => (
-              renderFeatureButton(key, feature)
+              <motion.div
+                key={key}
+                className={cn(
+                  "relative bg-white rounded-[20px] md:rounded-[32px] p-4 md:p-6 transition-all",
+                  feature.isLocked 
+                    ? "opacity-70 pointer-events-none"
+                    : "hover:shadow-lg cursor-pointer"
+                )}
+                whileHover={feature.isLocked ? {} : { scale: 1.02 }}
+                onClick={() => !feature.isLocked && handleFeatureClick(key)}
+                role="button"
+                tabIndex={feature.isLocked ? -1 : 0}
+                aria-label={feature.title}
+                aria-disabled={feature.isLocked}
+              >
+                {feature.tag && (
+                  <div 
+                    className="absolute top-3 right-3 md:top-4 md:right-4 bg-[#4856CD] text-white px-2 md:px-3 py-1 rounded-full text-xs md:text-sm"
+                    role="status"
+                  >
+                    {feature.tag}
+                  </div>
+                )}
+                <div className="flex flex-col items-center gap-3 md:gap-4">
+                  {key === 'linkedin' ? (
+                    <Linkedin 
+                      size={32} 
+                      className="text-[#0A66C2] md:w-12 md:h-12" 
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <Image
+                      src={`/design/${feature.icon}.svg`}
+                      alt=""
+                      width={32}
+                      height={32}
+                      className={cn(
+                        "md:w-12 md:h-12",
+                        feature.isLocked ? "opacity-50" : ""
+                      )}
+                      role="presentation"
+                    />
+                  )}
+                  <div className="text-center">
+                    <h3 className="text-base md:text-lg font-semibold mb-1 md:mb-2">{feature.title}</h3>
+                    <p className="text-xs md:text-sm text-gray-600">{feature.description}</p>
+                  </div>
+                </div>
+              </motion.div>
             ))}
           </div>
         </motion.div>

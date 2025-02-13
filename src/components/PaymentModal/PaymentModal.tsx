@@ -304,26 +304,33 @@ export const PaymentModal = ({ isOpen, onClose, isRTL, lang }: PaymentModalProps
       const messageHandler = (event: MessageEvent) => {
         try {
           console.log('Received message from iframe:', event.data);
-          let data;
+          let data: { success?: boolean; error?: string; status?: number; action?: string } = {};
           
+          // בדיקה אם המידע הוא אובייקט
           if (typeof event.data === 'object' && event.data !== null) {
             data = event.data;
+            // אם זו הודעת תשלום, נמיר אותה לפורמט הנכון
             if (data.action === 'payment') {
               data = {
                 success: data.status === 1,
                 error: data.status !== 1 ? 'Payment failed' : undefined
               };
             }
-          } else {
+          } else if (typeof event.data === 'string') {
+            // ניסיון לפרסר JSON אם זה סטרינג
             try {
               data = JSON.parse(event.data);
             } catch (e) {
-              console.log('Not a valid message format, ignoring');
+              console.warn('Failed to parse message as JSON:', e);
               return;
             }
+          } else {
+            console.warn('Unsupported message format, ignoring');
+            return;
           }
           
-          if (data.success) {
+          // וידוא שיש לנו את השדות הנדרשים לפני המשך העיבוד
+          if (data.success === true) {
             console.log('Payment successful');
             setPaymentIframe(null);
             setPaymentStatus('success');
