@@ -977,16 +977,16 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         updatedData.education = newData;
         break;
       case 'skills':
-        updatedData.skills = newData;
+        updatedData.skills = {
+          ...updatedData.skills,
+          ...newData
+        };
         break;
       case 'languages':
         console.log('Saving languages:', newData);
-        updatedData = {
-          ...updatedData,
-          skills: {
-            ...updatedData.skills,
-            languages: Array.isArray(newData) ? newData : []
-          }
+        updatedData.skills = {
+          ...updatedData.skills,
+          languages: Array.isArray(newData) ? newData : []
         };
         break;
       case 'military':

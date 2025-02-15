@@ -81,7 +81,7 @@ const SendCVModal = ({ isOpen, onClose, onSend, isRTL }: { isOpen: boolean; onCl
     >
       <div className="bg-white rounded-[32px] overflow-hidden w-full max-w-4xl relative flex flex-col md:flex-row">
         {/* תמונה - מוסתרת במובייל */}
-        <div className="hidden md:block w-full md:w-1/2 bg-[#F3F4F1] p-8 flex items-center justify-center">
+        <div className="hidden md:flex w-full md:w-1/2 bg-[#F3F4F1] p-8 items-center justify-center">
           <div className="relative w-full aspect-square">
             <Image
               src="/sendcv.png"
