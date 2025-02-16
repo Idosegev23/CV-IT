@@ -14,7 +14,7 @@ import {
 } from "@/components/theme/ui/accordion";
 import { AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
-import { Building2, Calendar, Briefcase, GripVertical, Plus, Trash2, MapPin, AlertCircle, Sparkles } from 'lucide-react';
+import { Building2, Calendar, Briefcase, GripVertical, Plus, Trash2, MapPin, AlertCircle, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Experience } from '@/types/resume';
 import { Button } from '@/components/theme/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/theme/ui/popover';
@@ -175,11 +175,13 @@ const AIPopup: React.FC<AIPopupProps> = ({
   const [generatedText, setGeneratedText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [wordCount, setWordCount] = useState(0);
+  const [status, setStatus] = useState<'idle' | 'generating' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     setText(originalText);
     setGeneratedText('');
     setWordCount(originalText.trim().split(/\s+/).length);
+    setStatus('idle');
   }, [originalText]);
 
   const handleTextChange = (value: string) => {
@@ -187,40 +189,59 @@ const AIPopup: React.FC<AIPopupProps> = ({
     setWordCount(value.trim().split(/\s+/).length);
   };
 
+  const handleSave = () => {
+    onGenerate(generatedText);
+    onClose();
+    setGeneratedText('');
+    setStatus('idle');
+  };
+
   const handleGenerate = async () => {
     setIsLoading(true);
+    setStatus('generating');
     try {
       const prompt = displayLang === 'he' ? `
-        You are a professional CV writer. Your goal is to help users write short, focused, and effective job descriptions.
-
-        Important rules:
-        1. The description must be up to 10 words
-        2. The description should be focused and emphasize achievements and impact
-        3. Use strong and measurable action verbs
-        4. Avoid unnecessary connecting words
-        5. Focus on results, not processes
-
-        Original text: ${text}
-
-        Please create a shortened and effective version of this description that follows all the rules mentioned.
-        The response should be in English.
-      ` : `
         אתה עוזר מקצועי לכתיבת קורות חיים. המטרה שלך היא לעזור למשתמשים לכתוב תיאורי תפקיד קצרים, ממוקדים ואפקטיביים.
 
         הנה כמה כללים חשובים:
         1. התיאור חייב להיות עד 10 מילים
         2. התיאור צריך להיות ממוקד ולהדגיש הישגים והשפעה
-        3. יש להשתמש בפעלים חזקים ומדידים
+        3. יש להשתמש בפעלים חזקים ומדידים (כמו: הובלתי, פיתחתי, שיפרתי, הגדלתי)
         4. יש להימנע ממילות קישור מיותרות
         5. יש להתמקד בתוצאות ולא בתהליכים
+        6. יש לשמור על שפה מקצועית ומדויקת
+        7. יש להוסיף מספרים ונתונים כמותיים אם יש (%, מספר אנשים, תקציב וכו')
+        8. יש לשמור על הקשר לתחום העיסוק
+        9. יש להשתמש בזמן עבר (אלא אם זה תפקיד נוכחי)
+        10. יש להימנע מחזרות ומילים מיותרות
 
         הטקסט המקורי: ${text}
 
-        אנא צור גרסה מקוצרת ואפקטיבית של התיאור הזה שעומדת בכל הכללים שצוינו.
+        אנא צור תיאור חדש ואפקטיבי שעומד בכל הכללים שצוינו.
         התשובה צריכה להיות בעברית.
+        התשובה צריכה להכיל רק את התיאור החדש, ללא הסברים או הערות נוספות.
+      ` : `
+        You are a professional CV writer. Your goal is to help users write short, focused, and effective job descriptions.
+
+        Important rules:
+        1. Description must be up to 10 words
+        2. Description should focus on achievements and impact
+        3. Use strong and measurable action verbs (like: led, developed, improved, increased)
+        4. Avoid unnecessary connecting words
+        5. Focus on results, not processes
+        6. Maintain professional and precise language
+        7. Add numbers and quantitative data if available (%, number of people, budget etc.)
+        8. Keep relevance to the field
+        9. Use past tense (unless it's a current position)
+        10. Avoid repetitions and unnecessary words
+
+        Original text: ${text}
+
+        Please create a new and effective description that follows all the rules mentioned.
+        The response should be in English.
+        The response should contain only the new description, without any explanations or additional notes.
       `;
 
-      // כאן יהיה הקוד שמתקשר עם ה-API של ה-AI
       const response = await fetch('/api/generate-description', {
         method: 'POST',
         headers: {
@@ -228,7 +249,7 @@ const AIPopup: React.FC<AIPopupProps> = ({
         },
         body: JSON.stringify({
           prompt,
-          model: 'claude-3-5-haiku-20241022'
+          model: 'claude-3-haiku-20241022'
         }),
       });
 
@@ -238,9 +259,11 @@ const AIPopup: React.FC<AIPopupProps> = ({
 
       const data = await response.json();
       setGeneratedText(data.text);
+      setStatus('success');
 
     } catch (error) {
       console.error('Error generating AI description:', error);
+      setStatus('error');
     } finally {
       setIsLoading(false);
     }
@@ -302,31 +325,45 @@ const AIPopup: React.FC<AIPopupProps> = ({
             disabled={isLoading || !text}
             className={cn(
               "w-full h-11 mt-4",
-              "rounded-xl bg-[#4856CD]",
+              "rounded-xl",
               "text-white text-[14px]",
-              "hover:bg-[#4856CD]/95",
-              "active:scale-[0.98]",
               "transition-all duration-200",
               "font-medium",
               "shadow-md shadow-[#4856CD]/10",
               "flex items-center justify-center gap-2",
+              status === 'generating' ? "bg-[#4856CD]/70" : "bg-[#4856CD] hover:bg-[#4856CD]/95",
               (isLoading || !text) && "opacity-50 cursor-not-allowed"
             )}
           >
-            {isLoading ? (
-              <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+            {status === 'generating' ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                {displayLang === 'he' ? 'מנסח...' : 'Generating...'}
+              </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
-                {displayLang === 'he' ? 'צור תיאור' : 'Generate Description'}
+                {displayLang === 'he' ? 'צור תיאור חדש' : 'Generate New Description'}
               </>
             )}
           </button>
 
+          {status === 'error' && (
+            <div className="mt-4 p-3 bg-red-50 rounded-xl text-red-600 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {displayLang === 'he' 
+                ? 'אופס! משהו השתבש. נסה שוב' 
+                : 'Oops! Something went wrong. Please try again'}
+            </div>
+          )}
+
           {generatedText && (
             <div className="mt-6">
-              <div className="text-[13px] font-medium text-gray-700 mb-2">
-                {displayLang === 'he' ? 'תיאור מקוצר:' : 'Shortened Description:'}
+              <div className="text-[13px] font-medium text-gray-700 mb-2 flex items-center gap-2">
+                {displayLang === 'he' ? 'תיאור חדש:' : 'New Description:'}
+                {status === 'success' && (
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                )}
               </div>
               <div className="relative">
                 <textarea
@@ -343,6 +380,9 @@ const AIPopup: React.FC<AIPopupProps> = ({
                   )}
                   dir={displayLang === 'he' ? 'rtl' : 'ltr'}
                 />
+                <div className="text-[12px] text-gray-400 mt-1">
+                  {generatedText.trim().split(/\s+/).length}/{MAX_WORDS_PER_DESCRIPTION} {displayLang === 'he' ? 'מילים' : 'words'}
+                </div>
               </div>
             </div>
           )}
@@ -357,7 +397,6 @@ const AIPopup: React.FC<AIPopupProps> = ({
               "rounded-xl border-2 border-[#4856CD]",
               "text-[#4856CD] text-[14px]",
               "hover:bg-[#4856CD]/[0.02]",
-              "active:scale-[0.98]",
               "transition-all duration-200",
               "font-medium"
             )}
@@ -366,21 +405,20 @@ const AIPopup: React.FC<AIPopupProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => onGenerate(generatedText || text)}
-            disabled={!text}
+            onClick={handleSave}
+            disabled={!generatedText && status !== 'success'}
             className={cn(
               "flex-1 h-11",
               "rounded-xl bg-[#4856CD]",
               "text-white text-[14px]",
               "hover:bg-[#4856CD]/95",
-              "active:scale-[0.98]",
               "transition-all duration-200",
               "font-medium",
               "shadow-md shadow-[#4856CD]/10",
-              !text && "opacity-50 cursor-not-allowed"
+              (!generatedText || status !== 'success') && "opacity-50 cursor-not-allowed"
             )}
           >
-            {isRTL ? 'שמור' : 'Save'}
+            {isRTL ? 'השתמש בתיאור' : 'Use Description'}
           </button>
         </div>
       </DialogContent>

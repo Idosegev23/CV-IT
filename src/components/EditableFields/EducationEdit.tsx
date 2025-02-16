@@ -17,7 +17,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format } from 'date-fns';
 import { he, enUS } from 'date-fns/locale';
-import { GraduationCap, BookOpen, Building2, Calendar, Plus, Trash2 } from 'lucide-react';
+import { GraduationCap, BookOpen, Building2, Calendar, Plus, Trash2, Sparkles, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Degree, DegreeType } from '@/types/resume';
 import { AnimatePresence } from 'framer-motion';
@@ -36,7 +36,354 @@ interface EducationEditProps {
   onSave: (newData: Degree[]) => void;
   isRTL?: boolean;
   template?: string;
+  displayLang?: 'he' | 'en';
 }
+
+const MAX_WORDS_PER_FIELD = 10;
+
+interface AIPopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onGenerate: (text: string) => void;
+  isRTL?: boolean;
+  displayLang: 'he' | 'en';
+  originalText: string;
+  fieldType: 'type' | 'field' | 'specialization';
+}
+
+const AIPopup: React.FC<AIPopupProps> = ({ 
+  isOpen, 
+  onClose, 
+  onGenerate, 
+  isRTL = false,
+  displayLang,
+  originalText,
+  fieldType 
+}) => {
+  const [text, setText] = useState(originalText);
+  const [generatedText, setGeneratedText] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
+  const [status, setStatus] = useState<'idle' | 'generating' | 'success' | 'error'>('idle');
+
+  useEffect(() => {
+    setText(originalText);
+    setGeneratedText('');
+    setWordCount(originalText.trim().split(/\s+/).length);
+    setStatus('idle');
+  }, [originalText]);
+
+  const handleTextChange = (value: string) => {
+    setText(value);
+    setWordCount(value.trim().split(/\s+/).length);
+  };
+
+  const handleSave = () => {
+    onGenerate(generatedText);
+    onClose();
+    setGeneratedText('');
+    setStatus('idle');
+  };
+
+  const getPromptByFieldType = (fieldType: string, text: string) => {
+    const basePrompt = displayLang === 'he' ? {
+      type: `
+        אתה עוזר מקצועי לכתיבת קורות חיים. המטרה שלך היא לעזור למשתמשים לכתוב שמות תארים מדויקים ומקצועיים.
+
+        הנה כמה כללים חשובים:
+        1. השם חייב להיות עד 10 מילים
+        2. השם צריך להיות מדויק ומקצועי
+        3. יש להשתמש במינוח המקובל בתחום
+        4. יש להימנע ממילים מיותרות
+        5. יש לשמור על פורמט אחיד
+        6. יש לציין את הרמה (ראשון, שני, שלישי) אם רלוונטי
+        7. יש לציין את סוג התעודה (תואר, תעודה, הסמכה) בצורה ברורה
+        8. יש להשתמש בשפה רשמית ומכובדת
+        9. יש להתאים לסטנדרטים אקדמיים
+        10. יש להימנע מקיצורים לא מקובלים
+
+        הטקסט המקורי: ${text}
+      `,
+      field: `
+        אתה עוזר מקצועי לכתיבת קורות חיים. המטרה שלך היא לעזור למשתמשים לכתוב תחומי לימוד בצורה מדויקת ומקצועית.
+
+        הנה כמה כללים חשובים:
+        1. השם חייב להיות עד 10 מילים
+        2. יש להשתמש בשמות תחומים מקובלים
+        3. יש לציין תת-תחום אם רלוונטי
+        4. יש להימנע ממילים מיותרות
+        5. יש לשמור על דיוק מקצועי
+        6. יש להשתמש במינוח אקדמי מקובל
+        7. יש להתאים לסטנדרטים בתעשייה
+        8. יש לשמור על בהירות ופשטות
+        9. יש להימנע מקיצורים לא מקובלים
+        10. יש להשתמש בשפה רשמית
+
+        הטקסט המקורי: ${text}
+      `,
+      specialization: `
+        אתה עוזר מקצועי לכתיבת קורות חיים. המטרה שלך היא לעזור למשתמשים לכתוב התמחויות בצורה מדויקת ומקצועית.
+
+        הנה כמה כללים חשובים:
+        1. השם חייב להיות עד 10 מילים
+        2. יש לציין את תחום ההתמחות הספציפי
+        3. יש להשתמש במינוח מקצועי מדויק
+        4. יש להימנע ממילים מיותרות
+        5. יש לשמור על רלוונטיות לתחום
+        6. יש להדגיש את הייחודיות של ההתמחות
+        7. יש להשתמש בשפה מקצועית
+        8. יש להתאים לסטנדרטים בתעשייה
+        9. יש להימנע מהכללות
+        10. יש לשמור על בהירות ודיוק
+
+        הטקסט המקורי: ${text}
+      `
+    } : {
+      type: `
+        You are a professional CV writer. Your goal is to help users write precise and professional degree names.
+
+        Important rules:
+        1. Name must be up to 10 words
+        2. Name should be precise and professional
+        3. Use accepted terminology in the field
+        4. Avoid unnecessary words
+        5. Maintain consistent format
+        6. Specify level (Bachelor's, Master's, PhD) if relevant
+        7. Clearly state the type (degree, certificate, certification)
+        8. Use formal and respectful language
+        9. Adhere to academic standards
+        10. Avoid uncommon abbreviations
+
+        Original text: ${text}
+      `,
+      field: `
+        You are a professional CV writer. Your goal is to help users write precise and professional fields of study.
+
+        Important rules:
+        1. Name must be up to 10 words
+        2. Use accepted field names
+        3. Specify sub-field if relevant
+        4. Avoid unnecessary words
+        5. Maintain professional accuracy
+        6. Use accepted academic terminology
+        7. Align with industry standards
+        8. Keep it clear and simple
+        9. Avoid uncommon abbreviations
+        10. Use formal language
+
+        Original text: ${text}
+      `,
+      specialization: `
+        You are a professional CV writer. Your goal is to help users write precise and professional specializations.
+
+        Important rules:
+        1. Name must be up to 10 words
+        2. Specify the exact specialization area
+        3. Use precise professional terminology
+        4. Avoid unnecessary words
+        5. Keep relevant to the field
+        6. Emphasize specialization uniqueness
+        7. Use professional language
+        8. Align with industry standards
+        9. Avoid generalizations
+        10. Maintain clarity and precision
+
+        Original text: ${text}
+      `
+    };
+
+    return basePrompt[fieldType as keyof typeof basePrompt];
+  };
+
+  const handleGenerate = async () => {
+    setIsLoading(true);
+    setStatus('generating');
+    try {
+      const prompt = getPromptByFieldType(fieldType, text);
+
+      const response = await fetch('/api/generate-description', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          model: 'claude-3-haiku-20241022'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate description');
+      }
+
+      const data = await response.json();
+      setGeneratedText(data.text);
+      setStatus('success');
+
+    } catch (error) {
+      console.error('Error generating AI description:', error);
+      setStatus('error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className={cn(
+        "!w-[90vw] md:!w-[500px]",
+        "!p-6",
+        "!bg-white",
+        "!rounded-2xl",
+        "!shadow-xl",
+        "!border !border-gray-100",
+        isRTL ? "!rtl" : "!ltr"
+      )}>
+        <DialogHeader>
+          <DialogTitle className={cn(
+            "text-center text-[20px] font-bold",
+            "bg-gradient-to-r from-[#4856CD] to-[#4856CD]/90 text-transparent bg-clip-text"
+          )}>
+            {isRTL ? 'תן ל-AI לעזור לך לנסח' : 'Let AI help you phrase it'}
+          </DialogTitle>
+          <p className="text-center text-gray-500 text-sm mt-2">
+            {isRTL 
+              ? 'תאר את ההשכלה שלך בחופשיות, ואני אעזור לך לנסח אותה בצורה מקצועית וממוקדת' 
+              : 'Describe your education freely, and I\'ll help you phrase it professionally and concisely'}
+          </p>
+        </DialogHeader>
+        
+        <div className="mt-6">
+          <div className="relative">
+            <textarea
+              value={text}
+              onChange={(e) => handleTextChange(e.target.value)}
+              className={cn(
+                "w-full min-h-[120px] p-4",
+                "rounded-xl border border-gray-200",
+                "text-[14px] text-gray-900",
+                "focus:border-[#4856CD] focus:ring-2 focus:ring-[#4856CD]/10",
+                "transition-all duration-200",
+                "resize-none"
+              )}
+              placeholder={isRTL ? 'תאר את ההשכלה שלך בחופשיות...' : 'Describe your education freely...'}
+              dir={displayLang === 'he' ? 'rtl' : 'ltr'}
+            />
+            <div className={cn(
+              "absolute bottom-2 right-2",
+              "text-[12px] text-gray-400",
+              wordCount > MAX_WORDS_PER_FIELD && "text-red-500"
+            )}>
+              {wordCount}/{MAX_WORDS_PER_FIELD} {displayLang === 'he' ? 'מילים' : 'words'}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={isLoading || !text}
+            className={cn(
+              "w-full h-11 mt-4",
+              "rounded-xl",
+              "text-white text-[14px]",
+              "transition-all duration-200",
+              "font-medium",
+              "shadow-md shadow-[#4856CD]/10",
+              "flex items-center justify-center gap-2",
+              status === 'generating' ? "bg-[#4856CD]/70" : "bg-[#4856CD] hover:bg-[#4856CD]/95",
+              (isLoading || !text) && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {status === 'generating' ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                {displayLang === 'he' ? 'מנסח...' : 'Generating...'}
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                {displayLang === 'he' ? 'צור ניסוח חדש' : 'Generate New Phrasing'}
+              </>
+            )}
+          </button>
+
+          {status === 'error' && (
+            <div className="mt-4 p-3 bg-red-50 rounded-xl text-red-600 text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {displayLang === 'he' 
+                ? 'אופס! משהו השתבש. נסה שוב' 
+                : 'Oops! Something went wrong. Please try again'}
+            </div>
+          )}
+
+          {generatedText && (
+            <div className="mt-6">
+              <div className="text-[13px] font-medium text-gray-700 mb-2 flex items-center gap-2">
+                {displayLang === 'he' ? 'ניסוח חדש:' : 'New Phrasing:'}
+                {status === 'success' && (
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                )}
+              </div>
+              <div className="relative">
+                <textarea
+                  value={generatedText}
+                  onChange={(e) => setGeneratedText(e.target.value)}
+                  className={cn(
+                    "w-full min-h-[80px] p-4",
+                    "rounded-xl border border-gray-200",
+                    "text-[14px] text-gray-900",
+                    "focus:border-[#4856CD] focus:ring-2 focus:ring-[#4856CD]/10",
+                    "transition-all duration-200",
+                    "resize-none",
+                    "bg-[#4856CD]/[0.02]"
+                  )}
+                  dir={displayLang === 'he' ? 'rtl' : 'ltr'}
+                />
+                <div className="text-[12px] text-gray-400 mt-1">
+                  {generatedText.trim().split(/\s+/).length}/{MAX_WORDS_PER_FIELD} {displayLang === 'he' ? 'מילים' : 'words'}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <button
+            type="button"
+            onClick={onClose}
+            className={cn(
+              "flex-1 h-11",
+              "rounded-xl border-2 border-[#4856CD]",
+              "text-[#4856CD] text-[14px]",
+              "hover:bg-[#4856CD]/[0.02]",
+              "transition-all duration-200",
+              "font-medium"
+            )}
+          >
+            {isRTL ? 'ביטול' : 'Cancel'}
+          </button>
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={!generatedText && status !== 'success'}
+            className={cn(
+              "flex-1 h-11",
+              "rounded-xl bg-[#4856CD]",
+              "text-white text-[14px]",
+              "hover:bg-[#4856CD]/95",
+              "transition-all duration-200",
+              "font-medium",
+              "shadow-md shadow-[#4856CD]/10",
+              (!generatedText || status !== 'success') && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            {isRTL ? 'השתמש בניסוח' : 'Use Phrasing'}
+          </button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const EducationEdit: React.FC<EducationEditProps> = ({
   isOpen,
@@ -45,10 +392,20 @@ const EducationEdit: React.FC<EducationEditProps> = ({
   onSave,
   isRTL = document.documentElement.lang === 'he',
   template = 'professional',
+  displayLang = 'en'
 }) => {
   const [degrees, setDegrees] = useState<Degree[]>([]);
   const [expandedItem, setExpandedItem] = useState<string | undefined>(undefined);
   const [dateErrors, setDateErrors] = useState<{ [key: string]: string }>({});
+  const [aiPopupConfig, setAiPopupConfig] = useState<{
+    isOpen: boolean;
+    degreeIndex: number;
+    fieldType: 'type' | 'field' | 'specialization';
+  }>({
+    isOpen: false,
+    degreeIndex: 0,
+    fieldType: 'type'
+  });
 
   // פונקציה להמרת תאריך מ־MM/yyyy או YYYY לאובייקט Date
   const parseDateString = (dateStr: string): Date | null => {
@@ -162,6 +519,11 @@ const EducationEdit: React.FC<EducationEditProps> = ({
     
     onSave(validDegrees);
     onClose();
+  };
+
+  // Add this function to validate word count
+  const validateWordCount = (text: string) => {
+    return text.trim().split(/\s+/).length <= MAX_WORDS_PER_FIELD;
   };
 
   return (
@@ -297,27 +659,60 @@ const EducationEdit: React.FC<EducationEditProps> = ({
                             {isRTL ? 'שם התואר' : 'Degree Name'}
                           </label>
                           <div className="relative">
-                            <Input
-                              value={degree.type}
-                              onChange={(e) => handleDegreeChange(index, 'type', e.target.value)}
-                              className={cn(
-                                "w-full h-11 bg-white text-[14px] text-gray-900",
-                                "rounded-lg border border-gray-200/80",
-                                "shadow-sm shadow-gray-100/50",
-                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
-                                "focus:ring-2 focus:ring-[#4856CD]/10",
-                                "transition duration-200",
-                                isRTL ? "pr-11" : "pl-11"
-                              )}
-                              dir={isRTL ? 'rtl' : 'ltr'}
-                              placeholder={isRTL ? 'לדוגמה: תואר ראשון' : "e.g. Bachelor's Degree"}
-                            />
-                            <GraduationCap className={cn(
-                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
-                              "text-gray-400 group-hover:text-[#4856CD]/70",
-                              "transition-colors duration-200",
-                              isRTL ? "right-4" : "left-4"
-                            )} />
+                            <div className="flex gap-2">
+                              <div className="flex-1 relative">
+                                <Input
+                                  value={degree.type}
+                                  onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    if (validateWordCount(newValue)) {
+                                      handleDegreeChange(index, 'type', newValue);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "w-full h-11 bg-white text-[14px] text-gray-900",
+                                    "rounded-lg border border-gray-200/80",
+                                    "shadow-sm shadow-gray-100/50",
+                                    "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                    "focus:ring-2 focus:ring-[#4856CD]/10",
+                                    "transition duration-200",
+                                    isRTL ? "pr-11" : "pl-11"
+                                  )}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
+                                  placeholder={isRTL ? 'לדוגמה: תואר ראשון' : "e.g. Bachelor's Degree"}
+                                />
+                                <GraduationCap className={cn(
+                                  "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                  "text-gray-400 group-hover:text-[#4856CD]/70",
+                                  "transition-colors duration-200",
+                                  isRTL ? "right-4" : "left-4"
+                                )} />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className={cn(
+                                  "h-11 w-11 rounded-lg",
+                                  "hover:bg-[#4856CD]/5",
+                                  "transition-colors duration-200"
+                                )}
+                                onClick={() => setAiPopupConfig({
+                                  isOpen: true,
+                                  degreeIndex: index,
+                                  fieldType: 'type'
+                                })}
+                              >
+                                <Sparkles className="w-4 h-4 text-[#4856CD]" />
+                              </Button>
+                            </div>
+                            <div className={cn(
+                              "text-[12px] mt-1",
+                              "text-gray-400",
+                              degree.type.trim().split(/\s+/).length > MAX_WORDS_PER_FIELD && "text-red-500"
+                            )}>
+                              {degree.type.trim().split(/\s+/).length}/{MAX_WORDS_PER_FIELD} {displayLang === 'he' ? 'מילים' : 'words'}
+                            </div>
                           </div>
                         </div>
 
@@ -331,27 +726,60 @@ const EducationEdit: React.FC<EducationEditProps> = ({
                             {isRTL ? 'תחום לימודים' : 'Field of Study'}
                           </label>
                           <div className="relative">
-                            <Input
-                              value={degree.field}
-                              onChange={(e) => handleDegreeChange(index, 'field', e.target.value)}
-                              className={cn(
-                                "w-full h-11 bg-white text-[14px] text-gray-900",
-                                "rounded-lg border border-gray-200/80",
-                                "shadow-sm shadow-gray-100/50",
-                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
-                                "focus:ring-2 focus:ring-[#4856CD]/10",
-                                "transition duration-200",
-                                isRTL ? "pr-11" : "pl-11"
-                              )}
-                              dir={isRTL ? 'rtl' : 'ltr'}
-                              placeholder={isRTL ? 'לדוגמה: מדעי המחשב' : 'e.g. Computer Science'}
-                            />
-                            <BookOpen className={cn(
-                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
-                              "text-gray-400 group-hover:text-[#4856CD]/70",
-                              "transition-colors duration-200",
-                              isRTL ? "right-4" : "left-4"
-                            )} />
+                            <div className="flex gap-2">
+                              <div className="flex-1 relative">
+                                <Input
+                                  value={degree.field}
+                                  onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    if (validateWordCount(newValue)) {
+                                      handleDegreeChange(index, 'field', newValue);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "w-full h-11 bg-white text-[14px] text-gray-900",
+                                    "rounded-lg border border-gray-200/80",
+                                    "shadow-sm shadow-gray-100/50",
+                                    "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                    "focus:ring-2 focus:ring-[#4856CD]/10",
+                                    "transition duration-200",
+                                    isRTL ? "pr-11" : "pl-11"
+                                  )}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
+                                  placeholder={isRTL ? 'לדוגמה: מדעי המחשב' : 'e.g. Computer Science'}
+                                />
+                                <BookOpen className={cn(
+                                  "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                  "text-gray-400 group-hover:text-[#4856CD]/70",
+                                  "transition-colors duration-200",
+                                  isRTL ? "right-4" : "left-4"
+                                )} />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className={cn(
+                                  "h-11 w-11 rounded-lg",
+                                  "hover:bg-[#4856CD]/5",
+                                  "transition-colors duration-200"
+                                )}
+                                onClick={() => setAiPopupConfig({
+                                  isOpen: true,
+                                  degreeIndex: index,
+                                  fieldType: 'field'
+                                })}
+                              >
+                                <Sparkles className="w-4 h-4 text-[#4856CD]" />
+                              </Button>
+                            </div>
+                            <div className={cn(
+                              "text-[12px] mt-1",
+                              "text-gray-400",
+                              degree.field.trim().split(/\s+/).length > MAX_WORDS_PER_FIELD && "text-red-500"
+                            )}>
+                              {degree.field.trim().split(/\s+/).length}/{MAX_WORDS_PER_FIELD} {displayLang === 'he' ? 'מילים' : 'words'}
+                            </div>
                           </div>
                         </div>
 
@@ -478,27 +906,60 @@ const EducationEdit: React.FC<EducationEditProps> = ({
                             {isRTL ? 'התמחות (אופציונלי)' : 'Specialization (Optional)'}
                           </label>
                           <div className="relative">
-                            <Input
-                              value={degree.specialization || ''}
-                              onChange={(e) => handleDegreeChange(index, 'specialization', e.target.value)}
-                              className={cn(
-                                "w-full h-11 bg-white text-[14px] text-gray-900",
-                                "rounded-lg border border-gray-200/80",
-                                "shadow-sm shadow-gray-100/50",
-                                "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
-                                "focus:ring-2 focus:ring-[#4856CD]/10",
-                                "transition duration-200",
-                                isRTL ? "pr-11" : "pl-11"
-                              )}
-                              dir={isRTL ? 'rtl' : 'ltr'}
-                              placeholder={isRTL ? 'לדוגמה: הנדסת חשמל' : 'e.g. Electrical Engineering'}
-                            />
-                            <BookOpen className={cn(
-                              "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
-                              "text-gray-400 group-hover:text-[#4856CD]/70",
-                              "transition-colors duration-200",
-                              isRTL ? "right-4" : "left-4"
-                            )} />
+                            <div className="flex gap-2">
+                              <div className="flex-1 relative">
+                                <Input
+                                  value={degree.specialization || ''}
+                                  onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    if (validateWordCount(newValue)) {
+                                      handleDegreeChange(index, 'specialization', newValue);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "w-full h-11 bg-white text-[14px] text-gray-900",
+                                    "rounded-lg border border-gray-200/80",
+                                    "shadow-sm shadow-gray-100/50",
+                                    "hover:border-[#4856CD]/30 focus:border-[#4856CD]",
+                                    "focus:ring-2 focus:ring-[#4856CD]/10",
+                                    "transition duration-200",
+                                    isRTL ? "pr-11" : "pl-11"
+                                  )}
+                                  dir={isRTL ? 'rtl' : 'ltr'}
+                                  placeholder={isRTL ? 'לדוגמה: הנדסת חשמל' : 'e.g. Electrical Engineering'}
+                                />
+                                <BookOpen className={cn(
+                                  "absolute top-1/2 -translate-y-1/2 w-[18px] h-[18px]",
+                                  "text-gray-400 group-hover:text-[#4856CD]/70",
+                                  "transition-colors duration-200",
+                                  isRTL ? "right-4" : "left-4"
+                                )} />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className={cn(
+                                  "h-11 w-11 rounded-lg",
+                                  "hover:bg-[#4856CD]/5",
+                                  "transition-colors duration-200"
+                                )}
+                                onClick={() => setAiPopupConfig({
+                                  isOpen: true,
+                                  degreeIndex: index,
+                                  fieldType: 'specialization'
+                                })}
+                              >
+                                <Sparkles className="w-4 h-4 text-[#4856CD]" />
+                              </Button>
+                            </div>
+                            <div className={cn(
+                              "text-[12px] mt-1",
+                              "text-gray-400",
+                              (degree.specialization?.trim().split(/\s+/).length || 0) > MAX_WORDS_PER_FIELD && "text-red-500"
+                            )}>
+                              {degree.specialization?.trim().split(/\s+/).length || 0}/{MAX_WORDS_PER_FIELD} {displayLang === 'he' ? 'מילים' : 'words'}
+                            </div>
                           </div>
                         </div>
 
@@ -604,6 +1065,18 @@ const EducationEdit: React.FC<EducationEditProps> = ({
                 </button>
               </div>
             </form>
+
+            <AIPopup
+              isOpen={aiPopupConfig.isOpen}
+              onClose={() => setAiPopupConfig(prev => ({ ...prev, isOpen: false }))}
+              onGenerate={(text) => {
+                handleDegreeChange(aiPopupConfig.degreeIndex, aiPopupConfig.fieldType, text);
+              }}
+              isRTL={isRTL}
+              displayLang={displayLang}
+              originalText={degrees[aiPopupConfig.degreeIndex]?.[aiPopupConfig.fieldType] || ''}
+              fieldType={aiPopupConfig.fieldType}
+            />
           </DialogContent>
         </Dialog>
       )}
