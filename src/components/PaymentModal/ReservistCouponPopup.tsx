@@ -28,29 +28,46 @@ export const ReservistCouponPopup: React.FC<CouponPopupProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const supabase = createClientComponentClient();
   const router = useRouter();
-
+  const supabase = createClientComponentClient();
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
 
     try {
-      // בדיקת תקינות הקופון
-      const { data: reservistCoupon, error: reservistError } = await supabase
-        .from('reservist_coupons')
-        .select('*')
-        .eq('coupon_code', couponCode.trim())
-        .eq('is_verified', true)
-        .single();
+      const trimmedCouponCode = couponCode.trim();
+      console.log('Searching for coupon:', trimmedCouponCode);
+      
+      // קריאה לשרת שלנו שישתמש ב-Service Role Key
+      const response = await fetch(
+        '/api/validate-reservist-coupon',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            couponCode: trimmedCouponCode
+          })
+        }
+      );
 
-      if (reservistError || !reservistCoupon) {
+      console.log('Response status:', response.status);
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
+      
+      if (!response.ok) {
+        throw new Error(responseData.message || 'Failed to validate coupon');
+      }
+
+      if (!responseData.coupon) {
         setError(isRTL ? 'קוד קופון לא תקין' : 'Invalid coupon code');
         return;
       }
 
-      if (reservistCoupon.is_used) {
+      if (responseData.coupon.is_used) {
         setError(isRTL ? 'קוד הקופון כבר נמצא בשימוש' : 'Coupon code already used');
         return;
       }
@@ -97,14 +114,23 @@ export const ReservistCouponPopup: React.FC<CouponPopupProps> = ({
 
       if (cvError) throw cvError;
 
-      // עדכון הקופון כ"בשימוש"
-      const { error: updateError } = await supabase
-        .from('reservist_coupons')
-        .update({ is_used: true })
-        .eq('id', reservistCoupon.id);
+      // עדכון הקופון כ"בשימוש" דרך ה-API שלנו
+      const updateResponse = await fetch(
+        '/api/update-reservist-coupon',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            couponId: responseData.coupon.id
+          })
+        }
+      );
 
-      if (updateError) {
-        throw updateError;
+      if (!updateResponse.ok) {
+        const updateData = await updateResponse.json();
+        throw new Error(updateData.message || 'Failed to update coupon');
       }
 
       setSessionId(sessionData.id);

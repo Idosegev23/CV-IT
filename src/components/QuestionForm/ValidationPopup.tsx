@@ -54,14 +54,7 @@ export const ValidationPopup: React.FC<ValidationPopupProps> = ({
 
   const validateAnswer = (text: string): boolean => {
     if (currentIssue.field === 'education') {
-      const educationContent = text.trim();
-      if (educationContent === 'NO_EDUCATION' || answers.education === 'NO_EDUCATION') {
-        return true;
-      }
-      if (educationContent === 'NO_EDUCATION\nNO_EDUCATION') {
-        onUpdateAnswer('education', 'NO_EDUCATION');
-        return true;
-      }
+      return true;
     }
 
     const rules = validationRules[currentIssue.field as keyof typeof validationRules];

@@ -399,34 +399,7 @@ export const QuestionForm: React.FC<QuestionFormProps> = ({
       return;
     }
 
-    // טיפול בשדה השכלה
-    if (questionType === 'education') {
-      const educationContent = currentAnswer?.trim() || '';
-      
-      // אם אין תוכן או שזה כבר מסומן כ-NO_EDUCATION
-      if (!educationContent || 
-          educationContent === 'NO_EDUCATION' || 
-          educationContent === 'NO_EDUCATION\nNO_EDUCATION' ||
-          answers.education === 'NO_EDUCATION') {
-        
-        const updatedAnswers = {
-          ...answers,
-          education: 'NO_EDUCATION'
-        };
-        
-        localStorage.setItem('cvit_form_answers', JSON.stringify(updatedAnswers));
-        setAnswers(updatedAnswers);
-        
-        if (currentQuestionIndex < questions.length - 1) {
-          setCurrentQuestionIndex(prev => prev + 1);
-          const nextType = getCurrentQuestionType(currentQuestionIndex + 1);
-          setCurrentAnswer(updatedAnswers[nextType] || '');
-          setError(null);
-          return;
-        }
-      }
-    }
-
+    // אם אין תשובה (חוץ משדה השכלה)
     if (!currentAnswer?.trim() && questionType !== 'education') {
       setError(lang === 'he' ? 'נא למלא תשובה' : 'Please fill in an answer');
       return;

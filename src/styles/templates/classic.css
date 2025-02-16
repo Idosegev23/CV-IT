@@ -10,6 +10,7 @@
   --font-family: 'Assistant', sans-serif;
   --section-spacing: 0.8rem; /* הקטנת המרווח בין סקציות */
   --item-spacing: 0.2rem; /* הקטנת המרווח בין פריטים */
+  --overflow-warning-color: rgba(255, 0, 0, 0.5);
 }
 
 /* הגדרות בסיס */
@@ -209,6 +210,26 @@
   width: 100%;
   margin-bottom: var(--section-spacing);
   position: relative;
+}
+
+/* סקציות */
+.section-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.section-container.overflow-warning::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to bottom, transparent, var(--overflow-warning-color));
+  pointer-events: none;
+  z-index: 10;
 }
 
 /* ניסיון תעסוקתי */
@@ -475,6 +496,7 @@
   padding: 0 1.5rem;
   text-align: right;
   position: relative;
+  transition: max-height 0.3s ease;
 }
 
 .summary-content {
@@ -660,6 +682,7 @@
   width: 100%;
   margin: 0.6rem 0; /* הקטנת המרווח מסביב להשכלה */
   position: relative;
+  transition: max-height 0.3s ease;
 }
 
 .education-items {

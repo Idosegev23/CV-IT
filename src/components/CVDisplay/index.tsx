@@ -1293,12 +1293,12 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       case 'experience':
         return (
           <ExperienceEdit
-            isOpen={true}
+            isOpen={editingItem?.type === 'experience'}
             onClose={handleClose}
             data={cvData.experience}
             onSave={(data) => handleEditSave('experience', undefined, data)}
-            isRTL={isRTL}
-            template={template}
+            isRTL={lang === 'he'}
+            displayLang={displayLang}
           />
         );
       case 'education':
