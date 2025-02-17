@@ -158,6 +158,21 @@ const MobilePreview: React.FC<MobilePreviewProps> = ({ data, lang, template, dic
   
   return (
     <div className="w-full max-w-md mx-auto px-4">
+      {/* באנר עבודה בתהליך */}
+      <div className="bg-[#4856CD]/10 rounded-lg p-4 mb-6 text-center">
+        <div className="flex items-center justify-center gap-2 mb-2">
+          <span className="text-[#4856CD] text-lg">🚧</span>
+          <h4 className="font-medium text-[#4856CD]">
+            {lang === 'he' ? 'רגע, עובדים על זה!' : 'Work in Progress!'}
+          </h4>
+        </div>
+        <p className="text-sm text-gray-600">
+          {lang === 'he' 
+            ? 'אנחנו בונים ממשק מובייל חדש ומטורף! בינתיים אפשר לצפות ולהוריד, ולערוך במחשב 💻✨'
+            : 'We\'re building an awesome new mobile interface! Meanwhile, you can view and download, and edit on desktop 💻✨'}
+        </p>
+      </div>
+
       {/* כותרת מעל התצוגה המקדימה */}
       <div className="text-center mb-4">
         <h3 className="text-lg font-medium text-gray-700">
@@ -264,7 +279,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   sessionId, 
   lang,
   hideButtons = false 
-}) => {
+}): JSX.Element => {
   const isRTL = lang === 'he';
   const isMobile = useMediaQuery('(max-width: 768px)');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -339,23 +354,29 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
   // אפקט חדש שיפתח את הפופאפ מיד לאחר סגירת ההדרכה
   useEffect(() => {
     if (!showTutorial && shouldShowPopupAfterTutorial && !hasShownPopup && !hasInteractedWithEdit) {
-      setShowScrollPopup(true);
-      setHasShownPopup(true);
-      setShouldShowPopupAfterTutorial(false);
+      // במובייל לא נציג את הפופאפ הזה בכלל
+      if (!isMobile) {
+        setShowScrollPopup(true);
+        setHasShownPopup(true);
+        setShouldShowPopupAfterTutorial(false);
+      }
     }
-  }, [showTutorial, shouldShowPopupAfterTutorial, hasShownPopup, hasInteractedWithEdit]);
+  }, [showTutorial, shouldShowPopupAfterTutorial, hasShownPopup, hasInteractedWithEdit, isMobile]);
 
   // אפקט קיים שיפתח את הפופאפ לאחר 15 שניות
   useEffect(() => {
     if (!showTutorial && !hasShownPopup && !hasInteractedWithEdit && !shouldShowPopupAfterTutorial) {
-      const timer = setTimeout(() => {
-        setShowScrollPopup(true);
-        setHasShownPopup(true);
-      }, 15000); // 15 seconds
+      // במובייל לא נציג את הפופאפ הזה בכלל
+      if (!isMobile) {
+        const timer = setTimeout(() => {
+          setShowScrollPopup(true);
+          setHasShownPopup(true);
+        }, 15000);
 
-      return () => clearTimeout(timer);
+        return () => clearTimeout(timer);
+      }
     }
-  }, [showTutorial, hasShownPopup, hasInteractedWithEdit, shouldShowPopupAfterTutorial]);
+  }, [showTutorial, hasShownPopup, hasInteractedWithEdit, shouldShowPopupAfterTutorial, isMobile]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -782,12 +803,11 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
   // נוסיף פונקציה חדשה לציה ב-PDF
   const handlePreviewPdf = async () => {
-    // בדיקה אם נמצאים במצב עריכה
-    if (isEditing) {
+    if (!cvData) {
       toast.error(
-        lang === 'he' 
-          ? 'היי אנחנו עורכים פה נסיים ואז יהיה אפשר להוריד'
-          : 'Please finish editing before downloading the CV'
+        lang === 'he'
+          ? 'שגיאה: נתונים חסרים'
+          : 'Error: Missing data'
       );
       return;
     }
@@ -796,14 +816,13 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       setIsGenerating(true);
       toast.info(lang === 'he' ? 'מכין תצוגה מקדימה...' : 'Preparing preview...');
 
-      const element = document.getElementById('cv-content');
+      const element = document.getElementById('cv-content-mobile');
       if (!element) {
-        toast.error(dictionary.messages.downloadError);
-        return;
+        throw new Error('CV content element not found');
       }
 
-      // המתנה לטעינת תמונות - משתמש באותו קוד מ-handlePdfDownload
-      const images = document.querySelectorAll('img');
+      // המתנה לטעינת תמונות
+      const images = element.querySelectorAll('img');
       await Promise.all(
         Array.from(images).map(img => {
           if (img.complete) return Promise.resolve();
@@ -815,13 +834,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         })
       );
 
-      const cvContent = document.getElementById('cv-content');
-      if (!cvContent) {
-        toast.error(dictionary.messages.downloadError);
-        return;
-      }
-
-      // איסוף סגנונות ויצירת HTML - זהה לקוד הקיים
+      // איסוף סגנונות
       let styles = '';
       try {
         styles = Array.from(document.styleSheets)
@@ -841,18 +854,10 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
       let processedHtml = '';
       try {
-        processedHtml = await processImages(cvContent.innerHTML);
+        processedHtml = await processImages(element.innerHTML);
       } catch (e) {
-        processedHtml = cvContent.innerHTML;
+        processedHtml = element.innerHTML;
       }
-
-      // הוספת כל הפנטים הנדרשים
-      const fonts = `
-        @import url('https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@100;200;300;400;500;600;700&display=swap');
-      `;
 
       const fullHtml = `
         <!DOCTYPE html>
@@ -861,47 +866,30 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              ${fonts}
               ${styles}
               
-              /* הגדרות בסיס */
-              body {
+              @page {
+                margin: 0;
+                size: A4 portrait;
+              }
+              
+              * {
                 margin: 0;
                 padding: 0;
+                box-sizing: border-box;
+              }
+              
+              body {
                 width: 210mm;
                 min-height: 297mm;
-                background: white;
-              }
-              
-              /* הגדרות פונטים לכל תבנית */
-              .template-classic {
-                font-family: 'Assistant', sans-serif;
-              }
-              .template-professional {
-                font-family: 'Rubik', sans-serif;
-              }
-              .template-general {
-                font-family: 'Open Sans', sans-serif;
-              }
-              .template-creative {
-                font-family: 'Heebo', sans-serif;
-              }
-              
-              /* תיקוני הדפסה */
-              @page {
-                size: A4;
                 margin: 0;
-              }
-              @media print {
-                html, body {
-                  width: 210mm;
-                  height: 297mm;
-                }
+                padding: 0;
+                background: white;
               }
             </style>
           </head>
           <body>
-            <div id="cv-content" class="bg-white template-${selectedTemplate}">
+            <div id="cv-content" class="bg-white">
               ${processedHtml}
             </div>
           </body>
@@ -928,20 +916,85 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       const pdfBlob = await pdfResponse.blob();
       const pdfUrl = URL.createObjectURL(pdfBlob);
       
-      // פתיחת ה-PDF בחלון חדש/באפליקציה של המכשיר
+      // פתיחת ה-PDF בחלון חדש
       window.open(pdfUrl, '_blank');
+
+      toast.success(
+        lang === 'he'
+          ? 'הקובץ נפתח בחלון חדש'
+          : 'File opened in new window'
+      );
 
     } catch (error) {
       console.error('Error generating preview:', error);
-      toast.error(dictionary.messages.previewError || 'Failed to generate preview');
+      toast.error(
+        lang === 'he'
+          ? 'שגיאה ביצירת תצוגה מקדימה'
+          : 'Error generating preview'
+      );
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const handleEdit = (type: EditableField, index?: number) => {
-    if (!cvData) return;
-    setEditingItem({ type, index });
+  const handleEdit = () => {
+    if (isMobile) {
+      // פתיחת דיאלוג עם הודעה קומית למשתמש
+      toast(
+        <div className="flex flex-col gap-3 rtl:text-right ltr:text-left">
+          <div className="flex items-center gap-2">
+            <span className="text-2xl">🎨</span>
+            <p className="font-medium">
+              {lang === 'he' 
+                ? 'וואו, איזה יופי של קורות חיים!'
+                : 'Wow, what a beautiful CV!'}
+            </p>
+          </div>
+          <p className="text-sm text-gray-600">
+            {lang === 'he'
+              ? 'רוצה לשדרג אותם עוד יותר? במחשב יש לנו כלי עריכה מטורפים! 🚀'
+              : 'Want to make it even better? We have amazing editing tools on desktop! 🚀'}
+          </p>
+          <div className="flex flex-col gap-1">
+            <p className="text-sm font-medium text-[#4856CD]">
+              {lang === 'he'
+                ? 'בוא נעשה קסמים עם קורות החיים שלך! ✨'
+                : 'Let\'s make magic with your CV! ✨'}
+            </p>
+            <div className="flex items-center gap-2 mt-2">
+              <a 
+                href={window.location.href}
+                className="flex-1 bg-[#4856CD] text-white px-4 py-2 rounded-lg text-sm text-center flex items-center justify-center gap-1"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>
+                  {lang === 'he' ? 'לעריכה במחשב' : 'Edit on Desktop'}
+                </span>
+                <span>✨</span>
+              </a>
+            </div>
+          </div>
+          <div className="text-xs text-gray-500 mt-1 text-center">
+            {lang === 'he'
+              ? 'טיפ: במחשב תוכל לערוך, לעצב ולשנות הכל! 🎯'
+              : 'Tip: On desktop you can edit, design and change everything! 🎯'}
+          </div>
+        </div>,
+        {
+          duration: 10000,
+          icon: '🎨',
+          style: {
+            backgroundColor: '#F8F9FF',
+            border: '1px solid rgba(72, 86, 205, 0.1)',
+          },
+        }
+      );
+      return;
+    }
+    
+    setIsEditing(!isEditing);
+    setHasInteractedWithEdit(true);
   };
 
   const handleClose = () => {
@@ -1148,10 +1201,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
           animate={highlightedElement === 'edit' ? pulseAnimation : {}}
         >
           <Button
-            onClick={() => {
-              setIsEditing(!isEditing);
-              setHasInteractedWithEdit(true);
-            }}
+            onClick={handleEdit}
             disabled={isDownloadingPdf}
             className={cn(
               "bg-[#4856CD] text-white hover:opacity-90 p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center",
@@ -1175,7 +1225,64 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
   const handleContinueWithoutDownload = () => {
     if (hasChanges) {
-      setShowSavePrompt(true);
+      if (isMobile) {
+        toast(
+          <div className="flex flex-col gap-3 rtl:text-right ltr:text-left">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">💡</span>
+              <p className="font-medium">
+                {lang === 'he' 
+                  ? 'רגע, יש לנו רעיון בשבילך!'
+                  : 'Wait, we have an idea for you!'}
+              </p>
+            </div>
+            <p className="text-sm text-gray-600">
+              {lang === 'he'
+                ? 'רוצה לשדרג את קורות החיים שלך? יש לנו כלי עריכה מטורפים במחשב! 🎨'
+                : 'Want to upgrade your CV? We have amazing editing tools on desktop! 🎨'}
+            </p>
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium text-[#4856CD]">
+                {lang === 'he'
+                  ? 'תן לנו להראות לך מה אפשר לעשות! 🚀'
+                  : 'Let us show you what\'s possible! 🚀'}
+              </p>
+              <div className="flex items-center gap-2 mt-2">
+                <a 
+                  href={window.location.href}
+                  className="flex-1 bg-[#4856CD] text-white px-4 py-2 rounded-lg text-sm text-center"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {lang === 'he' ? 'לעריכה במחשב ✨' : 'Edit on Desktop ✨'}
+                </a>
+                <button
+                  type="button"
+                  onClick={() => router.push(`/${lang}/finish/${sessionId}`)}
+                  className="flex-1 border border-[#4856CD] text-[#4856CD] px-4 py-2 rounded-lg text-sm"
+                >
+                  {lang === 'he' ? 'אולי בפעם אחרת' : 'Maybe Later'}
+                </button>
+              </div>
+            </div>
+            <div className="text-xs text-gray-500 mt-1 text-center">
+              {lang === 'he'
+                ? 'טיפ: במחשב יש לנו המון אפשרויות עיצוב מגניבות! 🎯'
+                : 'Tip: On desktop, we have tons of cool design options! 🎯'}
+            </div>
+          </div>,
+          {
+            duration: 10000,
+            icon: '✨',
+            style: {
+              backgroundColor: '#F8F9FF',
+              border: '1px solid rgba(72, 86, 205, 0.1)',
+            },
+          }
+        );
+      } else {
+        setShowSavePrompt(true);
+      }
     } else {
       router.push(`/${lang}/finish/${sessionId}`);
     }
@@ -1328,7 +1435,7 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       return;
     }
 
-    if (isTranslating || isDownloadingPdf || isEditing) {
+    if (isTranslating || isDownloadingPdf) {
       return;
     }
 
@@ -1336,7 +1443,11 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       setIsTranslating(true);
       const targetLang = displayLang === 'he' ? 'en' : 'he';
       
-      console.log('Starting translation to:', targetLang, 'with sessionId:', sessionId);
+      toast.info(
+        lang === 'he'
+          ? 'מתרגם את קורות החיים...'
+          : 'Translating your CV...'
+      );
       
       const response = await fetch('/api/translate-cv', {
         method: 'POST',
@@ -1355,7 +1466,6 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       }
 
       const data = await response.json();
-      console.log('Translation response:', data);
       
       if (!data || !data.success || !data.cv) {
         throw new Error('Invalid response format');
@@ -1363,16 +1473,14 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
 
       try {
         const transformedData = transformResumeData(data.cv);
-        console.log('Transformed data:', transformedData);
-        
         setCvData(transformedData);
         setDisplayLang(data.currentLang || targetLang);
         setHasTranslation(true);
         
         toast.success(
           lang === 'he' 
-            ? 'התרגום הושלם בהצלחה'
-            : 'Translation completed successfully'
+            ? 'התרגום הושלם בהצלחה! 🎉'
+            : 'Translation completed successfully! 🎉'
         );
       } catch (transformError) {
         console.error('Error transforming data:', transformError);
@@ -1382,8 +1490,8 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
       console.error('Translation error:', error);
       
       let errorMessage = lang === 'he'
-        ? 'שגיאה בתרגום קורות החיים'
-        : 'Error translating CV';
+        ? 'שגיאה בתרגום קורות החיים 😕'
+        : 'Error translating CV 😕';
 
       if (error instanceof Error) {
         if (error.message.includes('session')) {
@@ -1405,7 +1513,9 @@ export const CVDisplay: React.FC<CVDisplayProps> = ({
         }
       }
 
-      toast.error(errorMessage);
+      toast.error(errorMessage, {
+        duration: 4000,
+      });
     } finally {
       setIsTranslating(false);
     }
